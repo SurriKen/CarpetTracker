@@ -2,6 +2,8 @@ import importlib
 import json
 import os
 import shutil
+import time
+
 import cv2
 
 import numpy as np
@@ -21,6 +23,7 @@ class Predict:
 
     def __init__(self, video_path, yolo_model_path, class_model_path, save_path, data_dict_path, yolo_version='v3'):
         self.video_path = video_path
+        self.predict_video_name = f"predict_{self.video_path.split('/')[-1].split('.')[0]}"
         self.yolo_model_path = yolo_model_path
         self.class_model_path = class_model_path
         self.save_path = save_path
@@ -34,21 +37,21 @@ class Predict:
         self.target_yolo_size = (dict_["width"], dict_["height"])
         self.image_yolo_scaler = dict_["scaler"]
         f2.close()
-        self.tmp_folder = f"{save_path}/tmp2"
-        try:
-            os.mkdir(self.tmp_folder)
-        except:
-            shutil.rmtree(self.tmp_folder, ignore_errors=True)
-            os.mkdir(self.tmp_folder)
-        os.mkdir(f"{self.tmp_folder}/init")
-        os.mkdir(f"{self.tmp_folder}/pred")
+        # self.tmp_folder = f"{save_path}/tmp2"
+        # try:
+        #     os.mkdir(self.tmp_folder)
+        # except:
+        #     shutil.rmtree(self.tmp_folder, ignore_errors=True)
+        #     os.mkdir(self.tmp_folder)
+        # os.mkdir(f"{self.tmp_folder}/init")
+        # os.mkdir(f"{self.tmp_folder}/pred")
 
-        VideoProcessing.video2frames(
-            video_path=self.video_path,
-            save_path=f"{self.tmp_folder}",
-            max_time=None,
-            predict_mode=True
-        )
+        # VideoProcessing.video2frames(
+        #     video_path=self.video_path,
+        #     save_path=f"{self.tmp_folder}",
+        #     max_time=None,
+        #     predict_mode=True
+        # )
         if self.class_model_path:
             self.classification_classes = ["no", "yes"]
             self.class_model = self.set_model(model_type='normal')
@@ -163,66 +166,84 @@ class Predict:
         # calculating the predicted probability category box object
         return tf.concat([pred_xywh, pred_conf, pred_prob], axis=-1)
 
-    def predict(self, headline=False):
-        image_list = []
-        with os.scandir(f"{self.tmp_folder}/init") as folder:
-            for f in folder:
-                image_list.append(f.name)
-        class_counter = []
-        count = 0
-        for img in image_list:
-            classification_pass = 'yes'
+    def predict(self, obj_range=4, headline=False):
+        st = time.time()
+        video_capture = cv2.VideoCapture()
+        video_capture.open(self.video_path)
+        fps = video_capture.get(cv2.CAP_PROP_FPS)  # OpenCV v2.x used "CV_CAP_PROP_FPS"
+        frame_count = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        height = video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        width = video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)
+        size = (int(width), int(height))
+        out = cv2.VideoWriter(
+            f'{self.save_path}', cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
+        obj_seq = []
+        total_obj, count = 0, 0
+        emp, obj = False, False
+        print(frame_count)
+        for i in range(frame_count-1):
+            ret, frame = video_capture.read()
+            pil_img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
             if self.class_model_path:
-                cl_array, _ = PrepareDataset.image2array(
-                    image_path=f"{self.tmp_folder}/init/{img}",
-                    target_size=self.target_class_size,
-                    scaler=self.classification_scaler
-                )
-                pred = self.class_model(cl_array, training=False)
-                pred = int(np.argmax(pred, -1)[0])
-                if self.classification_classes[pred] == 'no':
-                    classification_pass = 'no'
-                    shutil.copy2(f"{self.tmp_folder}/init/{img}", f"{self.tmp_folder}/pred/{img}")
-                    class_counter.append(0)
+                if self.classification_scaler == 'no_scaler':
+                    class_array = np.expand_dims(np.array(pil_img.resize(self.target_class_size)), 0)
                 else:
-                    class_counter.append(1)
+                    class_array = np.expand_dims(np.array(pil_img.resize(self.target_class_size)), 0) / 255
+                result = self.class_model(class_array, training=False)
+                result = int(np.argmax(result, -1)[0])
+                if len(obj_seq) < obj_range:
+                    obj_seq.append(result)
+                else:
+                    obj_seq.append(result)
+                    obj_seq.pop(0)
+            else:
+                if len(obj_seq) < obj_range:
+                    obj_seq.append(1)
+                else:
+                    obj_seq.append(1)
+                    obj_seq.pop(0)
+            total_obj, emp, obj = Predict.object_counter(obj_seq, emp, obj, obj_range, total_obj)
 
-            if classification_pass == 'yes':
-                img_array, init_size = PrepareDataset.image2array(
-                    image_path=f"{self.tmp_folder}/init/{img}",
-                    target_size=self.target_yolo_size,
-                    scaler=self.image_yolo_scaler
+            if headline:
+                headline_str = f"Обнаружено объектов: {total_obj}"
+            else:
+                headline_str = ""
+
+            if obj_seq[-1] == 0:
+                pil_img = Predict.add_headline_to_image(
+                    image=pil_img,
+                    headline=headline_str
                 )
+            else:
+                img_array = pil_img.resize(self.target_yolo_size)
+                if self.image_yolo_scaler == 'no_scaler':
+                    img_array = np.expand_dims(np.array(img_array), 0)
+                else:
+                    img_array = np.expand_dims(np.array(img_array), 0) / 255
                 predict = self.yolo_model(img_array, training=False)
                 predict = self.get_yolo_y_pred(predict)
                 bb = Predict.get_optimal_box_channel(predict)
                 # print(img, bb, predict[bb])
-                Predict.plot_boxes(
+                pil_img = Predict.plot_boxes(
                     pred_bb=predict[bb][0],
-                    img_path=f"{self.tmp_folder}/init/{img}",
+                    image=pil_img,
                     name_classes=self.classes_names,
                     colors=self.box_colors,
                     image_size=self.target_yolo_size,
-                    save_path=f"{self.tmp_folder}/pred/{img}"
+                    headline=headline_str
                 )
+            # img = cv2.imread(f"{tmp_folder}/{filename}")
+            img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+            out.write(img)
             count += 1
-            if count % int(len(image_list) * 0.1) == 0:
-                print(f"{round(count *100 / len(image_list), 0)}% images was processes by YOLO...")
-        if headline:
-            # _, headline_list = Predict.object_counter(class_counter, generate_headline=True)
-            for i, img in enumerate(image_list):
-                Predict.add_headline_to_image(
-                    image_path=f"{self.tmp_folder}/pred/{img}",
-                    headline=f"Обнаружено фреймов: {i}", #headline,
-                    save_path=f"{self.tmp_folder}/pred/{img}",
-                )
-        VideoProcessing.frames2video(
-            frames_path=f"{self.tmp_folder}/pred",
-            save_path=self.save_path,
-            video_name='predict_tracker',
-            params=self.data_dict_path,
-        )
-        shutil.rmtree(self.tmp_folder, ignore_errors=True)
+            if count % int(frame_count * 0.01) == 0:
+                print(
+                    f"{int(count * 100 / frame_count)}% images were processed by tracker "
+                    f"(frame: {i + 1}/{frame_count}, "
+                    f"time: {int(round((time.time() - st) // 60), 0)}m {int(round((time.time() - st) % 60))}s)...")
+
+        out.release()
+        print(f"\nPrediction time={round(time.time() - st, 1)}s")
 
     def get_yolo_y_pred(self, array, sensitivity: float = 0.15, threashold: float = 0.1):
         y_pred = {}
@@ -307,8 +328,7 @@ class Predict:
         return pick, mean_iou
 
     @staticmethod
-    def plot_boxes(pred_bb, img_path, name_classes, colors, image_size=(416, 416), save_path=''):
-        image = Image.open(img_path)
+    def plot_boxes(pred_bb, image, name_classes, colors, image_size=(416, 416), headline=""):
         real_size = image.size
         scale_w = real_size[0] / image_size[0]
         scale_h = real_size[1] / image_size[1]
@@ -335,36 +355,56 @@ class Predict:
         label = ['{} {:.0f}% '.format(predicted_class[i], score[i]) for i in range(len(pred_bb))]
         cols = [colors[classes[i]] for i in range(len(pred_bb))]
 
-        # draw bounding boxes with fill color
-        image_pred = read_image(img_path)
-        image_pred = draw_bounding_boxes(image_pred, bbox, width=3, labels=label, colors=cols, fill=True)
+        image_pred = torchvision.transforms.ToTensor()(image)
+        image_pred = torch.tensor(image_pred * 255, dtype=torch.uint8)
+        font_size = int(real_size[1] * 0.03) if int(real_size[1] * 0.03) > 20 else 20
+        image_pred = draw_bounding_boxes(image_pred, bbox, width=3, labels=label, colors=cols, fill=True,
+                                         font='arial.ttf', font_size=font_size)
         image_pred = torchvision.transforms.ToPILImage()(image_pred)
-        image_pred.save(save_path)
+        if headline:
+            return Predict.add_headline_to_image(image_pred, headline)
+        else:
+            return image_pred
 
     @staticmethod
-    def add_headline_to_image(image_path, headline, save_path):
-        image = Image.open(image_path)
-        font_size = int(image.size[1] * 0.05)
-        draw = ImageDraw.Draw(image)
-        font = ImageFont.truetype("arial.ttf", font_size)
-        draw.text((10, 25), "world", font=font)
-
-        image = Image.open(image_path)
-        font_size = int(image.size[1] * 0.05)
-        draw = ImageDraw.Draw(image)
-        font = ImageFont.truetype("arial.ttf", font_size)
-        label_size = draw.textsize(headline, font)
-        text_origin = np.array([int(image.size[0] * 0.01), int(image.size[1] * 0.01)])
-        draw.rectangle(
-            [tuple(text_origin), tuple(text_origin + label_size)],
-            fill=(255, 255, 255)
-        )
-        draw.text((int(image.size[0] * 0.01), int(image.size[1] * 0.01)), headline, font=font, fill=(0, 0, 0))
-        image.save(save_path)
+    def add_headline_to_image(image, headline):
+        if headline:
+            font_size = int(image.size[1] * 0.03)
+            draw = ImageDraw.Draw(image)
+            font = ImageFont.truetype("arial.ttf", font_size)
+            label_size = draw.textsize(headline, font)
+            text_origin = np.array([int(image.size[0] * 0.01), int(image.size[1] * 0.01)])
+            draw.rectangle(
+                [tuple(text_origin), tuple(text_origin + label_size)],
+                fill=(255, 255, 255)
+            )
+            draw.text((int(image.size[0] * 0.01), int(image.size[1] * 0.01)), headline, font=font, fill=(0, 0, 0))
+        return image
 
     @staticmethod
-    def object_counter(self, class_counter, generate_headline=True):
-        return None, None
+    def object_counter(class_counter, emp: bool, obj: bool, obj_range, total_obj):
+        if len(class_counter) < obj_range:
+            emp = True
+            obj = False
+            total_obj = 0
+        else:
+            if emp and np.sum(class_counter) < obj_range:
+                emp = True
+                obj = False
+            elif emp and np.sum(class_counter) == obj_range:
+                emp = False
+                obj = True
+                total_obj += 1
+            elif obj and np.sum(class_counter) > 0:
+                emp = False
+                obj = True
+            elif obj and np.sum(class_counter) == 0:
+                emp = True
+                obj = False
+            else:
+                emp = False
+                obj = True
+        return total_obj, emp, obj
 
     @staticmethod
     def get_optimal_box_channel(array):
@@ -385,27 +425,21 @@ class Predict:
 
 
 if __name__ == '__main__':
-    video_path = 'init_video/Air_1.mp4'
-    path = 'init_frames/Air_1_24s'
-    # VideoProcessing.video2frames(
-    #     video_path=video_path,
-    #     save_path=f"init_frames",
-    #     max_time=None,
-    #     predict_mode=True
-    # )
-
+    # video_path = 'init_video/Air_1.mp4'
+    # 30s - processing time 642s
+    # 60s - processing time 1289.3s
+    path = 'init_frames/Train_0_60s'
     pred = Predict(
-        video_path=f"{path}/init_video/Air_1.mp4",
-        yolo_model_path=f"{path}/yolo_model",
-        class_model_path="",
+        video_path=f"init_frames/Train_0_60s/init_video/Train_0.mp4",
+        yolo_model_path=f"init_frames/Train_0_300s/yolo_model",
+        class_model_path=f"init_frames/Train_0_300s/class_model",
         save_path=path,
         data_dict_path=f"{path}/data.dict",
         yolo_version='v3'
     )
     pred.predict(headline=True)
-    # video_capture = cv2.VideoCapture()
-    # video_capture.open(f"{path}/init_video/Air_1.mp4")
-    # fps = video_capture.get(cv2.CAP_PROP_FPS)  # OpenCV v2.x used "CV_CAP_PROP_FPS"
-    # frame_count = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
-    # print(fps, frame_count)
-
+    # xxx = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,
+    #        1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
+    # yyy = Predict.object_counter(xxx)
+    # print(len(xxx))
+    # print(yyy)

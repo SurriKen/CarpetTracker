@@ -113,13 +113,17 @@ class VideoProcessing:
                     print(f"{i + 1} frames are ready")
                 ret, frame = video_capture.read()
                 size = (frame.shape[1], frame.shape[0])
-                cv2.imwrite(to_path + "/%05d.jpg" % i, frame)
+                cv2.imwrite(to_path + "/%05d.png" % i, frame)
             video_data = {
                 "fps": int(fps), "frames": int(frames), 'size': size
             }
             print(f"frames were got: fps - {int(fps)}, total frames - {int(frames)}, frame size - {size}")
             save_dict(video_data, f"{save_path}/{video_name}_{max_time}s", 'data')
         else:
+            # video_capture = cv2.VideoCapture()
+            # video_capture.open(video_path)
+            # fps = video_capture.get(cv2.CAP_PROP_FPS)
+            # frames = video_capture.get(cv2.CAP_PROP_FRAME_COUNT)
             print(f"Getting frames ({int(frame_count)} in total)...")
             size = ()
             for i in range(int(frame_count)):
@@ -127,11 +131,11 @@ class VideoProcessing:
                     print(f"{i + 1} frames are ready")
                 ret, frame = video_capture.read()
                 size = (frame.shape[1], frame.shape[0])
-                cv2.imwrite(to_path + "/%05d.jpg" % i, frame)
+                cv2.imwrite(to_path + "/%05d.png" % i, frame)
             video_data = {
                 "fps": int(fps), "frames": int(frame_count), 'size': size
             }
-            print(f"frames were got: fps - {int(fps)}, total frames - {int(frame_count)}, frame size - {size}")
+            print(f"frames were prepared: fps - {int(fps)}, total frames - {int(frame_count)}, frame size - {size}")
             save_dict(video_data, save_path, 'data')
 
     @staticmethod
@@ -256,7 +260,7 @@ if __name__ == '__main__':
     #     save_path=save_path_,
     #     max_time=max_tim
     # )
-    # VideoProcessing.init_new_folder('init_frames/Air_1_24s')
+    # VideoProcessing.init_new_folder('init_frames/Train_0_300s')
     # VideoProcessing.frames2video(
     #     frames_path='init_frames/Air_1_24s/init_frames',
     #     save_path='init_frames/Air_1_24s',
