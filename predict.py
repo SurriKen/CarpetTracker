@@ -1,7 +1,5 @@
 import importlib
 import json
-import os
-import shutil
 import time
 
 import cv2
@@ -11,51 +9,31 @@ import tensorflow as tf
 import torch
 import torchvision
 from PIL import Image, ImageFont, ImageDraw
-from torchvision.io import read_image
 from torchvision.utils import draw_bounding_boxes
 
-from VideoProcessing import VideoProcessing
-from prepare_dataset import PrepareDataset
+from parameters import YOLO_MODEL_PATH, CLASSIFICATION_MODEL_PATH, PREDICT_PATH
 from utils import get_colors
 
 
 class Predict:
 
-    def __init__(self, video_path, yolo_model_path, class_model_path, save_path, data_dict_path, yolo_version='v3'):
+    def __init__(self, video_path, yolo_version='v3'):
         self.video_path = video_path
         self.predict_video_name = f"predict_{self.video_path.split('/')[-1].split('.')[0]}"
-        self.yolo_model_path = yolo_model_path
-        self.class_model_path = class_model_path
-        self.save_path = save_path
+        self.save_path = f"{PREDICT_PATH}/{self.predict_video_name}"
         self.yolo_version = yolo_version
-        self.data_dict_path = data_dict_path
-        f = open(f'{self.yolo_model_path}/instructions/parameters/2_object_detection.json')
+        f = open(f'{YOLO_MODEL_PATH}/instructions/parameters/2_object_detection.json')
         self.classes_names = json.load(f)['classes_names']
         f.close()
-        f2 = open(f'{self.yolo_model_path}/instructions/parameters/1_image.json')
+        f2 = open(f'{YOLO_MODEL_PATH}/instructions/parameters/1_image.json')
         dict_ = json.load(f2)
         self.target_yolo_size = (dict_["width"], dict_["height"])
         self.image_yolo_scaler = dict_["scaler"]
         f2.close()
-        # self.tmp_folder = f"{save_path}/tmp2"
-        # try:
-        #     os.mkdir(self.tmp_folder)
-        # except:
-        #     shutil.rmtree(self.tmp_folder, ignore_errors=True)
-        #     os.mkdir(self.tmp_folder)
-        # os.mkdir(f"{self.tmp_folder}/init")
-        # os.mkdir(f"{self.tmp_folder}/pred")
-
-        # VideoProcessing.video2frames(
-        #     video_path=self.video_path,
-        #     save_path=f"{self.tmp_folder}",
-        #     max_time=None,
-        #     predict_mode=True
-        # )
-        if self.class_model_path:
+        if CLASSIFICATION_MODEL_PATH:
             self.classification_classes = ["no", "yes"]
             self.class_model = self.set_model(model_type='normal')
-            f3 = open(f'{self.class_model_path}/instructions/parameters/1_image.json')
+            f3 = open(f'{CLASSIFICATION_MODEL_PATH}/instructions/parameters/1_image.json')
             dict_ = json.load(f3)
             self.target_class_size = (dict_["width"], dict_["height"])
             self.classification_scaler = dict_["scaler"]
@@ -66,18 +44,18 @@ class Predict:
     def set_model(self, model_type='normal'):
 
         if model_type == 'normal':
-            model_json = f"{self.class_model_path}/trained_model_json.trm"
-            custom_obj_json = f"{self.class_model_path}/trained_model_custom_obj_json.trm"
-            model_best_weights = f"{self.class_model_path}/trained_model_best_weights"
+            model_json = f"{CLASSIFICATION_MODEL_PATH}/trained_model_json.trm"
+            custom_obj_json = f"{CLASSIFICATION_MODEL_PATH}/trained_model_custom_obj_json.trm"
+            model_best_weights = f"{CLASSIFICATION_MODEL_PATH}/trained_model_best_weights"
             model_data, custom_dict = Predict.__get_json_data(model_json, custom_obj_json)
             custom_object = self.__set_custom_objects(custom_dict)
             model = tf.keras.models.model_from_json(model_data, custom_objects=custom_object)
             model.load_weights(model_best_weights)
             return model
         elif model_type == 'yolo':
-            model_json = f"{self.yolo_model_path}/trained_model_json.trm"
-            custom_obj_json = f"{self.yolo_model_path}/trained_model_custom_obj_json.trm"
-            model_best_weights = f"{self.yolo_model_path}/trained_model_best_weights"
+            model_json = f"{YOLO_MODEL_PATH}/trained_model_json.trm"
+            custom_obj_json = f"{YOLO_MODEL_PATH}/trained_model_custom_obj_json.trm"
+            model_best_weights = f"{YOLO_MODEL_PATH}/trained_model_best_weights"
             model_data, custom_dict = Predict.__get_json_data(model_json, custom_obj_json)
             custom_object = self.__set_custom_objects(custom_dict)
             model = tf.keras.models.model_from_json(model_data, custom_objects=custom_object)
@@ -184,7 +162,7 @@ class Predict:
         for i in range(frame_count-1):
             ret, frame = video_capture.read()
             pil_img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-            if self.class_model_path:
+            if CLASSIFICATION_MODEL_PATH:
                 if self.classification_scaler == 'no_scaler':
                     class_array = np.expand_dims(np.array(pil_img.resize(self.target_class_size)), 0)
                 else:
@@ -425,21 +403,9 @@ class Predict:
 
 
 if __name__ == '__main__':
-    # video_path = 'init_video/Air_1.mp4'
-    # 30s - processing time 642s
-    # 60s - processing time 1289.3s
-    path = 'init_frames/Train_0_60s'
     pred = Predict(
         video_path=f"init_frames/Train_0_60s/init_video/Train_0.mp4",
-        yolo_model_path=f"init_frames/Train_0_300s/yolo_model",
-        class_model_path=f"init_frames/Train_0_300s/class_model",
-        save_path=path,
-        data_dict_path=f"{path}/data.dict",
         yolo_version='v3'
     )
     pred.predict(headline=True)
-    # xxx = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1,
-    #        1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
-    # yyy = Predict.object_counter(xxx)
-    # print(len(xxx))
-    # print(yyy)
+

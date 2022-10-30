@@ -13,7 +13,7 @@ from torchvision.utils import draw_bounding_boxes
 
 from predict import Predict
 
-VIDEO_PATH = 'init_video/Train_0.mp4'
+VIDEO_PATH = 'videos/Train_0.mp4'
 
 # pred = Predict(
 #     video_path=VIDEO_PATH,
