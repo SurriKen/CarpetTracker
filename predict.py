@@ -1,5 +1,7 @@
 import importlib
 import json
+import os
+import shutil
 import time
 
 import cv2
@@ -11,16 +13,30 @@ import torchvision
 from PIL import Image, ImageFont, ImageDraw
 from torchvision.utils import draw_bounding_boxes
 
-from parameters import YOLO_MODEL_PATH, CLASSIFICATION_MODEL_PATH, PREDICT_PATH
+from VideoProcessing import VideoProcessing
+from parameters import YOLO_MODEL_PATH, CLASSIFICATION_MODEL_PATH, PREDICT_PATH, IMAGE_IRRELEVANT_SPACE_PERCENT
 from utils import get_colors
 
 
 class Predict:
 
-    def __init__(self, video_path, yolo_version='v3'):
+    def __init__(self, video_path, yolo_version='v3', cut_video=None):
         self.video_path = video_path
         self.predict_video_name = f"predict_{self.video_path.split('/')[-1].split('.')[0]}"
-        self.save_path = f"{PREDICT_PATH}/{self.predict_video_name}"
+        if cut_video:
+            tmp_folder = f"{PREDICT_PATH}/tmp_{self.video_path.split('/')[-1].split('.')[0]}"
+            try:
+                os.mkdir(tmp_folder)
+            except:
+                shutil.rmtree(tmp_folder, ignore_errors=True)
+                os.mkdir(tmp_folder)
+            VideoProcessing.cut_video(
+                video_path=video_path,
+                save_path=tmp_folder,
+                from_time=0,
+                to_time=cut_video)
+            self.video_path = f"{tmp_folder}/{video_path.split('/')[-1]}"
+        self.save_path = f"{PREDICT_PATH}/{self.predict_video_name}.mp4"
         self.yolo_version = yolo_version
         f = open(f'{YOLO_MODEL_PATH}/instructions/parameters/2_object_detection.json')
         self.classes_names = json.load(f)['classes_names']
@@ -144,7 +160,7 @@ class Predict:
         # calculating the predicted probability category box object
         return tf.concat([pred_xywh, pred_conf, pred_prob], axis=-1)
 
-    def predict(self, obj_range=4, headline=False):
+    def predict(self, obj_range=4, headline=False, classification=True):
         st = time.time()
         video_capture = cv2.VideoCapture()
         video_capture.open(self.video_path)
@@ -153,41 +169,47 @@ class Predict:
         height = video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
         width = video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)
         size = (int(width), int(height))
+        print(self.save_path)
         out = cv2.VideoWriter(
             f'{self.save_path}', cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
         obj_seq = []
         total_obj, count = 0, 0
         emp, obj = False, False
-        print(frame_count)
-        for i in range(frame_count-1):
+        for i in range(frame_count - 1):
             ret, frame = video_capture.read()
             pil_img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-            if CLASSIFICATION_MODEL_PATH:
+            if CLASSIFICATION_MODEL_PATH and classification:
                 if self.classification_scaler == 'no_scaler':
                     class_array = np.expand_dims(np.array(pil_img.resize(self.target_class_size)), 0)
                 else:
                     class_array = np.expand_dims(np.array(pil_img.resize(self.target_class_size)), 0) / 255
                 result = self.class_model(class_array, training=False)
                 result = int(np.argmax(result, -1)[0])
-                if len(obj_seq) < obj_range:
-                    obj_seq.append(result)
-                else:
-                    obj_seq.append(result)
-                    obj_seq.pop(0)
+                obj_seq.append(result)
+                # if len(obj_seq) < obj_range:
+                #     obj_seq.append(result)
+                # else:
+                #     obj_seq.append(result)
+                #     obj_seq.pop(0)
             else:
-                if len(obj_seq) < obj_range:
-                    obj_seq.append(1)
-                else:
-                    obj_seq.append(1)
-                    obj_seq.pop(0)
-            total_obj, emp, obj = Predict.object_counter(obj_seq, emp, obj, obj_range, total_obj)
-
-            if headline:
-                headline_str = f"Обнаружено объектов: {total_obj}"
-            else:
-                headline_str = ""
+                obj_seq.append(1)
+            #     if len(obj_seq) < obj_range:
+            #         obj_seq.append(1)
+            #     else:
+            #         obj_seq.append(1)
+            #         obj_seq.pop(0)
+            # total_obj, emp, obj = Predict.object_counter(obj_seq, emp, obj, obj_range, total_obj)
+            # if headline:
+            #     headline_str = f"Обнаружено объектов: {total_obj}"
+            # else:
+            #     headline_str = ""
 
             if obj_seq[-1] == 0:
+                total_obj, emp, obj = Predict.object_counter(obj_seq, emp, obj, obj_range, total_obj)
+                if headline:
+                    headline_str = f"Обнаружено объектов: {total_obj}"
+                else:
+                    headline_str = ""
                 pil_img = Predict.add_headline_to_image(
                     image=pil_img,
                     headline=headline_str
@@ -200,8 +222,15 @@ class Predict:
                     img_array = np.expand_dims(np.array(img_array), 0) / 255
                 predict = self.yolo_model(img_array, training=False)
                 predict = self.get_yolo_y_pred(predict)
+                predict = Predict.remove_irrelevant_box(predict)
                 bb = Predict.get_optimal_box_channel(predict)
-                # print(img, bb, predict[bb])
+                if obj_seq[-1] != 0 and not predict[bb][0].any():
+                    obj_seq[-1] = 0
+                total_obj, emp, obj = Predict.object_counter(obj_seq, emp, obj, obj_range, total_obj)
+                if headline:
+                    headline_str = f"Обнаружено объектов: {total_obj}"
+                else:
+                    headline_str = ""
                 pil_img = Predict.plot_boxes(
                     pred_bb=predict[bb][0],
                     image=pil_img,
@@ -210,17 +239,17 @@ class Predict:
                     image_size=self.target_yolo_size,
                     headline=headline_str
                 )
-            # img = cv2.imread(f"{tmp_folder}/{filename}")
             img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
             out.write(img)
             count += 1
             if count % int(frame_count * 0.01) == 0:
                 print(
-                    f"{int(count * 100 / frame_count)}% images were processed by tracker "
+                    f"{round(count * 100 / frame_count, 1)}% images were processed by tracker "
                     f"(frame: {i + 1}/{frame_count}, "
-                    f"time: {int(round((time.time() - st) // 60), 0)}m {int(round((time.time() - st) % 60))}s)...")
-
+                    f"time: {int((time.time() - st) // 60)}m {int((time.time() - st) % 60)}s)..."
+                )
         out.release()
+        # print(obj_seq)
         print(f"\nPrediction time={round(time.time() - st, 1)}s")
 
     def get_yolo_y_pred(self, array, sensitivity: float = 0.15, threashold: float = 0.1):
@@ -311,38 +340,39 @@ class Predict:
         scale_w = real_size[0] / image_size[0]
         scale_h = real_size[1] / image_size[1]
 
-        coord = pred_bb[:, :4].astype('float')
-        coord = np.where(coord < 0, 0, coord)
-        coord = np.where(coord > 416, 416, coord)
-        resized_coord = np.concatenate(
-            [coord[:, 0:1] * scale_h, coord[:, 1:2] * scale_w,
-             coord[:, 2:3] * scale_h, coord[:, 3:4] * scale_w], axis=-1).astype('int')
-        resized_coord = np.concatenate([resized_coord, pred_bb[:, 4:]], axis=-1)
-        pred_bb = resized_coord
-        classes = np.argmax(pred_bb[:, 5:], axis=-1)
-        # bounding box in (xmin, ymin, xmax, ymax) format
-        box = np.concatenate([
-            pred_bb[..., 1:2],
-            pred_bb[..., 0:1],
-            pred_bb[..., 3:4],
-            pred_bb[..., 2:3]
-        ], axis=-1)
-        bbox = torch.tensor(box, dtype=torch.int)
-        predicted_class = ['{}'.format(name_classes[classes[i]]) for i in range(len(pred_bb))]
-        score = [pred_bb[:, 5:][i][classes[i]] * 100 for i in range(len(pred_bb))]
-        label = ['{} {:.0f}% '.format(predicted_class[i], score[i]) for i in range(len(pred_bb))]
-        cols = [colors[classes[i]] for i in range(len(pred_bb))]
+        if list(pred_bb):
+            coord = pred_bb[:, :4].astype('float')
+            coord = np.where(coord < 0, 0, coord)
+            coord = np.where(coord > 416, 416, coord)
+            resized_coord = np.concatenate(
+                [coord[:, 0:1] * scale_h, coord[:, 1:2] * scale_w,
+                 coord[:, 2:3] * scale_h, coord[:, 3:4] * scale_w], axis=-1).astype('int')
+            resized_coord = np.concatenate([resized_coord, pred_bb[:, 4:]], axis=-1)
+            pred_bb = resized_coord
+            classes = np.argmax(pred_bb[:, 5:], axis=-1)
+            # bounding box in (xmin, ymin, xmax, ymax) format
+            box = np.concatenate([
+                pred_bb[..., 1:2],
+                pred_bb[..., 0:1],
+                pred_bb[..., 3:4],
+                pred_bb[..., 2:3]
+            ], axis=-1)
+            bbox = torch.tensor(box, dtype=torch.int)
+            predicted_class = ['{}'.format(name_classes[classes[i]]) for i in range(len(pred_bb))]
+            score = [pred_bb[:, 5:][i][classes[i]] * 100 for i in range(len(pred_bb))]
+            label = ['{} {:.0f}% '.format(predicted_class[i], score[i]) for i in range(len(pred_bb))]
+            cols = [colors[classes[i]] for i in range(len(pred_bb))]
 
-        image_pred = torchvision.transforms.ToTensor()(image)
-        image_pred = torch.tensor(image_pred * 255, dtype=torch.uint8)
-        font_size = int(real_size[1] * 0.03) if int(real_size[1] * 0.03) > 20 else 20
-        image_pred = draw_bounding_boxes(image_pred, bbox, width=3, labels=label, colors=cols, fill=True,
-                                         font='arial.ttf', font_size=font_size)
-        image_pred = torchvision.transforms.ToPILImage()(image_pred)
+            image_pred = torchvision.transforms.ToTensor()(image)
+            image_pred = torch.tensor(image_pred * 255, dtype=torch.uint8)
+            font_size = int(real_size[1] * 0.03) if int(real_size[1] * 0.03) > 20 else 20
+            image_pred = draw_bounding_boxes(image_pred, bbox, width=3, labels=label, colors=cols, fill=True,
+                                             font='arial.ttf', font_size=font_size)
+            image = torchvision.transforms.ToPILImage()(image_pred)
         if headline:
-            return Predict.add_headline_to_image(image_pred, headline)
+            return Predict.add_headline_to_image(image, headline)
         else:
-            return image_pred
+            return image
 
     @staticmethod
     def add_headline_to_image(image, headline):
@@ -366,17 +396,17 @@ class Predict:
             obj = False
             total_obj = 0
         else:
-            if emp and np.sum(class_counter) < obj_range:
+            if emp and np.sum(class_counter[-obj_range:]) < obj_range:
                 emp = True
                 obj = False
-            elif emp and np.sum(class_counter) == obj_range:
+            elif emp and np.sum(class_counter[-obj_range:]) == obj_range:
                 emp = False
                 obj = True
                 total_obj += 1
-            elif obj and np.sum(class_counter) > 0:
+            elif obj and np.sum(class_counter[-obj_range:]) > 0:
                 emp = False
                 obj = True
-            elif obj and np.sum(class_counter) == 0:
+            elif obj and np.sum(class_counter[-obj_range:]) == 0:
                 emp = True
                 obj = False
             else:
@@ -401,11 +431,44 @@ class Predict:
                 best_channel = i
         return best_channel
 
+    @staticmethod
+    def remove_irrelevant_box(boxes: dict):
+        # bounding box in (ymin, xmin, ymax, xmax) format
+        x_min = int(416 * IMAGE_IRRELEVANT_SPACE_PERCENT)
+        x_max = int(416 - 416 * IMAGE_IRRELEVANT_SPACE_PERCENT)
+        y_min = int(416 * IMAGE_IRRELEVANT_SPACE_PERCENT)
+        y_max = int(416 - 416 * IMAGE_IRRELEVANT_SPACE_PERCENT)
+        # print(x_min, y_min, x_max, y_max)
+        new_boxes = {}
+        for i, ch in boxes.items():
+            if list(ch[0]):
+                # new_boxes[i] = [[]]
+                bb = []
+                # print(ch)
+                for b in ch[0]:
+                    # new_boxes[i] = []
+                    # print(b)
+                    if b[0] > y_min and b[1] > x_min and b[2] < y_max and b[3] < x_max:
+                        bb.append(b)
+                new_boxes[i] = [np.array(bb, dtype='float64')]
+            else:
+                new_boxes[i] = ch
+        # print('new_boxes', new_boxes)
+        return new_boxes
+
 
 if __name__ == '__main__':
-    pred = Predict(
-        video_path=f"init_frames/Train_0_60s/init_video/Train_0.mp4",
-        yolo_version='v3'
-    )
-    pred.predict(headline=True)
+    # for i in range(5):
+    #     pred = Predict(
+    #         video_path=f"videos/Train_{i}.mp4",
+    #         yolo_version='v3',
+    #         cut_video=60,
+    #     )
+    #     pred.predict(obj_range=8, headline=True)
 
+    pred = Predict(
+        video_path=f"predict/tmp_Test_0/Train_4.mp4",
+        yolo_version='v3',
+        # cut_video=60,
+    )
+    pred.predict(obj_range=8, headline=True, classification=False)

@@ -13,10 +13,10 @@ class PrepareDataset:
         pass
 
     @staticmethod
-    def xml2terra_dataset(image_dir: str, xml_dir: str, dataset_name: str, save_path: str, shrink=False, limit=500):
+    def xml2terra_dataset(project_paths: list, dataset_name: str, save_path: str, shrink=False, limit=500):
         print("\nPreparing dataset for object detection...")
         tmp_folder = f"{save_path}/tmp"
-        PrepareDataset.remove_empty_xml(xml_dir)
+        # PrepareDataset.remove_empty_xml(xml_dir)
         try:
             os.mkdir(tmp_folder)
         except:
@@ -24,24 +24,30 @@ class PrepareDataset:
             os.mkdir(tmp_folder)
 
         image_list, xml_list = [], []
-        with os.scandir(image_dir) as folder:
-            for f in folder:
-                image_list.append(f.name)
-        with os.scandir(xml_dir) as folder:
-            for f in folder:
-                xml_list.append(f.name)
+        for pr in project_paths:
+            PrepareDataset.remove_empty_xml(f"{pr}/xml_labels")
+            with os.scandir(f"{pr}/frames") as folder:
+                for f in folder:
+                    image_list.append((f"{pr}", f"{f.name}"))
+            with os.scandir(f"{pr}/xml_labels") as folder:
+                for f in folder:
+                    xml_list.append((f"{pr}", f"{f.name}"))
         image_list_upd = []
         names_list = []
         coords_list = []
         frames = 0
         random.shuffle(image_list)
+        print("Preparing images and labels...")
         for img in image_list:
-            ext_length = len(img.split('.')[-1]) + 1
-            if f"{img[:-ext_length]}.xml" in xml_list:
+            ext_length = len(img[1].split('.')[-1]) + 1
+            if (img[0], f"{img[1][:-ext_length]}.xml") in xml_list:
                 if frames >= limit:
                     break
                 image_list_upd.append(img)
-                coord = PrepareDataset.read_xml(xml_path=f"{xml_dir}/{img[:-ext_length]}.xml", shrink=shrink)
+                coord = PrepareDataset.read_xml(
+                    xml_path=f"{img[0]}/xml_labels/{img[1][:-ext_length]}.xml",
+                    shrink=shrink
+                )
                 coords_list.append(coord)
                 for i in coord['coords']:
                     if i[-1] not in names_list:
@@ -57,41 +63,46 @@ class PrepareDataset:
         PrepareDataset.write_train_txt(image_list=image_list, dataset_name=dataset_name, save_path=tmp_folder)
         os.mkdir(f"{tmp_folder}/Images")
         os.mkdir(f"{tmp_folder}/Annotation")
-        for data in coords_list:
-            img_name = data['filename']
+        print("Sorting and saving dataset...")
+        for i, data in enumerate(coords_list):
+            if (i + 1) % int(len(coords_list) * 0.05) == 0:
+                print(f"{int((i + 1) * 100 / len(coords_list))}% complete...")
+            # img_name = data['filename']
+            pr_path, img_name = image_list[i]
+            pr_name = pr_path.split("/")[-1]
             if shrink:
-                image = Image.open(f"{image_dir}/{img_name}")
+                image = Image.open(f"{pr_path}/frames/{img_name}")
                 new_image = image.resize((416, 416))
-                new_image.save(f"{tmp_folder}/Images/{img_name}")
+                new_image.save(f"{tmp_folder}/Images/{pr_name}_{img_name}")
             else:
-                shutil.copy2(f"{image_dir}/{img_name}", f"{tmp_folder}/Images/{img_name}")
+                shutil.copy2(f"{pr_path}/frames/{img_name}", f"{tmp_folder}/Images/{pr_name}_{img_name}")
             ext_length = len(img_name.split('.')[-1]) + 1
-            txt_name = f"{img_name[:-ext_length]}.txt"
+            txt_name = f"{pr_name}_{img_name[:-ext_length]}.txt"
             coord_txt = ""
             for c in data['coords']:
                 coord_txt = f"{coord_txt}\n{c[0]},{c[1]},{c[2]},{c[3]},{names_list.index(c[-1])}"
             save_txt(coord_txt[1:], f"{tmp_folder}/Annotation/{txt_name}")
+        print(f"Prepare zip archive...")
         shutil.make_archive(f'{save_path}/{dataset_name}', 'zip', f"{save_path}/tmp")
         shutil.rmtree(tmp_folder, ignore_errors=True)
         print(f"Object detection dataset is ready! Dataset path: '{f'{save_path}/{dataset_name}'}'")
 
     @staticmethod
-    def prepare_classificator_dataset(image_path: str, xml_path: str, dataset_name: str, save_path: str, limit=500):
+    def prepare_classificator_dataset(project_paths: list, dataset_name: str, save_path: str, resize=(0, 0), limit=500):
         print("\nPreparing dataset for image classification...")
-        if not image_path:
+        if not project_paths:
             print("No image_path")
             return None
-        if not xml_path:
-            print("No label_path")
-            return None
-        PrepareDataset.remove_empty_xml(xml_path)
+        # PrepareDataset.remove_empty_xml(xml_path)
         image_list, lbl_list = [], []
-        with os.scandir(image_path) as folder:
-            for f in folder:
-                image_list.append(f.name)
-        with os.scandir(xml_path) as folder:
-            for f in folder:
-                lbl_list.append(f.name)
+        for pr in project_paths:
+            PrepareDataset.remove_empty_xml(f"{pr}/xml_labels")
+            with os.scandir(f"{pr}/frames") as folder:
+                for f in folder:
+                    image_list.append((f"{pr}", f"{f.name}"))
+            with os.scandir(f"{pr}/xml_labels") as folder:
+                for f in folder:
+                    lbl_list.append((f"{pr}", f"{f.name}"))
         if not image_list:
             print("image_path is empty!")
         if not lbl_list:
@@ -116,19 +127,24 @@ class PrepareDataset:
         for img in image_list:
             if (labeled + not_labeled + 1) % int(length * 0.05) == 0:
                 print(f"{round((labeled + not_labeled + 1) * 100 / length, 0)}% complete...")
-            name = img.split(".")[0]
-            if f"{name}.xml" in lbl_list:
-                # if labeled < limit:
-                shutil.copy2(f"{image_path}/{img}", f"{tmp_folder}/yes/{img}")
+            name = img[1].split(".")[0]
+            pr_name = img[0].split("/")[-1]
+            if (img[0], f"{name}.xml") in lbl_list:
+                if resize != (0, 0):
+                    image = Image.open(f"{img[0]}/frames/{img[1]}")
+                    new_image = image.resize(resize)
+                    new_image.save(f"{tmp_folder}/yes/{pr_name}_{img[1]}")
+                else:
+                    shutil.copy2(f"{img[0]}/frames/{img[1]}", f"{tmp_folder}/yes/{pr_name}_{img[1]}")
                 labeled += 1
-                # else:
-                #     continue
             else:
-                # if not_labeled < limit:
-                shutil.copy2(f"{image_path}/{img}", f"{tmp_folder}/no/{img}")
+                if resize != (0, 0):
+                    image = Image.open(f"{img[0]}/frames/{img[1]}")
+                    new_image = image.resize(resize)
+                    new_image.save(f"{tmp_folder}/no/{pr_name}_{img[1]}")
+                else:
+                    shutil.copy2(f"{img[0]}/frames/{img[1]}", f"{tmp_folder}/no/{pr_name}_{img[1]}")
                 not_labeled += 1
-                # else:
-                #     continue
             if labeled + not_labeled >= limit:
                 break
         print(f"Prepare zip archive...")
@@ -216,25 +232,26 @@ class PrepareDataset:
 
 
 if __name__ == "__main__":
-    # image_dir = "E:/AI/CarpetTracker/init_frames/Train_0_300s/init_frames"
-    # xml_dir = "E:/AI/CarpetTracker/init_frames/Train_0_300s/xml_labels"
-    # save_path = "E:/AI/CarpetTracker/init_frames/Train_0_300s"
-    image_dir = "E:/AI/CarpetTracker/init_frames/Air_1_24s/init_frames"
-    xml_dir = "E:/AI/CarpetTracker/init_frames/Air_1_24s/xml_labels"
-    save_path = "E:/AI/CarpetTracker/init_frames/Air_1_24s"
+    pr_dir = [
+        'datasets/Train_0_0s-300s',
+        'datasets/Train_1_0s-300s',
+        'datasets/Train_2_0s-300s',
+        'datasets/Train_3_0s-300s',
+        'datasets/Train_4_0s-300s',
+    ]
+    save_path = "datasets"
 
     PrepareDataset.xml2terra_dataset(
-        image_dir=image_dir,
-        xml_dir=xml_dir,
-        dataset_name='air_tracker_yolo',
+        project_paths=pr_dir,
+        dataset_name='complex_carpet_yolo_10000',
         save_path=save_path,
         shrink=True,
-        limit=1000
+        limit=10000
     )
-    # PrepareDataset.prepare_classificator_dataset(
-    #     image_path=image_dir,
-    #     xml_path=xml_dir,
-    #     dataset_name="carpet_class2",
-    #     save_path=save_path,
-    #     limit=5000
-    # )
+    PrepareDataset.prepare_classificator_dataset(
+        project_paths=pr_dir,
+        dataset_name="complex_carpet_class_10000",
+        resize=(416, 416),
+        save_path=save_path,
+        limit=10000
+    )
