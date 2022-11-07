@@ -62,7 +62,7 @@ class Predict:
         if model_type == 'normal':
             model_json = f"{CLASSIFICATION_MODEL_PATH}/trained_model_json.trm"
             custom_obj_json = f"{CLASSIFICATION_MODEL_PATH}/trained_model_custom_obj_json.trm"
-            model_best_weights = f"{CLASSIFICATION_MODEL_PATH}/trained_model_best_weights"
+            model_best_weights = f"{CLASSIFICATION_MODEL_PATH}/trained_model_weights"
             model_data, custom_dict = Predict.__get_json_data(model_json, custom_obj_json)
             custom_object = self.__set_custom_objects(custom_dict)
             model = tf.keras.models.model_from_json(model_data, custom_objects=custom_object)
@@ -71,7 +71,7 @@ class Predict:
         elif model_type == 'yolo':
             model_json = f"{YOLO_MODEL_PATH}/trained_model_json.trm"
             custom_obj_json = f"{YOLO_MODEL_PATH}/trained_model_custom_obj_json.trm"
-            model_best_weights = f"{YOLO_MODEL_PATH}/trained_model_best_weights"
+            model_best_weights = f"{YOLO_MODEL_PATH}/trained_model_weights"
             model_data, custom_dict = Predict.__get_json_data(model_json, custom_obj_json)
             custom_object = self.__set_custom_objects(custom_dict)
             model = tf.keras.models.model_from_json(model_data, custom_objects=custom_object)
@@ -248,6 +248,7 @@ class Predict:
                     f"(frame: {i + 1}/{frame_count}, "
                     f"time: {int((time.time() - st) // 60)}m {int((time.time() - st) % 60)}s)..."
                 )
+        print(obj_seq)
         out.release()
         # print(obj_seq)
         print(f"\nPrediction time={round(time.time() - st, 1)}s")
@@ -458,17 +459,17 @@ class Predict:
 
 
 if __name__ == '__main__':
-    # for i in range(5):
-    #     pred = Predict(
-    #         video_path=f"videos/Train_{i}.mp4",
-    #         yolo_version='v3',
-    #         cut_video=60,
-    #     )
-    #     pred.predict(obj_range=8, headline=True)
+    for i in range(5):
+        pred = Predict(
+            video_path=f"predict/tmp_Train_{i}/Train_{i}.mp4",
+            yolo_version='v3',
+            # cut_video=60,
+        )
+        pred.predict(obj_range=7, headline=True, classification=True)
 
     pred = Predict(
-        video_path=f"predict/tmp_Test_0/Train_4.mp4",
+        video_path=f"predict/tmp_Test_0/Test_0.mp4",
         yolo_version='v3',
         # cut_video=60,
     )
-    pred.predict(obj_range=8, headline=True, classification=False)
+    pred.predict(obj_range=7, headline=True, classification=True)

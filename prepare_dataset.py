@@ -154,6 +154,98 @@ class PrepareDataset:
         print(f"Dataset path: '{f'{save_path}/{dataset_name}'}'. Preparation time={round(time.time() - st, 1)}s")
 
     @staticmethod
+    def prepare_box_classification_dataset(project_paths: list, dataset_name: str,
+                                           save_path: str, crop=0.2, limit=500):
+        print("\nPreparing dataset for box classification...")
+        if not project_paths:
+            print("No image_path")
+            return None
+        # PrepareDataset.remove_empty_xml(xml_path)
+        image_list, lbl_list = [], []
+        for pr in project_paths:
+            PrepareDataset.remove_empty_xml(f"{pr}/xml_labels")
+            with os.scandir(f"{pr}/frames") as folder:
+                for f in folder:
+                    image_list.append((f"{pr}", f"{f.name}"))
+            with os.scandir(f"{pr}/xml_labels") as folder:
+                for f in folder:
+                    lbl_list.append((f"{pr}", f"{f.name}"))
+        if not image_list:
+            print("image_path is empty!")
+        if not lbl_list:
+            print("label_path is empty!")
+
+        tmp_folder = f"{save_path}/tmp"
+        try:
+            os.mkdir(tmp_folder)
+        except:
+            shutil.rmtree(tmp_folder, ignore_errors=True)
+            os.mkdir(tmp_folder)
+        os.mkdir(f"{tmp_folder}/yes")
+        os.mkdir(f"{tmp_folder}/no")
+
+        count = 0
+        random.shuffle(lbl_list)
+        if limit > len(lbl_list):
+            length = len(lbl_list)
+        else:
+            length = limit
+        st = time.time()
+        for lbl in lbl_list:
+            if (count + 1) % int(length * 0.05) == 0:
+                print(f"{round((count + 1) * 100 / length, 0)}% complete...")
+            name = lbl[1].split(".")[0]
+            img_name = f"{name}.png"
+            xml_info = PrepareDataset.read_xml(xml_path=f"{lbl[0]}/xml_labels/{lbl[1]}")
+            box = random.choice(xml_info['coord'])
+            box_center = (box[0] + int((box[2]-box[0])/2), box[1] + int((box[3]-box[1])/2))
+            img = Image.open(f"{lbl[0]}/frames/{img_name}")
+            w, h = img.size
+            if box_center[0] < w / 2:
+                left = int(box_center[0] - crop * w) if int(box_center[0] - crop * w) > 0 else 0
+                right = int(box_center[0] + crop * w) if left > 0 else int(crop * w)
+            else:
+                right = int(box_center[0] + crop * w) if int(box_center[0] + crop * w) < w else w
+                left = int(box_center[0] - crop * w) if right < w else int(w - crop * w)
+            if box_center[1] < h / 2:
+                top = int(box_center[1] - crop * h) if int(box_center[1] - crop * h) > 0 else 0
+                bottom = int(box_center[1] + crop * h) if top > 0 else int(crop * h)
+            else:
+                bottom = int(box_center[1] + crop * h) if int(box_center[1] + crop * h) < h else h
+                top = int(box_center[1] - crop * h) if bottom < h else int(h - crop * h)
+            yes_img = img.crop((left, top, right, bottom))
+            yes_img.save(f"{tmp_folder}/yes/y_{lbl[0]}_{img_name}")
+
+            x = random.randint(int(crop * w), int((1 - crop) * w))
+            while x > box_center[0] - 0.2 * w and x < box_center[0] + 0.2 * w:
+                x = random.randint(int(crop * w), int((1 - crop) * w))
+            y = random.randint(int(crop * h), int((1 - crop) * h))
+            while y > box_center[1] - 0.2 * h and y < box_center[1] - 0.2 * h:
+                y = random.randint(int(crop * h), int((1 - crop) * h))
+            if x < w / 2:
+                left = int(x - crop * w) if int(x - crop * w) > 0 else 0
+                right = int(x + crop * w) if left > 0 else int(crop * w)
+            else:
+                right = int(x + crop * w) if int(x + crop * w) < w else w
+                left = int(x - crop * w) if right < w else int(w - crop * w)
+            if y < h / 2:
+                top = int(y - crop * h) if int(y - crop * h) > 0 else 0
+                bottom = int(y + crop * h) if top > 0 else int(crop * h)
+            else:
+                bottom = int(y + crop * h) if int(y + crop * h) < h else h
+                top = int(y - crop * h) if bottom < h else int(h - crop * h)
+            no_img = img.crop((left, top, right, bottom))
+            no_img.save(f"{tmp_folder}/no/n_{lbl[0]}_{img_name}")
+            count += 1
+            if count >= limit:
+                break
+        print(f"Prepare zip archive...")
+        shutil.make_archive(f'{save_path}/{dataset_name}', 'zip', f"{tmp_folder}")
+        shutil.rmtree(tmp_folder)
+        print(f"Classificator dataset is ready! Images - {count}")
+        print(f"Dataset path: '{f'{save_path}/{dataset_name}'}'. Preparation time={round(time.time() - st, 1)}s")
+
+    @staticmethod
     def read_xml(xml_path: str, shrink=False, new_width: int = 416, new_height: int = 416):
         with open(xml_path, 'r') as xml:
             lines = xml.readlines()
@@ -241,17 +333,24 @@ if __name__ == "__main__":
     ]
     save_path = "datasets"
 
-    PrepareDataset.xml2terra_dataset(
+    # PrepareDataset.xml2terra_dataset(
+    #     project_paths=pr_dir,
+    #     dataset_name='complex_carpet_yolo_8000',
+    #     save_path=save_path,
+    #     shrink=True,
+    #     limit=5000
+    # )
+    # PrepareDataset.prepare_classificator_dataset(
+    #     project_paths=pr_dir,
+    #     dataset_name="complex_carpet_class_10000",
+    #     resize=(416, 416),
+    #     save_path=save_path,
+    #     limit=10000
+    # )
+    PrepareDataset.prepare_box_classification_dataset(
         project_paths=pr_dir,
-        dataset_name='complex_carpet_yolo_10000',
+        dataset_name="complex_box_class_5000",
+        # resize=(416, 416),
         save_path=save_path,
-        shrink=True,
-        limit=10000
-    )
-    PrepareDataset.prepare_classificator_dataset(
-        project_paths=pr_dir,
-        dataset_name="complex_carpet_class_10000",
-        resize=(416, 416),
-        save_path=save_path,
-        limit=10000
+        limit=5000
     )

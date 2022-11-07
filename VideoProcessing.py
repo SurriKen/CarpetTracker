@@ -1,18 +1,8 @@
 import os
 import shutil
-import time
 
 import cv2
-import numpy as np
-import torch
-import torchvision
-from PIL import Image
 from moviepy.video.io.VideoFileClip import VideoFileClip
-from torchvision.io import read_image
-from torchvision.utils import draw_bounding_boxes
-
-from parameters import PREDICT_PATH
-from prepare_dataset import PrepareDataset
 from utils import save_dict, load_dict, get_colors
 
 
@@ -49,6 +39,7 @@ class VideoProcessing:
         video_capture = cv2.VideoCapture()
         video_capture.open(video_path)
         fps = video_capture.get(cv2.CAP_PROP_FPS)  # OpenCV v2.x used "CV_CAP_PROP_FPS"
+        # print(video_path, fps)
         frame_count = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
         duration = int(frame_count / fps)
         if to_time:
@@ -288,22 +279,22 @@ class VideoProcessing:
 
 
 if __name__ == '__main__':
-    # for i in range(5):
-        # video_path_ = f'videos/Train_{i}.mp4'
-        # save_path_ = 'datasets'
-        # max_time = 300
-        # VideoProcessing.video2frames(
-        #     video_path=video_path_,
-        #     save_path=save_path_,
-        #     from_time=0,
-        #     to_time=max_time
-        # )
-    i=2
-    VideoProcessing.frames2video(
-        frames_path=f'datasets/Train_{i}_0s-300s/frames',
-        save_path=f'datasets/Train_{i}_0s-300s',
-        video_name=f'Train_{i}_with_boxes_2',
-        params=f'datasets/Train_{i}_0s-300s/data.dict',
-        box_path=f'datasets/Train_{i}_0s-300s/xml_labels',
-        resize=False
-    )
+    for i in range(1):
+        video_path_ = f'videos/Train_{i}.mp4'
+        save_path_ = 'datasets'
+        max_time = 10
+        VideoProcessing.video2frames(
+            video_path=video_path_,
+            save_path=save_path_,
+            from_time=0,
+            to_time=max_time
+        )
+    # i=2
+    # VideoProcessing.frames2video(
+    #     frames_path=f'datasets/Train_{i}_0s-300s/frames',
+    #     save_path=f'datasets/Train_{i}_0s-300s',
+    #     video_name=f'Train_{i}_with_boxes_2',
+    #     params=f'datasets/Train_{i}_0s-300s/data.dict',
+    #     box_path=f'datasets/Train_{i}_0s-300s/xml_labels',
+    #     resize=False
+    # )
