@@ -64,20 +64,21 @@ class PrepareDataset:
         os.mkdir(f"{tmp_folder}/Images")
         os.mkdir(f"{tmp_folder}/Annotation")
         print("Sorting and saving dataset...")
+
         for i, data in enumerate(coords_list):
             if (i + 1) % int(len(coords_list) * 0.05) == 0:
                 print(f"{int((i + 1) * 100 / len(coords_list))}% complete...")
             # img_name = data['filename']
             pr_path, img_name = image_list[i]
-            pr_name = pr_path.split("/")[-1]
+            # pr_name = pr_path.split("/")[-1]
             if shrink:
                 image = Image.open(f"{pr_path}/frames/{img_name}")
                 new_image = image.resize((416, 416))
-                new_image.save(f"{tmp_folder}/Images/{pr_name}_{img_name}")
+                new_image.save(f"{tmp_folder}/Images/{i}.png")
             else:
-                shutil.copy2(f"{pr_path}/frames/{img_name}", f"{tmp_folder}/Images/{pr_name}_{img_name}")
-            ext_length = len(img_name.split('.')[-1]) + 1
-            txt_name = f"{pr_name}_{img_name[:-ext_length]}.txt"
+                shutil.copy2(f"{pr_path}/frames/{img_name}", f"{tmp_folder}/Images/{i}.png")
+            # ext_length = len(img_name.split('.')[-1]) + 1
+            txt_name = f"{i}.txt"
             coord_txt = ""
             for c in data['coords']:
                 coord_txt = f"{coord_txt}\n{c[0]},{c[1]},{c[2]},{c[3]},{names_list.index(c[-1])}"
@@ -124,7 +125,7 @@ class PrepareDataset:
         else:
             length = limit
         st = time.time()
-        for img in image_list:
+        for i, img in enumerate(image_list):
             if (labeled + not_labeled + 1) % int(length * 0.05) == 0:
                 print(f"{round((labeled + not_labeled + 1) * 100 / length, 0)}% complete...")
             name = img[1].split(".")[0]
@@ -133,17 +134,17 @@ class PrepareDataset:
                 if resize != (0, 0):
                     image = Image.open(f"{img[0]}/frames/{img[1]}")
                     new_image = image.resize(resize)
-                    new_image.save(f"{tmp_folder}/yes/{pr_name}_{img[1]}")
+                    new_image.save(f"{tmp_folder}/yes/{i}.png")
                 else:
-                    shutil.copy2(f"{img[0]}/frames/{img[1]}", f"{tmp_folder}/yes/{pr_name}_{img[1]}")
+                    shutil.copy2(f"{img[0]}/frames/{img[1]}", f"{tmp_folder}/yes/{i}.png")
                 labeled += 1
             else:
                 if resize != (0, 0):
                     image = Image.open(f"{img[0]}/frames/{img[1]}")
                     new_image = image.resize(resize)
-                    new_image.save(f"{tmp_folder}/no/{pr_name}_{img[1]}")
+                    new_image.save(f"{tmp_folder}/no/{i}.png")
                 else:
-                    shutil.copy2(f"{img[0]}/frames/{img[1]}", f"{tmp_folder}/no/{pr_name}_{img[1]}")
+                    shutil.copy2(f"{img[0]}/frames/{img[1]}", f"{tmp_folder}/no/{i}.png")
                 not_labeled += 1
             if labeled + not_labeled >= limit:
                 break
@@ -185,22 +186,29 @@ class PrepareDataset:
         os.mkdir(f"{tmp_folder}/no")
 
         count = 0
-        random.shuffle(lbl_list)
+        random.shuffle(image_list)
         if limit > len(lbl_list):
             length = len(lbl_list)
         else:
             length = limit
         st = time.time()
-        for lbl in lbl_list:
+        for i, img in enumerate(image_list):
             if (count + 1) % int(length * 0.05) == 0:
                 print(f"{round((count + 1) * 100 / length, 0)}% complete...")
-            name = lbl[1].split(".")[0]
-            img_name = f"{name}.png"
-            xml_info = PrepareDataset.read_xml(xml_path=f"{lbl[0]}/xml_labels/{lbl[1]}")
-            box = random.choice(xml_info['coord'])
-            box_center = (box[0] + int((box[2]-box[0])/2), box[1] + int((box[3]-box[1])/2))
-            img = Image.open(f"{lbl[0]}/frames/{img_name}")
-            w, h = img.size
+            name = img[1].split(".")[0]
+            if (img[0], f"{name}.xml") in lbl_list:
+                xml_info = PrepareDataset.read_xml(xml_path=f"{img[0]}/xml_labels/{name}.xml")
+                bb = random.choice(xml_info['coords'])
+                box_center = (bb[0] + int((bb[2]-bb[0])/2), bb[1] + int((bb[3]-bb[1])/2))
+                box = True
+            else:
+                xml = random.choice(lbl_list)
+                xml_info = PrepareDataset.read_xml(xml_path=f"{xml[0]}/xml_labels/{xml[1]}")
+                bb = random.choice(xml_info['coords'])
+                box_center = (bb[0] + int((bb[2] - bb[0]) / 2), bb[1] + int((bb[3] - bb[1]) / 2))
+                box = False
+            image = Image.open(f"{img[0]}/frames/{name}.png")
+            w, h = image.size
             if box_center[0] < w / 2:
                 left = int(box_center[0] - crop * w) if int(box_center[0] - crop * w) > 0 else 0
                 right = int(box_center[0] + crop * w) if left > 0 else int(crop * w)
@@ -213,29 +221,13 @@ class PrepareDataset:
             else:
                 bottom = int(box_center[1] + crop * h) if int(box_center[1] + crop * h) < h else h
                 top = int(box_center[1] - crop * h) if bottom < h else int(h - crop * h)
-            yes_img = img.crop((left, top, right, bottom))
-            yes_img.save(f"{tmp_folder}/yes/y_{lbl[0]}_{img_name}")
 
-            x = random.randint(int(crop * w), int((1 - crop) * w))
-            while x > box_center[0] - 0.2 * w and x < box_center[0] + 0.2 * w:
-                x = random.randint(int(crop * w), int((1 - crop) * w))
-            y = random.randint(int(crop * h), int((1 - crop) * h))
-            while y > box_center[1] - 0.2 * h and y < box_center[1] - 0.2 * h:
-                y = random.randint(int(crop * h), int((1 - crop) * h))
-            if x < w / 2:
-                left = int(x - crop * w) if int(x - crop * w) > 0 else 0
-                right = int(x + crop * w) if left > 0 else int(crop * w)
+            if box:
+                yes_img = image.crop((left, top, right, bottom))
+                yes_img.save(f"{tmp_folder}/yes/{i}.png")
             else:
-                right = int(x + crop * w) if int(x + crop * w) < w else w
-                left = int(x - crop * w) if right < w else int(w - crop * w)
-            if y < h / 2:
-                top = int(y - crop * h) if int(y - crop * h) > 0 else 0
-                bottom = int(y + crop * h) if top > 0 else int(crop * h)
-            else:
-                bottom = int(y + crop * h) if int(y + crop * h) < h else h
-                top = int(y - crop * h) if bottom < h else int(h - crop * h)
-            no_img = img.crop((left, top, right, bottom))
-            no_img.save(f"{tmp_folder}/no/n_{lbl[0]}_{img_name}")
+                no_img = image.crop((left, top, right, bottom))
+                no_img.save(f"{tmp_folder}/no/{i}.png")
             count += 1
             if count >= limit:
                 break
@@ -338,19 +330,19 @@ if __name__ == "__main__":
     #     dataset_name='complex_carpet_yolo_8000',
     #     save_path=save_path,
     #     shrink=True,
-    #     limit=5000
+    #     limit=8000
     # )
-    # PrepareDataset.prepare_classificator_dataset(
-    #     project_paths=pr_dir,
-    #     dataset_name="complex_carpet_class_10000",
-    #     resize=(416, 416),
-    #     save_path=save_path,
-    #     limit=10000
-    # )
+    PrepareDataset.prepare_classificator_dataset(
+        project_paths=pr_dir,
+        dataset_name="complex_carpet_class_8000",
+        resize=(416, 416),
+        save_path=save_path,
+        limit=8000
+    )
     PrepareDataset.prepare_box_classification_dataset(
         project_paths=pr_dir,
-        dataset_name="complex_box_class_5000",
-        # resize=(416, 416),
+        dataset_name="complex_box_class_8000",
+        crop=0.1,
         save_path=save_path,
-        limit=5000
+        limit=8000
     )

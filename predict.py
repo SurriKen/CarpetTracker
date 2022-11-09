@@ -3,18 +3,16 @@ import json
 import os
 import shutil
 import time
-
 import cv2
-
 import numpy as np
 import tensorflow as tf
 import torch
 import torchvision
 from PIL import Image, ImageFont, ImageDraw
 from torchvision.utils import draw_bounding_boxes
-
 from VideoProcessing import VideoProcessing
-from parameters import YOLO_MODEL_PATH, CLASSIFICATION_MODEL_PATH, PREDICT_PATH, IMAGE_IRRELEVANT_SPACE_PERCENT
+from parameters import YOLO_MODEL_PATH, CLASSIFICATION_MODEL_PATH, PREDICT_PATH, IMAGE_IRRELEVANT_SPACE_PERCENT, \
+    BOX_CLASSIFICATION_MODEL_PATH
 from utils import get_colors
 
 
@@ -54,6 +52,14 @@ class Predict:
             self.target_class_size = (dict_["width"], dict_["height"])
             self.classification_scaler = dict_["scaler"]
             f3.close()
+        if BOX_CLASSIFICATION_MODEL_PATH:
+            self.box_classification_classes = ["no", "yes"]
+            self.box_class_model = self.set_model(model_type='box_class')
+            f4 = open(f'{BOX_CLASSIFICATION_MODEL_PATH}/instructions/parameters/1_image.json')
+            dict_ = json.load(f4)
+            self.target_box_class_size = (dict_["width"], dict_["height"])
+            self.box_classification_scaler = dict_["scaler"]
+            f4.close()
         self.yolo_model = self.set_model(model_type='yolo')
         self.box_colors = get_colors(self.classes_names)
 
@@ -62,7 +68,16 @@ class Predict:
         if model_type == 'normal':
             model_json = f"{CLASSIFICATION_MODEL_PATH}/trained_model_json.trm"
             custom_obj_json = f"{CLASSIFICATION_MODEL_PATH}/trained_model_custom_obj_json.trm"
-            model_best_weights = f"{CLASSIFICATION_MODEL_PATH}/trained_model_weights"
+            model_best_weights = f"{CLASSIFICATION_MODEL_PATH}/trained_model_best_weights"
+            model_data, custom_dict = Predict.__get_json_data(model_json, custom_obj_json)
+            custom_object = self.__set_custom_objects(custom_dict)
+            model = tf.keras.models.model_from_json(model_data, custom_objects=custom_object)
+            model.load_weights(model_best_weights)
+            return model
+        elif model_type == 'box_class':
+            model_json = f"{BOX_CLASSIFICATION_MODEL_PATH}/trained_model_json.trm"
+            custom_obj_json = f"{BOX_CLASSIFICATION_MODEL_PATH}/trained_model_custom_obj_json.trm"
+            model_best_weights = f"{BOX_CLASSIFICATION_MODEL_PATH}/trained_model_best_weights"
             model_data, custom_dict = Predict.__get_json_data(model_json, custom_obj_json)
             custom_object = self.__set_custom_objects(custom_dict)
             model = tf.keras.models.model_from_json(model_data, custom_objects=custom_object)
@@ -71,7 +86,7 @@ class Predict:
         elif model_type == 'yolo':
             model_json = f"{YOLO_MODEL_PATH}/trained_model_json.trm"
             custom_obj_json = f"{YOLO_MODEL_PATH}/trained_model_custom_obj_json.trm"
-            model_best_weights = f"{YOLO_MODEL_PATH}/trained_model_weights"
+            model_best_weights = f"{YOLO_MODEL_PATH}/trained_model_best_weights"
             model_data, custom_dict = Predict.__get_json_data(model_json, custom_obj_json)
             custom_object = self.__set_custom_objects(custom_dict)
             model = tf.keras.models.model_from_json(model_data, custom_objects=custom_object)
@@ -169,7 +184,7 @@ class Predict:
         height = video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
         width = video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)
         size = (int(width), int(height))
-        print(self.save_path)
+        # print(fps, frame_count, size, self.video_path)
         out = cv2.VideoWriter(
             f'{self.save_path}', cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
         obj_seq = []
@@ -224,7 +239,8 @@ class Predict:
                 predict = self.get_yolo_y_pred(predict)
                 predict = Predict.remove_irrelevant_box(predict)
                 bb = Predict.get_optimal_box_channel(predict)
-                if obj_seq[-1] != 0 and not predict[bb][0].any():
+                predict = self.drop_wrong_boxes(predict[bb][0], pil_img)
+                if obj_seq[-1] != 0 and not predict.any():
                     obj_seq[-1] = 0
                 total_obj, emp, obj = Predict.object_counter(obj_seq, emp, obj, obj_range, total_obj)
                 if headline:
@@ -232,7 +248,7 @@ class Predict:
                 else:
                     headline_str = ""
                 pil_img = Predict.plot_boxes(
-                    pred_bb=predict[bb][0],
+                    pred_bb=predict,
                     image=pil_img,
                     name_classes=self.classes_names,
                     colors=self.box_colors,
@@ -242,9 +258,9 @@ class Predict:
             img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
             out.write(img)
             count += 1
-            if count % int(frame_count * 0.01) == 0:
+            if count % round(frame_count * 0.01, 0) == 0:
                 print(
-                    f"{round(count * 100 / frame_count, 1)}% images were processed by tracker "
+                    f"{int(count * 100 / frame_count)}% images were processed by tracker "
                     f"(frame: {i + 1}/{frame_count}, "
                     f"time: {int((time.time() - st) // 60)}m {int((time.time() - st) % 60)}s)..."
                 )
@@ -439,37 +455,62 @@ class Predict:
         x_max = int(416 - 416 * IMAGE_IRRELEVANT_SPACE_PERCENT)
         y_min = int(416 * IMAGE_IRRELEVANT_SPACE_PERCENT)
         y_max = int(416 - 416 * IMAGE_IRRELEVANT_SPACE_PERCENT)
-        # print(x_min, y_min, x_max, y_max)
         new_boxes = {}
         for i, ch in boxes.items():
             if list(ch[0]):
-                # new_boxes[i] = [[]]
                 bb = []
-                # print(ch)
                 for b in ch[0]:
-                    # new_boxes[i] = []
-                    # print(b)
                     if b[0] > y_min and b[1] > x_min and b[2] < y_max and b[3] < x_max:
                         bb.append(b)
                 new_boxes[i] = [np.array(bb, dtype='float64')]
             else:
                 new_boxes[i] = ch
-        # print('new_boxes', new_boxes)
         return new_boxes
+
+    def drop_wrong_boxes(self, boxes: np.ndarray, img: Image):
+        if not boxes.any() or not BOX_CLASSIFICATION_MODEL_PATH:
+            return boxes
+        new_boxes = []
+        for b in boxes:
+            w, h = img.size
+            target_size = self.target_box_class_size
+            box_center = ((b[0] + int((b[2] - b[0]) / 2)) * h / 416, (b[1] + int((b[3] - b[1]) / 2)) * w / 416)
+            if box_center[1] < w / 2:
+                left = int(box_center[1] - 0.5 * target_size[0]) if int(
+                    box_center[1] - 0.5 * target_size[0]) > 0 else 0
+                right = int(box_center[1] + 0.5 * target_size[0]) if left > 0 else int(target_size[0])
+            else:
+                right = int(box_center[1] + 0.5 * target_size[0]) if int(
+                    box_center[1] + 0.5 * target_size[0]) < w else target_size[0]
+                left = int(box_center[1] - 0.5 * target_size[0]) if right < w else int(w - target_size[0])
+            if box_center[0] < h / 2:
+                top = int(box_center[0] - 0.5 * target_size[1]) if int(
+                    box_center[0] - 0.5 * target_size[1]) > 0 else 0
+                bottom = int(box_center[0] + 0.5 * target_size[1]) if top > 0 else int(0.5 * target_size[1])
+            else:
+                bottom = int(box_center[0] + 0.5 * target_size[1]) if int(
+                    box_center[0] + 0.5 * target_size[1]) < h else target_size[0]
+                top = int(box_center[0] - 0.5 * target_size[1]) if bottom < h else int(h - 0.5 * target_size[1])
+            crop_img = np.array(img.crop((left, top, right, bottom)))
+            res = self.box_class_model.predict(np.expand_dims(crop_img, axis=0))
+            if self.box_classification_classes[np.argmax(res[0])] == "yes":
+                new_boxes.append(b)
+        # print(list(boxes), np.array(new_boxes))
+        return np.array(new_boxes)
 
 
 if __name__ == '__main__':
     for i in range(5):
         pred = Predict(
-            video_path=f"predict/tmp_Train_{i}/Train_{i}.mp4",
+            video_path=f"videos/Train_{i}.mp4",
             yolo_version='v3',
-            # cut_video=60,
+            cut_video=60,
         )
-        pred.predict(obj_range=7, headline=True, classification=True)
+        pred.predict(obj_range=6, headline=True, classification=False)
 
     pred = Predict(
         video_path=f"predict/tmp_Test_0/Test_0.mp4",
         yolo_version='v3',
         # cut_video=60,
     )
-    pred.predict(obj_range=7, headline=True, classification=True)
+    pred.predict(obj_range=6, headline=True, classification=False)

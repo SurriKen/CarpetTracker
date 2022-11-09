@@ -42,6 +42,7 @@ class PretrainedYOLO(Layer):
         return yolo
 
     def load_yolo_weights(self, model, weights_file):
+        # print(weights_file)
         tf.keras.backend.clear_session()  # used to reset layer names
         # load Darknet original weights to TensorFlow model
         if self.version == "YOLOv3":
