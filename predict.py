@@ -18,8 +18,9 @@ from utils import get_colors
 
 class Predict:
 
-    def __init__(self, video_path, yolo_version='v3', cut_video=None):
+    def __init__(self, video_path, yolo_version='v3', mode="best", cut_video=None):
         self.video_path = video_path
+        self.mode = mode
         self.predict_video_name = f"predict_{self.video_path.split('/')[-1].split('.')[0]}"
         if cut_video:
             tmp_folder = f"{PREDICT_PATH}/tmp_{self.video_path.split('/')[-1].split('.')[0]}"
@@ -68,7 +69,8 @@ class Predict:
         if model_type == 'normal':
             model_json = f"{CLASSIFICATION_MODEL_PATH}/trained_model_json.trm"
             custom_obj_json = f"{CLASSIFICATION_MODEL_PATH}/trained_model_custom_obj_json.trm"
-            model_best_weights = f"{CLASSIFICATION_MODEL_PATH}/trained_model_best_weights"
+            model_best_weights = f"{CLASSIFICATION_MODEL_PATH}/trained_model_{self.mode}_weights" \
+                if self.mode == "best" else f"{CLASSIFICATION_MODEL_PATH}/trained_model_weights"
             model_data, custom_dict = Predict.__get_json_data(model_json, custom_obj_json)
             custom_object = self.__set_custom_objects(custom_dict)
             model = tf.keras.models.model_from_json(model_data, custom_objects=custom_object)
@@ -77,7 +79,8 @@ class Predict:
         elif model_type == 'box_class':
             model_json = f"{BOX_CLASSIFICATION_MODEL_PATH}/trained_model_json.trm"
             custom_obj_json = f"{BOX_CLASSIFICATION_MODEL_PATH}/trained_model_custom_obj_json.trm"
-            model_best_weights = f"{BOX_CLASSIFICATION_MODEL_PATH}/trained_model_best_weights"
+            model_best_weights = f"{BOX_CLASSIFICATION_MODEL_PATH}/trained_model_{self.mode}_weights" \
+                if self.mode == "best" else f"{BOX_CLASSIFICATION_MODEL_PATH}/trained_model_weights"
             model_data, custom_dict = Predict.__get_json_data(model_json, custom_obj_json)
             custom_object = self.__set_custom_objects(custom_dict)
             model = tf.keras.models.model_from_json(model_data, custom_objects=custom_object)
@@ -86,7 +89,8 @@ class Predict:
         elif model_type == 'yolo':
             model_json = f"{YOLO_MODEL_PATH}/trained_model_json.trm"
             custom_obj_json = f"{YOLO_MODEL_PATH}/trained_model_custom_obj_json.trm"
-            model_best_weights = f"{YOLO_MODEL_PATH}/trained_model_best_weights"
+            model_best_weights = f"{YOLO_MODEL_PATH}/trained_model_{self.mode}_weights" \
+                if self.mode == "best" else f"{YOLO_MODEL_PATH}/trained_model_weights"
             model_data, custom_dict = Predict.__get_json_data(model_json, custom_obj_json)
             custom_object = self.__set_custom_objects(custom_dict)
             model = tf.keras.models.model_from_json(model_data, custom_objects=custom_object)
@@ -201,23 +205,8 @@ class Predict:
                 result = self.class_model(class_array, training=False)
                 result = int(np.argmax(result, -1)[0])
                 obj_seq.append(result)
-                # if len(obj_seq) < obj_range:
-                #     obj_seq.append(result)
-                # else:
-                #     obj_seq.append(result)
-                #     obj_seq.pop(0)
             else:
                 obj_seq.append(1)
-            #     if len(obj_seq) < obj_range:
-            #         obj_seq.append(1)
-            #     else:
-            #         obj_seq.append(1)
-            #         obj_seq.pop(0)
-            # total_obj, emp, obj = Predict.object_counter(obj_seq, emp, obj, obj_range, total_obj)
-            # if headline:
-            #     headline_str = f"Обнаружено объектов: {total_obj}"
-            # else:
-            #     headline_str = ""
 
             if obj_seq[-1] == 0:
                 total_obj, emp, obj = Predict.object_counter(obj_seq, emp, obj, obj_range, total_obj)
@@ -241,7 +230,7 @@ class Predict:
                 bb = Predict.get_optimal_box_channel(predict)
                 predict = self.drop_wrong_boxes(predict[bb][0], pil_img)
                 if obj_seq[-1] != 0 and not predict.any():
-                    obj_seq[-1] = 0
+                    obj_seq[-1] = predict.shape[0]
                 total_obj, emp, obj = Predict.object_counter(obj_seq, emp, obj, obj_range, total_obj)
                 if headline:
                     headline_str = f"Обнаружено объектов: {total_obj}"
@@ -500,17 +489,19 @@ class Predict:
 
 
 if __name__ == '__main__':
-    for i in range(5):
-        pred = Predict(
-            video_path=f"videos/Train_{i}.mp4",
-            yolo_version='v3',
-            cut_video=60,
-        )
-        pred.predict(obj_range=6, headline=True, classification=False)
+    # for i in range(5):
+    #     pred = Predict(
+    #         video_path=f"predict/tmp_Train_{i}/Train_{i}.mp4",
+    #         yolo_version='v3',
+    #         # cut_video=60,
+    #         mode="best",
+    #     )
+    #     pred.predict(obj_range=6, headline=True, classification=True)
 
     pred = Predict(
-        video_path=f"predict/tmp_Test_0/Test_0.mp4",
-        yolo_version='v3',
-        # cut_video=60,
+        video_path=f"videos/Test_0.mp4",
+        yolo_version='v4',
+        cut_video=300,
+        mode="",
     )
-    pred.predict(obj_range=6, headline=True, classification=False)
+    pred.predict(obj_range=8, headline=True, classification=False)

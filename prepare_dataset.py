@@ -32,6 +32,7 @@ class PrepareDataset:
             with os.scandir(f"{pr}/xml_labels") as folder:
                 for f in folder:
                     xml_list.append((f"{pr}", f"{f.name}"))
+
         image_list_upd = []
         names_list = []
         coords_list = []
@@ -64,10 +65,9 @@ class PrepareDataset:
         os.mkdir(f"{tmp_folder}/Images")
         os.mkdir(f"{tmp_folder}/Annotation")
         print("Sorting and saving dataset...")
-
         for i, data in enumerate(coords_list):
-            if (i + 1) % int(len(coords_list) * 0.05) == 0:
-                print(f"{int((i + 1) * 100 / len(coords_list))}% complete...")
+            if (i + 1) % int(len(coords_list) * 0.01) == 0:
+                print(f"{int((i + 1) * 100 / len(coords_list))}% ({i + 1}/{len(coords_list)}) complete...")
             # img_name = data['filename']
             pr_path, img_name = image_list[i]
             # pr_name = pr_path.split("/")[-1]
@@ -325,24 +325,24 @@ if __name__ == "__main__":
     ]
     save_path = "datasets"
 
-    # PrepareDataset.xml2terra_dataset(
+    PrepareDataset.xml2terra_dataset(
+        project_paths=pr_dir,
+        dataset_name='complex_carpet_yolo_full',
+        save_path=save_path,
+        shrink=True,
+        limit=800000
+    )
+    # PrepareDataset.prepare_classificator_dataset(
     #     project_paths=pr_dir,
-    #     dataset_name='complex_carpet_yolo_8000',
+    #     dataset_name="complex_carpet_class_8000",
+    #     resize=(416, 416),
     #     save_path=save_path,
-    #     shrink=True,
     #     limit=8000
     # )
-    PrepareDataset.prepare_classificator_dataset(
-        project_paths=pr_dir,
-        dataset_name="complex_carpet_class_8000",
-        resize=(416, 416),
-        save_path=save_path,
-        limit=8000
-    )
-    PrepareDataset.prepare_box_classification_dataset(
-        project_paths=pr_dir,
-        dataset_name="complex_box_class_8000",
-        crop=0.1,
-        save_path=save_path,
-        limit=8000
-    )
+    # PrepareDataset.prepare_box_classification_dataset(
+    #     project_paths=pr_dir,
+    #     dataset_name="complex_box_class_8000",
+    #     crop=0.1,
+    #     save_path=save_path,
+    #     limit=8000
+    # )

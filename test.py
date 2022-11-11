@@ -1,71 +1,67 @@
-import importlib
-import json
-
 import numpy as np
-import tensorflow
-from PIL import Image
 
-from parameters import BOX_CLASSIFICATION_MODEL_PATH
-from predict import Predict
-
-xxx = [[105., 107., 142., 155., 0.17594504, 0.17594495]]
+xxx = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 2, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2,
+       2, 2, 2, 1, 2, 2, 2, 2, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
+cnt = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+       2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6]
 
 
-def get_json_data(model_json, custom_obj_json):
-    with open(model_json) as json_file:
-        data = json.load(json_file)
-
-    with open(custom_obj_json) as json_file:
-        custom_dict = json.load(json_file)
-
-    return data, custom_dict
-
-
-def set_custom_objects(custom_dict):
-    custom_object = {}
-    for k, v in custom_dict.items():
-        try:
-            custom_object[k] = getattr(importlib.import_module(f".{v}", package="custom_objects"), k)
-        except:
-            continue
-    return custom_object
-
-
-model_json = f"{BOX_CLASSIFICATION_MODEL_PATH}/trained_model_json.trm"
-custom_obj_json = f"{BOX_CLASSIFICATION_MODEL_PATH}/trained_model_custom_obj_json.trm"
-model_best_weights = f"{BOX_CLASSIFICATION_MODEL_PATH}/trained_model_best_weights"
-model_data, custom_dict = get_json_data(model_json, custom_obj_json)
-custom_object = set_custom_objects(custom_dict)
-model = tensorflow.keras.models.model_from_json(model_data, custom_objects=custom_object)
-model.load_weights(model_best_weights)
-img = Image.open('datasets/Train_0_0s-300s/frames/00000.png')
-# img.show()
-new_boxes = []
-for b in xxx:
-    w, h = img.size
-    print(w, h)
-    target_size = (384, 216)
-    box_center = ((b[0] + int((b[2]-b[0])/2)) * h / 416, (b[1] + int((b[3]-b[1])/2)) * w / 416)
-    print(box_center)
-    if box_center[1] < w / 2:
-        left = int(box_center[1] - 0.5 * target_size[0]) if int(box_center[1] - 0.5 * target_size[0]) > 0 else 0
-        right = int(box_center[1] + 0.5 * target_size[0]) if left > 0 else int(target_size[0])
+def object_counter(class_counter, emp: bool, obj: bool, cur_obj: int, obj_range, total_obj):
+    if len(class_counter) < obj_range:
+        emp = True
+        obj = False
+        total_obj = 0
+        cur_obj = 0
     else:
-        right = int(box_center[1] + 0.5 * target_size[0]) if int(box_center[1] + 0.5 * target_size[0]) < w else target_size[0]
-        left = int(box_center[1] - 0.5 * target_size[0]) if right < w else int(w - target_size[0])
-    if box_center[0] < h / 2:
-        top = int(box_center[0] - 0.5 * target_size[1]) if int(box_center[0] - 0.5 * target_size[1]) > 0 else 0
-        bottom = int(box_center[0] + 0.5 * target_size[1]) if top > 0 else int(0.5 * target_size[1])
-    else:
-        bottom = int(box_center[0] + 0.5 * target_size[1]) if int(box_center[0] + 0.5 * target_size[1]) < h else target_size[0]
-        top = int(box_center[0] - 0.5 * target_size[1]) if bottom < h else int(h - 0.5 * target_size[1])
-    print((left, top, right, bottom))
-    crop_img = np.array(img.crop((left, top, right, bottom)))
-    print(crop_img.shape)
-    res = model.predict(np.expand_dims(crop_img, axis=0))
-    print(res)
-    if np.argmax(res[0]):
-        new_boxes.append(b)
+        found_obj = class_counter[-1]
+        objects = 0
+        for j in range(obj_range):
+            if class_counter[-(j + 1)] > 0:
+                objects += 1
+        if emp and objects < obj_range:
+            emp = True
+            obj = False
+        elif emp and objects == obj_range:
+            emp = False
+            obj = True
+            if found_obj < cur_obj:
+                pass
+            elif found_obj == cur_obj:
+                total_obj += cur_obj
+            elif found_obj > cur_obj and np.sum(class_counter[-obj_range:]) == found_obj * obj_range:
+                total_obj += found_obj - cur_obj
+                cur_obj = found_obj
+        elif obj and objects > 0:
+            emp = False
+            obj = True
+            if found_obj > cur_obj and np.sum(class_counter[-obj_range:]) == found_obj * obj_range:
+                total_obj += found_obj - cur_obj
+                cur_obj = found_obj
+        elif obj and objects == 0:
+            emp = True
+            obj = False
+            cur_obj = 0
+        else:
+            emp = False
+            obj = True
+    return total_obj, emp, obj, cur_obj
 
 
-
+emp = True
+obj = False
+cur_obj = 0
+obj_range = 4
+total_obj = 0
+result = []
+for i in range(len(xxx)):
+    total_obj, emp, obj, cur_obj = object_counter(
+        class_counter=xxx[:(i+1)],
+        emp=emp,
+        obj=obj,
+        cur_obj=cur_obj,
+        obj_range=obj_range,
+        total_obj=total_obj,
+    )
+    result.append(total_obj)
+print(cnt)
+print(result)
