@@ -191,9 +191,10 @@ class Predict:
         # print(fps, frame_count, size, self.video_path)
         out = cv2.VideoWriter(
             f'{self.save_path}', cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
-        obj_seq = []
+        obj_seq, box_seq = [], []
         total_obj, count = 0, 0
         emp, obj = False, False
+        cur_obj = 0
         for i in range(frame_count - 1):
             ret, frame = video_capture.read()
             pil_img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
@@ -218,6 +219,7 @@ class Predict:
                     image=pil_img,
                     headline=headline_str
                 )
+                box_seq.append([])
             else:
                 img_array = pil_img.resize(self.target_yolo_size)
                 if self.image_yolo_scaler == 'no_scaler':
@@ -229,9 +231,12 @@ class Predict:
                 predict = Predict.remove_irrelevant_box(predict)
                 bb = Predict.get_optimal_box_channel(predict)
                 predict = self.drop_wrong_boxes(predict[bb][0], pil_img)
-                if obj_seq[-1] != 0 and not predict.any():
+                if not predict.any(): # obj_seq[-1] != 0 and not predict.any():
                     obj_seq[-1] = predict.shape[0]
-                total_obj, emp, obj = Predict.object_counter(obj_seq, emp, obj, obj_range, total_obj)
+                    box_seq.append(predict.tolist())
+                else:
+                    box_seq.append([])
+                total_obj, emp, obj, cur_obj = Predict.object_counter(obj_seq, emp, obj, cur_obj, obj_range, total_obj)
                 if headline:
                     headline_str = f"Обнаружено объектов: {total_obj}"
                 else:
@@ -254,8 +259,8 @@ class Predict:
                     f"time: {int((time.time() - st) // 60)}m {int((time.time() - st) % 60)}s)..."
                 )
         print(obj_seq)
+        print(box_seq)
         out.release()
-        # print(obj_seq)
         print(f"\nPrediction time={round(time.time() - st, 1)}s")
 
     def get_yolo_y_pred(self, array, sensitivity: float = 0.15, threashold: float = 0.1):
@@ -396,29 +401,68 @@ class Predict:
         return image
 
     @staticmethod
-    def object_counter(class_counter, emp: bool, obj: bool, obj_range, total_obj):
+    def object_counter(class_counter, emp: bool, obj: bool, cur_obj: int, obj_range, total_obj):
         if len(class_counter) < obj_range:
             emp = True
             obj = False
             total_obj = 0
+            cur_obj = 0
         else:
-            if emp and np.sum(class_counter[-obj_range:]) < obj_range:
+            found_obj = class_counter[-1]
+            objects = 0
+            for j in range(obj_range):
+                if class_counter[-(j + 1)] > 0:
+                    objects += 1
+            if emp and objects < obj_range:
                 emp = True
                 obj = False
-            elif emp and np.sum(class_counter[-obj_range:]) == obj_range:
+            elif emp and objects == obj_range:
                 emp = False
                 obj = True
-                total_obj += 1
-            elif obj and np.sum(class_counter[-obj_range:]) > 0:
+                if found_obj < cur_obj:
+                    pass
+                elif found_obj == cur_obj:
+                    total_obj += cur_obj
+                elif found_obj > cur_obj and np.sum(class_counter[-obj_range:]) == found_obj * obj_range:
+                    total_obj += found_obj - cur_obj
+                    cur_obj = found_obj
+            elif obj and objects > 0:
                 emp = False
                 obj = True
-            elif obj and np.sum(class_counter[-obj_range:]) == 0:
+                if found_obj > cur_obj and np.sum(class_counter[-obj_range:]) == found_obj * obj_range:
+                    total_obj += found_obj - cur_obj
+                    cur_obj = found_obj
+            elif obj and objects == 0:
                 emp = True
                 obj = False
+                cur_obj = 0
             else:
                 emp = False
                 obj = True
-        return total_obj, emp, obj
+        return total_obj, emp, obj, cur_obj
+    # def object_counter(class_counter, emp: bool, obj: bool, obj_range, total_obj):
+    #     if len(class_counter) < obj_range:
+    #         emp = True
+    #         obj = False
+    #         total_obj = 0
+    #     else:
+    #         if emp and np.sum(class_counter[-obj_range:]) < obj_range:
+    #             emp = True
+    #             obj = False
+    #         elif emp and np.sum(class_counter[-obj_range:]) == obj_range:
+    #             emp = False
+    #             obj = True
+    #             total_obj += 1
+    #         elif obj and np.sum(class_counter[-obj_range:]) > 0:
+    #             emp = False
+    #             obj = True
+    #         elif obj and np.sum(class_counter[-obj_range:]) == 0:
+    #             emp = True
+    #             obj = False
+    #         else:
+    #             emp = False
+    #             obj = True
+    #     return total_obj, emp, obj
 
     @staticmethod
     def get_optimal_box_channel(array):
@@ -499,9 +543,9 @@ if __name__ == '__main__':
     #     pred.predict(obj_range=6, headline=True, classification=True)
 
     pred = Predict(
-        video_path=f"videos/Test_0.mp4",
+        video_path=f"predict/tmp_Test_0/Test_0.mp4",
         yolo_version='v4',
-        cut_video=300,
+        # cut_video=60,
         mode="",
     )
     pred.predict(obj_range=8, headline=True, classification=False)
