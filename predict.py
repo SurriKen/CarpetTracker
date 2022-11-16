@@ -440,6 +440,7 @@ class Predict:
                 emp = False
                 obj = True
         return total_obj, emp, obj, cur_obj
+
     # def object_counter(class_counter, emp: bool, obj: bool, obj_range, total_obj):
     #     if len(class_counter) < obj_range:
     #         emp = True
@@ -535,17 +536,17 @@ class Predict:
 if __name__ == '__main__':
     # for i in range(5):
     #     pred = Predict(
-    #         video_path=f"predict/tmp_Train_{i}/Train_{i}.mp4",
-    #         yolo_version='v3',
-    #         # cut_video=60,
+    #         video_path=f"videos/Train_{i}.mp4",
+    #         yolo_version='v4',
+    #         cut_video=300,
     #         mode="best",
     #     )
-    #     pred.predict(obj_range=6, headline=True, classification=True)
+    #     pred.predict(obj_range=6, headline=True, classification=False)
 
-    pred = Predict(
-        video_path=f"predict/tmp_Test_0/Test_0.mp4",
-        yolo_version='v4',
-        # cut_video=60,
-        mode="",
-    )
-    pred.predict(obj_range=8, headline=True, classification=False)
+    # pred = Predict(
+    #     video_path=f"predict/tmp_Test_0/Test_0.mp4",
+    #     yolo_version='v4',
+    #     # cut_video=300,
+    #     mode="",
+    # )
+    # pred.predict(obj_range=6, headline=True, classification=False)

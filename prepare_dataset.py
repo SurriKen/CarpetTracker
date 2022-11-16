@@ -5,7 +5,7 @@ import time
 
 import numpy as np
 from PIL import Image
-from utils import save_txt
+from utils import save_txt, load_yaml, save_yaml
 
 
 class PrepareDataset:
@@ -86,6 +86,127 @@ class PrepareDataset:
         print(f"Prepare zip archive...")
         shutil.make_archive(f'{save_path}/{dataset_name}', 'zip', f"{save_path}/tmp")
         shutil.rmtree(tmp_folder, ignore_errors=True)
+        print(f"Object detection dataset is ready! Dataset path: '{f'{save_path}/{dataset_name}'}'")
+
+    @staticmethod
+    def xml2yolov7_dataset(project_paths: list, dataset_name: str, save_path: str, limit=500, resize=(0, 0), val_percent=0.2, v7_mode="yolov7"):
+        print("\nPreparing dataset for yolov7 object detection...")
+        # if not os.path.isdir(f"{save_path}/{dataset_name}"):
+        #     os.mkdir(f"{save_path}/{dataset_name}")
+
+        data_folder = f"{save_path}/{dataset_name}_yolov7"
+        # PrepareDataset.remove_empty_xml(xml_dir)
+        if not os.path.isdir(data_folder):
+            os.mkdir(data_folder)
+            os.mkdir(f"{data_folder}/train")
+            os.mkdir(f"{data_folder}/train/images")
+            os.mkdir(f"{data_folder}/train/labels")
+            os.mkdir(f"{data_folder}/val")
+            os.mkdir(f"{data_folder}/val/images")
+            os.mkdir(f"{data_folder}/val/labels")
+        else:
+            shutil.rmtree(data_folder, ignore_errors=True)
+            os.mkdir(data_folder)
+            os.mkdir(f"{data_folder}/train")
+            os.mkdir(f"{data_folder}/train/images")
+            os.mkdir(f"{data_folder}/train/labels")
+            os.mkdir(f"{data_folder}/val")
+            os.mkdir(f"{data_folder}/val/images")
+            os.mkdir(f"{data_folder}/val/labels")
+
+        image_list, xml_list = [], []
+        for pr in project_paths:
+            PrepareDataset.remove_empty_xml(f"{pr}/xml_labels")
+            with os.scandir(f"{pr}/frames") as folder:
+                for f in folder:
+                    image_list.append((f"{pr}", f"{f.name}"))
+            with os.scandir(f"{pr}/xml_labels") as folder:
+                for f in folder:
+                    xml_list.append((f"{pr}", f"{f.name}"))
+
+        names_list = []
+        coords_list = []
+        random.shuffle(image_list)
+        if limit < len(image_list):
+            image_list = image_list[:limit]
+        print("Preparing images and labels...")
+        for i, img in enumerate(image_list):
+            pr_path, img_name = image_list[i]
+            if i+1 < int(len(image_list)*(1 - val_percent)):
+                dirct = "train"
+            else:
+                dirct = "val"
+            if resize != (0, 0):
+                image = Image.open(f"{pr_path}/frames/{img_name}")
+                new_image = image.resize(resize)
+                new_image.save(f"{data_folder}/{dirct}/images/{i}.png")
+            else:
+                shutil.copy2(f"{pr_path}/frames/{img_name}", f"{data_folder}/{dirct}/images/{i}.png")
+            ext_length = len(img[1].split('.')[-1]) + 1
+            txt = ""
+            if (img[0], f"{img[1][:-ext_length]}.xml") in xml_list:
+                coord = PrepareDataset.read_xml(
+                    xml_path=f"{img[0]}/xml_labels/{img[1][:-ext_length]}.xml",
+                    shrink=False
+                )  # {"width": width, "height": height, "coords": coords, "filename": filename}
+                coords_list.append(coord)
+                for c in coord['coords']:
+                    if c[-1] not in names_list:
+                        names_list.append(c[-1])
+                    xc = (c[2] + c[0]) / 2 / coord["width"]
+                    yc = (c[3] + c[1]) / 2 / coord["height"]
+                    w = (c[2] - c[0]) / coord["width"]
+                    h = (c[3] - c[1]) / coord["height"]
+                    txt = f"{txt}\n{names_list.index(c[-1])} {xc} {yc} {w} {h}"
+                txt = txt[1:]
+            save_txt(txt, f"{data_folder}/{dirct}/labels/{i}.txt")
+            if (i + 1) % int(len(image_list) * 0.01) == 0:
+                print(f"{int((i + 1) * 100 / len(image_list))}% ({i + 1}/{len(image_list)}) complete...")
+
+        names_list = sorted(names_list)
+        # shutil.copy2(f"data/coco.yaml", f"{data_folder}/data_custom.yaml")
+        data_custom = load_yaml(f"yolov7/data/coco.yaml")
+        data_custom['nc'] = len(names_list)
+        data_custom['names'] = names_list
+        data_custom['train'] = f"{data_folder}/train/"
+        data_custom['val'] = f"{data_folder}/val/"
+        save_yaml(data_custom, f"{data_folder}/data_custom.yaml")
+
+        shutil.copy2(f"yolov7/data/hyp.scratch.custom.yaml", f"{data_folder}/hyp.scratch.custom.yaml")
+
+        cfg_yaml = load_yaml(f"yolov7/cfg/training/{v7_mode}.yaml")
+        cfg_yaml['nc'] = len(names_list)
+        save_yaml(cfg_yaml, f"{data_folder}/cfg_custom.yaml")
+
+        # PrepareDataset.write_obj_data(num_classes=len(names_list), save_path=tmp_folder)
+        # names_list = sorted(names_list)
+        # PrepareDataset.write_obj_names(names=names_list, save_path=tmp_folder)
+        # image_list = image_list_upd
+        # PrepareDataset.write_train_txt(image_list=image_list, dataset_name=dataset_name, save_path=tmp_folder)
+        # os.mkdir(f"{tmp_folder}/Images")
+        # os.mkdir(f"{tmp_folder}/Annotation")
+        # print("Sorting and saving dataset...")
+        # for i, data in enumerate(coords_list):
+        #     if (i + 1) % int(len(coords_list) * 0.01) == 0:
+        #         print(f"{int((i + 1) * 100 / len(coords_list))}% ({i + 1}/{len(coords_list)}) complete...")
+        #     # img_name = data['filename']
+        #     pr_path, img_name = image_list[i]
+        #     # pr_name = pr_path.split("/")[-1]
+        #     if shrink:
+        #         image = Image.open(f"{pr_path}/frames/{img_name}")
+        #         new_image = image.resize((416, 416))
+        #         new_image.save(f"{tmp_folder}/Images/{i}.png")
+        #     else:
+        #         shutil.copy2(f"{pr_path}/frames/{img_name}", f"{tmp_folder}/Images/{i}.png")
+        #     # ext_length = len(img_name.split('.')[-1]) + 1
+        #     txt_name = f"{i}.txt"
+        #     coord_txt = ""
+        #     for c in data['coords']:
+        #         coord_txt = f"{coord_txt}\n{c[0]},{c[1]},{c[2]},{c[3]},{names_list.index(c[-1])}"
+        #     save_txt(coord_txt[1:], f"{tmp_folder}/Annotation/{txt_name}")
+        # print(f"Prepare zip archive...")
+        # shutil.make_archive(f'{save_path}/{dataset_name}', 'zip', f"{save_path}/tmp")
+        # shutil.rmtree(tmp_folder, ignore_errors=True)
         print(f"Object detection dataset is ready! Dataset path: '{f'{save_path}/{dataset_name}'}'")
 
     @staticmethod
@@ -317,32 +438,40 @@ class PrepareDataset:
 
 if __name__ == "__main__":
     pr_dir = [
-        'datasets/Train_0_0s-300s',
-        'datasets/Train_1_0s-300s',
+        #'datasets/Train_0_0s-300s',
+        #'datasets/Train_1_0s-300s',
         'datasets/Train_2_0s-300s',
-        'datasets/Train_3_0s-300s',
-        'datasets/Train_4_0s-300s',
+        #'datasets/Train_3_0s-300s',
+        #'datasets/Train_4_0s-300s',
     ]
     save_path = "datasets"
 
-    PrepareDataset.xml2terra_dataset(
-        project_paths=pr_dir,
-        dataset_name='complex_carpet_yolo_full',
-        save_path=save_path,
-        shrink=True,
-        limit=800000
-    )
+    # PrepareDataset.xml2terra_dataset(
+    #     project_paths=pr_dir,
+    #     dataset_name='complex_carpet_yolo_train2',
+    #     save_path=save_path,
+    #     shrink=True,
+    #     limit=800000
+    # )
     # PrepareDataset.prepare_classificator_dataset(
     #     project_paths=pr_dir,
-    #     dataset_name="complex_carpet_class_8000",
+    #     dataset_name="complex_carpet_class_train2",
     #     resize=(416, 416),
     #     save_path=save_path,
-    #     limit=8000
+    #     limit=80000
     # )
     # PrepareDataset.prepare_box_classification_dataset(
     #     project_paths=pr_dir,
-    #     dataset_name="complex_box_class_8000",
+    #     dataset_name="complex_box_class_train2",
     #     crop=0.1,
     #     save_path=save_path,
-    #     limit=8000
+    #     limit=80000
     # )
+    PrepareDataset.xml2yolov7_dataset(
+        project_paths=pr_dir,
+        dataset_name="train2",
+        save_path=save_path,
+        limit=80000,
+        resize=(416, 416)
+    )
+# project_paths: list, dataset_name: str, save_path: str, limit=500, val_percent=0.2, v7_mode="yolov7"

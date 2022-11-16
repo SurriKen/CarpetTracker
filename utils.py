@@ -1,7 +1,10 @@
 import colorsys
+import io
 import os
 import pickle
 import random
+
+import yaml
 
 
 def save_dict(dict_, file_path, filename):
@@ -26,6 +29,17 @@ def load_txt(txt_path):
     return b
 
 
+def save_yaml(dict_, yaml_path):
+    with io.open(yaml_path, 'w', encoding='utf8') as outfile:
+        yaml.dump(dict_, outfile, default_flow_style=False, allow_unicode=True)
+
+
+def load_yaml(yaml_path):
+    with open(yaml_path, 'r') as stream:
+        data_loaded = yaml.safe_load(stream)
+    return data_loaded
+
+
 def get_colors(name_classes: list):
     length = 10 * len(name_classes)
     hsv_tuples = [(x / length, 1., 1.) for x in range(length)]
@@ -36,8 +50,4 @@ def get_colors(name_classes: list):
 
 
 if __name__ == '__main__':
-    s = {'a': 25, 'b': 25.02, 'c': [146, 11], 'd': (1, 1, 1)}
-    save_dict(s, 'bin', '111')
-    xx = load_dict('bin/111.dict')
-    for k, v in xx.items():
-        print(k, v, type(v))
+    pass
