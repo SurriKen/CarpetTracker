@@ -1,4 +1,6 @@
 import os
+import shutil
+
 import wget
 
 yolov7_types = {
@@ -24,16 +26,20 @@ def set_yolo_v7(v7_mode="yolov7"):
         wget.download(url, f"yolov7/{v7_mode}.pt")
 
 
-def predict_yolo_v7(v7_mode, conf, source, save_path, name):
+def predict_yolo_v7(v7_mode, weights, conf, source, save_path, name):
+    try:
+        shutil.rmtree(f"{save_path}/{name}")
+    except:
+        pass
     # os.system("cd yolov7")
     os.system(
-        f"python yolov7/detect.py --weights yolov7/{v7_mode}.pt --conf {conf} "
+        f"python3 yolov7/detect.py --weights {weights} --conf {conf} "
         f"--img-size {yolov7_types[v7_mode]['Test Size']} --source {source} --save-txt "
         f"--project {save_path} --name {name}"
     )
 
 
-def train_yolo_v7(dataset_path, v7_mode, batch, epochs, name, save_path):
+def train_yolo_v7(dataset_path, v7_mode, batch, epochs, name, save_path, weights='yolo7/yolo7.pt'):
     try:
         os.remove(f"{dataset_path}/train/labels.cache")
         os.remove(f"{dataset_path}/val/labels.cache")
@@ -41,23 +47,45 @@ def train_yolo_v7(dataset_path, v7_mode, batch, epochs, name, save_path):
         pass
 
     os.system(
-        f"python yolov7/train.py --workers 1 --device 0 --batch-size {batch} --epochs {epochs} "
+        f"python3 yolov7/train.py --workers 1 --device 0 --batch-size {batch} --epochs {epochs} --weights {weights} "
         f"--data {dataset_path}/data_custom.yaml --img-size {yolov7_types[v7_mode]['Test Size']} "
-        f"{yolov7_types[v7_mode]['Test Size']} --cfg {dataset_path}/cfg_custom.yaml --weights yolov7/{v7_mode}.pt "
+        f"{yolov7_types[v7_mode]['Test Size']} --cfg {dataset_path}/cfg_custom.yaml "
         f"--hyp {dataset_path}/hyp.scratch.custom.yaml --project {save_path} --name {name}"
     )
 
 
-# predict_yolo_v7("yolov7", 0.5, "videos/Air_1.mp4", 'predict', 'predict_yolo_v7_air')
+# # predict_yolo_v7("yolov7", 0.5, "videos/Air_1.mp4", 'predict', 'predict_yolo_v7_air')
 # train_yolo_v7(
-#     dataset_path='datasets/train2_yolov7',
+#     dataset_path='datasets/mix_yolov7',
 #     v7_mode='yolov7',
 #     batch=4,
 #     epochs=50,
-#     name='train2_yolov7',
-#     save_path='runs'
+#     name='mix_yolov7',
+#     save_path='train',
+#     weights="train/mix_yolov79/weights/last.pt"
 # )
-import torch
-print(torch.__version__)
-print(torch.cuda.is_available())
-torch.zeros(1).cuda()
+# for i in range(5):
+#     predict_yolo_v7(
+#         v7_mode="yolov7",
+#         weights='train/mix_yolov710/weights/best.pt',
+#         conf=0.7,
+#         source=f"datasets/Train_{i}_0s-300s/video/Train_{i}.mp4",
+#         save_path='predict',
+#         name=f'predict_train_{i}_yolov7'
+#     )
+predict_yolo_v7(
+    v7_mode="yolov7",
+    weights='train/mix_yolov710/weights/best.pt',
+    conf=0.7,
+    source="datasets/Test_0_0s-300s/Test_0.mp4",
+    save_path='predict',
+    name='predict_test_0_yolov7'
+)
+# predict_yolo_v7(
+#     v7_mode="yolov7",
+#     weights='train/mix_yolov710/weights/best.pt',
+#     conf=0.7,
+#     source="datasets/Train_0_0s-300s/Train_0.mp4",
+#     save_path='predict',
+#     name='predict_train_0_300s_yolov7'
+# )

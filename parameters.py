@@ -5,3 +5,7 @@ YOLO_MODEL_PATH = "models/yolo4 99.6%/model"
 BOX_CLASSIFICATION_MODEL_PATH = 'models/box class 97.4%/model'
 PREDICT_PATH = 'predict'
 IMAGE_IRRELEVANT_SPACE_PERCENT = 0.2
+MIN_OBJ_SEQUENCE = 6
+NUM_CLUSTERS = 4
+CARPET_SIZE_LIST = ['XL', "L", "M", "S"]
+KMEANS_MODEL_FOLDER = "kmean_model"

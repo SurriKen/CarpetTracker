@@ -534,6 +534,7 @@ class Predict:
 
 
 if __name__ == '__main__':
+    pass
     # for i in range(5):
     #     pred = Predict(
     #         video_path=f"videos/Train_{i}.mp4",
