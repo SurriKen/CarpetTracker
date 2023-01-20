@@ -1,5 +1,7 @@
+import argparse
 import os
 import shutil
+import torch
 
 import wget
 
@@ -31,7 +33,7 @@ def predict_yolo_v7(v7_mode, weights, conf, source, save_path, name):
         shutil.rmtree(f"{save_path}/{name}")
     except:
         pass
-    # os.system("cd yolov7")
+    os.system("cd yolov7")
     os.system(
         f"python3 yolov7/detect.py --weights {weights} --conf {conf} "
         f"--img-size {yolov7_types[v7_mode]['Test Size']} --source {source} --save-txt "
@@ -73,19 +75,20 @@ def train_yolo_v7(dataset_path, v7_mode, batch, epochs, name, save_path, weights
 #         save_path='predict',
 #         name=f'predict_train_{i}_yolov7'
 #     )
+# for i in ['Test_2', 'Test_3']:
+#     predict_yolo_v7(
+#         v7_mode="yolov7",
+#         weights='train/mix_yolov710/weights/best.pt',
+#         conf=0.7,
+#         source=f"videos/{i}.mp4",
+#         save_path='predict',
+#         name=f'predict_{i}'
+#     )
 predict_yolo_v7(
     v7_mode="yolov7",
     weights='train/mix_yolov710/weights/best.pt',
     conf=0.7,
-    source="datasets/Test_0_0s-300s/Test_0.mp4",
+    source="datasets/Train_0_0s-300s/video/Train_0.mp4",
     save_path='predict',
-    name='predict_test_0_yolov7'
+    name='predict_train_0_300s_yolov7'
 )
-# predict_yolo_v7(
-#     v7_mode="yolov7",
-#     weights='train/mix_yolov710/weights/best.pt',
-#     conf=0.7,
-#     source="datasets/Train_0_0s-300s/Train_0.mp4",
-#     save_path='predict',
-#     name='predict_train_0_300s_yolov7'
-# )

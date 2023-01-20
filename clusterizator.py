@@ -7,7 +7,7 @@ from scipy import stats
 import numpy as np
 from sklearn.cluster import KMeans
 
-from parameters import MIN_OBJ_SEQUENCE, CARPET_SIZE_LIST, NUM_CLUSTERS
+from parameters import MIN_OBJ_SEQUENCE, CARPET_SIZE_LIST, NUM_CLUSTERS, KMEANS_MODEL_NAME
 from utils import save_txt, load_txt, get_distance, save_dict, load_dict
 
 
@@ -303,12 +303,12 @@ class Clusterizator:
         return vecs
 
     @staticmethod
-    def train_kmeans(array, num_clusters, save_path=''):
+    def train_kmeans(array, num_clusters, save_path='', name='model'):
         print(f"train_kmeans on total {len(array)} objects")
         kmeans = KMeans(n_clusters=num_clusters, init='k-means++', n_init=10, max_iter=300, tol=0.0001)
         kmeans.fit(array)
         if save_path:
-            Clusterizator.save_model(kmeans, save_path)
+            Clusterizator.save_model(kmeans, save_path, name)
         stat = {}
         for l in range(num_clusters):
             stat[l] = []
@@ -320,28 +320,28 @@ class Clusterizator:
         s = sorted(s, reverse=True)
         stat2 = {}
         for l, ss in enumerate(s):
-            print(l, ss, len(stat[ss[1]]))
+            # print(l, ss, len(stat[ss[1]]))
             stat2[ss[1]] = CARPET_SIZE_LIST[l]
         if save_path:
             save_dict(
                 dict_=stat2,
                 file_path=save_path,
-                filename='model'
+                filename=name
             )
         return kmeans, stat2
 
     @staticmethod
-    def save_model(model, save_path):
-        with open(f"{save_path}/model.pkl", "wb") as f:
+    def save_model(model, save_path, name='model'):
+        with open(f"{save_path}/{name}.pkl", "wb") as f:
             pickle.dump(model, f)
 
     @staticmethod
-    def load_model(path, dict_=False):
-        with open(f"{path}/model.pkl", "rb") as f:
+    def load_model(path, dict_=False, name='model'):
+        with open(f"{path}/{name}.pkl", "rb") as f:
             model = pickle.load(f)
         lbl_dict = {}
         if dict_:
-            lbl_dict = load_dict(pickle_path=f"{path}/model.dict")
+            lbl_dict = load_dict(pickle_path=f"{path}/{name}.dict")
         return model, lbl_dict
 
     @staticmethod
@@ -393,12 +393,13 @@ if __name__ == "__main__":
         box_folder=kmean_dataset,
         total_length=max_count
     )
-    print(coord)
+    # print(coord)
     vec = Clusterizator.distribute_coords(coord)
     kmeans, stat2 = Clusterizator.train_kmeans(
         array=vec,
         num_clusters=NUM_CLUSTERS,
-        save_path='kmean_model'
+        save_path='kmean_model',
+        name=KMEANS_MODEL_NAME,
     )
     print(stat2)
     # train_kmeans on total 476 objects
