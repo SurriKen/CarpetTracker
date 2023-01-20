@@ -35,7 +35,7 @@ def predict_yolo_v7(v7_mode, weights, conf, source, save_path, name):
         pass
     os.system("cd yolov7")
     os.system(
-        f"python3 yolov7/detect.py --weights {weights} --conf {conf} "
+        f"python3 yolo7/detect.py --weights {weights} --conf {conf} "
         f"--img-size {yolov7_types[v7_mode]['Test Size']} --source {source} --save-txt "
         f"--project {save_path} --name {name}"
     )
