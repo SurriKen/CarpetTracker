@@ -1,8 +1,5 @@
-import argparse
 import os
 import shutil
-import torch
-
 import wget
 
 yolov7_types = {
@@ -23,9 +20,9 @@ def set_yolo_v7(v7_mode="yolov7"):
     if not os.path.isdir("yolov7"):
         os.system("git clone https://github.com/WongKinYiu/yolov7.git")
 
-    if not os.path.isdir(f"yolov7/{v7_mode}.pt"):
+    if not os.path.isdir(f"{v7_mode}/{v7_mode}.pt"):
         url = yolov7_types[v7_mode]["link"]
-        wget.download(url, f"yolov7/{v7_mode}.pt")
+        wget.download(url, f"{v7_mode}/{v7_mode}.pt")
 
 
 def predict_yolo_v7(v7_mode, weights, conf, source, save_path, name):
@@ -49,7 +46,7 @@ def train_yolo_v7(dataset_path, v7_mode, batch, epochs, name, save_path, weights
         pass
 
     os.system(
-        f"python3 yolov7/train.py --workers 1 --device 0 --batch-size {batch} --epochs {epochs} --weights {weights} "
+        f"python3 yolo7/train.py --workers 1 --device 0 --batch-size {batch} --epochs {epochs} --weights {weights} "
         f"--data {dataset_path}/data_custom.yaml --img-size {yolov7_types[v7_mode]['Test Size']} "
         f"{yolov7_types[v7_mode]['Test Size']} --cfg {dataset_path}/cfg_custom.yaml "
         f"--hyp {dataset_path}/hyp.scratch.custom.yaml --project {save_path} --name {name}"
@@ -60,11 +57,11 @@ def train_yolo_v7(dataset_path, v7_mode, batch, epochs, name, save_path, weights
 # train_yolo_v7(
 #     dataset_path='datasets/mix_yolov7',
 #     v7_mode='yolov7',
-#     batch=4,
-#     epochs=50,
+#     batch=2,
+#     epochs=5,
 #     name='mix_yolov7',
 #     save_path='train',
-#     weights="train/mix_yolov79/weights/last.pt"
+#     weights="train/mix_yolov710/weights/last.pt"
 # )
 # for i in range(5):
 #     predict_yolo_v7(

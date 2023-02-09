@@ -1,8 +1,15 @@
 import os
 import shutil
-
+import time
 import cv2
+import torch
+import torchvision
 from moviepy.video.io.VideoFileClip import VideoFileClip
+from torchvision.utils import draw_bounding_boxes
+from torchvision.io import read_image
+from PIL import Image
+
+from prepare_dataset import PrepareDataset
 from utils import save_dict, load_dict, get_colors
 
 
@@ -124,7 +131,7 @@ class VideoProcessing:
             if (count + 1) % int(len(image_list) * 0.1) == 0:
                 print(f"{round((count + 1) * 100 / len(image_list), 0)}% images were processed...")
             name = img.split(".")[0]
-            if box_path and f"{name}.xml" in box_list:
+            if box_path:
                 # print(img)
                 if box_type == 'xml':
                     if resize:
@@ -136,6 +143,19 @@ class VideoProcessing:
                         )
                     else:
                         box_info = PrepareDataset.read_xml(xml_path=f"{box_path}/{f'{name}.xml'}")
+                    boxes, labels = [], []
+                    # print(box_info)
+                    for b in box_info["coords"]:
+                        boxes.append(b[:-1])
+                        labels.append(b[-1])
+                    bbox = torch.tensor(boxes, dtype=torch.int)
+                    image = read_image(f"{frames_path}/{img}")
+                    image_true = draw_bounding_boxes(image, bbox, width=3, labels=labels, colors=color_list, fill=True)
+                    image = torchvision.transforms.ToPILImage()(image_true)
+                    # image = torchvision.transforms.ToPILImage()(image_true)
+                    # image_true.save(f"{tmp_folder}/{img}")
+                if box_type == 'txt':
+                    box_info = PrepareDataset.read_xml(xml_path=f"{box_path}/{f'{name}.xml'}")
                     boxes, labels = [], []
                     # print(box_info)
                     for b in box_info["coords"]:
