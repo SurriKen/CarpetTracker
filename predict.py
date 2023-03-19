@@ -10,7 +10,7 @@ import torch
 import torchvision
 from PIL import Image, ImageFont, ImageDraw
 from torchvision.utils import draw_bounding_boxes
-from VideoProcessing import VideoProcessing
+from DatasetProcessing import DatasetProcessing
 from parameters import YOLO_MODEL_PATH, CLASSIFICATION_MODEL_PATH, PREDICT_PATH, IMAGE_IRRELEVANT_SPACE_PERCENT, \
     BOX_CLASSIFICATION_MODEL_PATH
 from utils import get_colors
@@ -29,7 +29,7 @@ class Predict:
             except:
                 shutil.rmtree(tmp_folder, ignore_errors=True)
                 os.mkdir(tmp_folder)
-            VideoProcessing.cut_video(
+            DatasetProcessing.cut_video(
                 video_path=video_path,
                 save_path=tmp_folder,
                 from_time=0,
