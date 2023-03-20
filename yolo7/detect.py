@@ -153,27 +153,33 @@ def detect(save_img=False):
                     xywh0 = (xyxy2xywh(torch.tensor(xyxy0).view(1, 4)) / gn0).view(-1).tolist()  # normalized xywh
                     lines.append([cls0.item(), *xywh0])
             coords.append(lines)
+            # print('test 1', step, coords)
         else:
             coords.append([])
 
         t111 = time.time()
         if ttc != len(total_count):
             obj_count, clust_coords = get_object_count(total_count, coords)
+            # print('obj_count', obj_count, coords)
             # t112 = time.time()
             # print(f"get_object_count {(1E3 * (t112 - t111)):.1f}ms, obj_count = {obj_count}, length = {len(total_count)}")
-            vecs = get_obj_box_squares(clust_coords)
+            vecs, bbox = get_obj_box_squares(clust_coords)
+            # print('bbox', bbox)
+            # print('clust_coords', clust_coords)
             if vecs.any():
                 _, lbl_pred = kmeans_predict(
                     model=Kmeans_model,
                     lbl_dict=Kmeans_cluster_names,
                     array=vecs[-1]
                 )
+                # print('lbl_pred', lbl_pred, vecs)
                 if len(vecs) > cur_obj:
                     cur_obj = len(vecs)
                     cluster_list.append(lbl_pred)
                 else:
                     cluster_list[-1] = lbl_pred
             cluster_pred = dict(collections.Counter(cluster_list))
+            # print(' cluster_pred', cluster_pred)
 
             ttc = len(total_count)
         t12 = time.time()

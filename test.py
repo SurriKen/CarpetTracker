@@ -1,84 +1,125 @@
-import os
-import shutil
-import time
 import cv2
+import numpy as np
 import torch
 import torchvision
+import ultralytics
 from torchvision.utils import draw_bounding_boxes
-from torchvision.io import read_image
-from PIL import Image
-
+from ultralytics import YOLO
+from tracker import Tracker
 from utils import get_colors
+from utils import add_headline_to_cv_image
 
 
-# Основная функция
-def put_box_on_image(dataset: str, save_path: str, box_path: str = None):
-    labels = ['carpet']
-    color_list = get_colors(labels)
-    # dataset = 'datasets/DataSetMat_Yolo/train_63sec'
-    img_names = []
-    # save_path = 'datasets/DataSetMat_Yolo/train_63sec/img+box'
-    with os.scandir(f"{dataset}/images") as folder:
-        for f in folder:
-            img_names.append(f.name[:-4])
-    for name in img_names:
-        img_path = f'{dataset}/images/{name}.jpg'
-        box_path = f'{dataset}/labels/{name}.txt'
-        img = Image.open(img_path)
-        with open(box_path, 'r') as handle:
-            box_info = handle.readlines()[0]
-            box_info = box_info.split('\n')
-        # print(box_info, img.size)
-        coord = []
-        for box in box_info:
-            box = box.split(" ")
-            # print(box, len(box))
-            coord.append([
-                int((float(box[1]) - float(box[3]) / 2) * img.size[0]),
-                int((float(box[2]) - float(box[4]) / 2) * img.size[1]),
-                int((float(box[1]) + float(box[3]) / 2) * img.size[0]),
-                int((float(box[2]) + float(box[4]) / 2) * img.size[1]),
-            ])
-        print(coord)
-        bbox = torch.tensor(coord, dtype=torch.int)
-        image = read_image(img_path)
-        image_true = draw_bounding_boxes(image, bbox, width=3, labels=labels, colors=color_list, fill=True)
+def put_box_on_image(save_path, results, labels, color_list):
+    image = results[0].orig_img[:, :, ::-1].copy()
+    image = np.transpose(image, (2, 0, 1))
+    w, h = image.shape[:2]
+    image = torch.from_numpy(image)
+    coord = []
+    for box in results[0].boxes:
+        box = box.boxes.tolist()[0]
+        coord.append([
+            int(box[0]),
+            int(box[1]),
+            int(box[2]),
+            int(box[3]),
+        ])
+    bbox = torch.tensor(coord, dtype=torch.int)
+    if bbox.tolist():
+        image_true = draw_bounding_boxes(
+            image, bbox, width=3, labels=labels, colors=color_list, fill=True, font='arial.ttf', font_size=int(h * 0.02))
         image = torchvision.transforms.ToPILImage()(image_true)
-        image.save(f'{save_path}/{name}.png')
+    else:
+        image = torchvision.transforms.ToPILImage()(image)
+    if save_path:
+        image.save(f'{save_path}')
+    return image
 
 
-if __name__ == '__main__':
-    # labels = ['carpet']
-    # color_list = get_colors(labels)
-    # dataset = 'datasets/DataSetMat_Yolo/train_63sec'
-    # img_names = []
-    # save_path = 'datasets/DataSetMat_Yolo/train_63sec/img+box'
-    # with os.scandir(f"{dataset}/images") as folder:
-    #     for f in folder:
-    #         img_names.append(f.name[:-4])
-    # for name in img_names:
-    #     img_path = f'{dataset}/images/{name}.jpg'
-    #     box_path = f'{dataset}/labels/{name}.txt'
-    #     img = Image.open(img_path)
-    #     with open(box_path, 'r') as handle:
-    #         box_info = handle.readlines()[0]
-    #         box_info = box_info.split('\n')
-    #     # print(box_info, img.size)
-    #     coord = []
-    #     for box in box_info:
-    #         box = box.split(" ")
-    #         # print(box, len(box))
-    #         coord.append([
-    #             int((float(box[1]) - float(box[3]) / 2) * img.size[0]),
-    #             int((float(box[2]) - float(box[4]) / 2) * img.size[1]),
-    #             int((float(box[1]) + float(box[3]) / 2) * img.size[0]),
-    #             int((float(box[2]) + float(box[4]) / 2) * img.size[1]),
-    #         ])
-    #     print(coord)
-    #     bbox = torch.tensor(coord, dtype=torch.int)
-    #     image = read_image(img_path)
-    #     image_true = draw_bounding_boxes(image, bbox, width=3, labels=labels, colors=color_list, fill=True)
-    #     image = torchvision.transforms.ToPILImage()(image_true)
-    #     image.save(f'{save_path}/{name}.png')
+# video_path = '/home/deny/Рабочий стол/CarpetTracker/videos/Test_0.mp4'
+# save_path = 'temp/tracked_video.mp4'
+# tracker = Tracker()
+# count = 0
+#
+# vc = cv2.VideoCapture()
+# vc.open(video_path)
+# f = vc.get(cv2.CAP_PROP_FRAME_COUNT)
+# fps = vc.get(cv2.CAP_PROP_FPS)
+# w = int(vc.get(cv2.CAP_PROP_FRAME_WIDTH))
+# h = int(vc.get(cv2.CAP_PROP_FRAME_HEIGHT))
+#
+# model = YOLO('runs/detect/train21/weights/best.pt')
+#
+# color_list = get_colors(["carpet"])
+#
+# out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), fps, (w, h))
+#
+# for i in range(int(f)):
+#     print(i)
+#     ret, frame = vc.read()
+#     res = model(frame)
+#     tracker.process(res)
+#     count += 1
+#     # clear_output()
+#
+#     if tracker.id_coords[-1]:
+#         tracker_id = tracker.id_coords[-1]
+#         coords = tracker.coordinates[-1]
+#         labels = [
+#             f"# {tracker_id[i]} {model.model.names[coords[i][-1]]} {coords[i][-2]:0.2f}"
+#             for i in range(len(tracker_id))
+#         ]
+#         if len(labels) > 1:
+#             cl = color_list * len(labels)
+#         else:
+#             cl = color_list
+#
+#         fr = put_box_on_image(
+#             save_path=None,
+#             results=res,
+#             labels=labels,
+#             color_list=cl
+#         )
+#         fr = np.array(fr)
+#         # print(fr.shape)
+#         # print(np.array(frame).max())
+#     else:
+#         fr = res[0].orig_img[:, :, ::-1].copy()
+#         # fr = np.transpose(fr, (2, 0, 1))
+#         # print(fr.shape)
+#     # vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
+#     # vid_writer.write(fr)
+#     headline = f"Обнаружено объектов: {tracker.obj_count}\n"
+#     # for s in CARPET_SIZE_LIST:
+#     #     if not cluster_pred.get(s):
+#     #         x = 0
+#     #     else:
+#     #         x = cluster_pred.get(s)
+#     #     headline = f"{headline}\nSize {s}: {x}"
+#     im0 = add_headline_to_cv_image(
+#         image=fr,
+#         headline=headline
+#     )
+#     cv_img = cv2.cvtColor(im0, cv2.COLOR_RGB2BGR)
+#     out.write(cv_img)
+#     # clear_output()
+#
+#     # cv2.imshow('yolov8', cv_img)
+#
+#     if count > 300:
+#         break
 
-    pass
+
+# pandas==1.3.5
+# numpy==1.21.6
+# Pillow==9.3.0
+# tensorflow-hub==0.12.0
+# matplotlib==3.6.3
+# opencv-python==4.7.0
+# moviepy==1.0.3
+# wget==3.2
+# seaborn==0.12.2
+# scipy==1.10.0
+# scikit-learn==1.2.1
+import sklearn
+print(sklearn.__version__)

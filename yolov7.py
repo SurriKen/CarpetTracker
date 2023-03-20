@@ -63,15 +63,15 @@ def train_yolo_v7(dataset_path, v7_mode, batch, epochs, name, save_path, weights
 
 
 # # predict_yolo_v7("yolov7", 0.5, "videos/Air_1.mp4", 'predict', 'predict_yolo_v7_air')
-train_yolo_v7(
-    dataset_path='datasets/mix_yolov7',
-    v7_mode='yolov7',
-    batch=2,
-    epochs=1,
-    name='mix_yolov7',
-    save_path='train',
-    weights="train/mix_yolov710/weights/last.pt"
-)
+# train_yolo_v7(
+#     dataset_path='datasets/mix_yolov7',
+#     v7_mode='yolov7',
+#     batch=2,
+#     epochs=1,
+#     name='mix_yolov7',
+#     save_path='train',
+#     weights="train/mix_yolov710/weights/last.pt"
+# )
 # for i in range(5):
 #     predict_yolo_v7(
 #         v7_mode="yolov7",
@@ -90,11 +90,11 @@ train_yolo_v7(
 #         save_path='predict',
 #         name=f'predict_{i}'
 #     )
-# predict_yolo_v7(
-#     v7_mode="yolov7",
-#     weights='train/mix_yolov710/weights/best.pt',
-#     conf=0.7,
-#     source="datasets/Train_0_0s-300s/video/Train_0.mp4",
-#     save_path='predict',
-#     name='predict_train_0_300s_yolov7'
-# )
+predict_yolo_v7(
+    v7_mode="yolov7",
+    weights='train/mix_yolov710/weights/best.pt',
+    conf=0.7,
+    source="datasets/Train_0_0s-300s/video/Train_0.mp4",
+    save_path='predict',
+    name='predict_train_0_300s_yolov7'
+)
