@@ -201,6 +201,7 @@ class DatasetProcessing:
         # dataset = 'datasets/DataSetMat_Yolo/train_63sec'
         img_names = []
         # save_path = 'datasets/DataSetMat_Yolo/train_63sec/img+box'
+        empty_box, fill_box = 0, 0
         with os.scandir(f"{dataset}/images") as folder:
             for f in folder:
                 img_names.append(f.name[:-4])
@@ -209,25 +210,36 @@ class DatasetProcessing:
             box_path = f'{dataset}/labels/{name}.txt'
             img = Image.open(img_path)
             with open(box_path, 'r') as handle:
-                box_info = handle.readlines()[0]
-                box_info = box_info.split('\n')
-            # print(box_info, img.size)
+                box_info = handle.readlines()
+                if box_info:
+                    fill_box += 1
+                    box_info = box_info[0].split('\n')[:-1]
+                else:
+                    empty_box += 1
+
+            print('box_info', box_info)
             coord = []
-            for box in box_info:
-                box = box.split(" ")
-                # print(box, len(box))
-                coord.append([
-                    int((float(box[1]) - float(box[3]) / 2) * img.size[0]),
-                    int((float(box[2]) - float(box[4]) / 2) * img.size[1]),
-                    int((float(box[1]) + float(box[3]) / 2) * img.size[0]),
-                    int((float(box[2]) + float(box[4]) / 2) * img.size[1]),
-                ])
-            print(coord)
-            bbox = torch.tensor(coord, dtype=torch.int)
-            image = read_image(img_path)
-            image_true = draw_bounding_boxes(image, bbox, width=3, labels=labels, colors=color_list, fill=True)
-            image = torchvision.transforms.ToPILImage()(image_true)
-            image.save(f'{save_path}/{name}.png')
+            if box_info:
+                for box in box_info:
+                    box = box.split(" ")
+                    # print(box, len(box))
+                    coord.append([
+                        int((float(box[1]) - float(box[3]) / 2) * img.size[0]),
+                        int((float(box[2]) - float(box[4]) / 2) * img.size[1]),
+                        int((float(box[1]) + float(box[3]) / 2) * img.size[0]),
+                        int((float(box[2]) + float(box[4]) / 2) * img.size[1]),
+                    ])
+                # print(coord)
+                bbox = torch.tensor(coord, dtype=torch.int)
+                image = read_image(img_path)
+                image_true = draw_bounding_boxes(image, bbox, width=3, labels=labels, colors=color_list, fill=True)
+                image = torchvision.transforms.ToPILImage()(image_true)
+                image.save(f'{save_path}/{name}.png')
+            else:
+                image = read_image(img_path)
+                image = torchvision.transforms.ToPILImage()(image)
+                image.save(f'{save_path}/{name}.png')
+            print('fill_box=', fill_box, 'empty_box=', empty_box)
 
     @staticmethod
     def fill_empty_box(dataset: str):
@@ -270,9 +282,23 @@ if __name__ == '__main__':
     #     box_path=f'datasets/Train_{i}_0s-300s/xml_labels',
     #     resize=False
     # )
-    DatasetProcessing.cut_video(
-        video_path=f'videos/Train_0.mp4',
-        save_path=f'datasets/Train_0_0s-15s',
-        from_time=0,
-        to_time=15
+    # DatasetProcessing.cut_video(
+    #     video_path=f'videos/Train_0.mp4',
+    #     save_path=f'datasets/Train_0_0s-15s',
+    #     from_time=0,
+    #     to_time=15
+    # )
+
+    # p = 'datasets/DataSetMat_Yolo/Olesya/KUP_20-21_frames'
+    # rp = 'datasets/DataSetMat_Yolo/Olesya'
+    # with os.scandir(p) as folder:
+    #     for f in folder:
+    #         if f.name[-3:] in ['png', 'jpg']:
+    #             shutil.copy2(f"{p}/{f.name}", f"{rp}/images/{f.name}")
+    #         if f.name[-3:] in ['txt']:
+    #             shutil.copy2(f"{p}/{f.name}", f"{rp}/labels/{f.name}")
+
+    DatasetProcessing.put_box_on_image(
+        dataset='datasets/DataSetMat_Yolo/Olesya',
+        save_path='datasets/DataSetMat_Yolo/Olesya/img+lbl'
     )
