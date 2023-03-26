@@ -1,7 +1,6 @@
 import os
 import shutil
 import wget
-from ultralytics import YOLO
 
 yolov7_types = {
     "yolov7": {"Test Size": 640, "link": "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7.pt"},

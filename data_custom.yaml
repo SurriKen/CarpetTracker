@@ -1,5 +1,5 @@
 names:
 - carpet
 nc: 1
-train: mix_yolov7/train
-val: mix_yolov7/val
+train: yolov8/train
+val: yolov8/val

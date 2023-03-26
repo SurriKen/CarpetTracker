@@ -109,17 +109,3 @@ def put_box_on_image(save_path, results, labels, color_list):
 #     if count > 300:
 #         break
 
-
-# pandas==1.3.5
-# numpy==1.21.6
-# Pillow==9.3.0
-# tensorflow-hub==0.12.0
-# matplotlib==3.6.3
-# opencv-python==4.7.0
-# moviepy==1.0.3
-# wget==3.2
-# seaborn==0.12.2
-# scipy==1.10.0
-# scikit-learn==1.2.1
-import sklearn
-print(sklearn.__version__)

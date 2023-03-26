@@ -1,4 +1,5 @@
 import os
+import random
 import shutil
 import time
 import cv2
@@ -196,6 +197,12 @@ class DatasetProcessing:
 
     @staticmethod
     def put_box_on_image(dataset: str, save_path: str):
+        try:
+            os.mkdir(save_path)
+        except:
+            shutil.rmtree(save_path)
+            os.mkdir(save_path)
+
         labels = ['carpet']
         color_list = get_colors(labels)
         # dataset = 'datasets/DataSetMat_Yolo/train_63sec'
@@ -261,6 +268,72 @@ class DatasetProcessing:
                     txt_path=f"{dataset}/labels/{name}.txt"
                 )
 
+    @staticmethod
+    def form_dataset_for_train(data: list, split: float, save_path: str):
+        """
+        :param data: list of lists of 2 str [[image_folder, corresponding_labels_folder], ...]
+        """
+        try:
+            os.mkdir(save_path)
+            os.mkdir(f"{save_path}/train")
+            os.mkdir(f"{save_path}/train/images")
+            os.mkdir(f"{save_path}/train/labels")
+            os.mkdir(f"{save_path}/val")
+            os.mkdir(f"{save_path}/val/images")
+            os.mkdir(f"{save_path}/val/labels")
+        except:
+            shutil.rmtree(save_path)
+            os.mkdir(save_path)
+            os.mkdir(f"{save_path}/train")
+            os.mkdir(f"{save_path}/train/images")
+            os.mkdir(f"{save_path}/train/labels")
+            os.mkdir(f"{save_path}/val")
+            os.mkdir(f"{save_path}/val/images")
+            os.mkdir(f"{save_path}/val/labels")
+
+        count = 0
+        for folders in data:
+            print()
+            print(folders)
+            img_list = []
+            lbl_list = []
+
+            with os.scandir(folders[0]) as fold:
+                for f in fold:
+                    if f.name[-3:] in ['png', 'jpg']:
+                        img_list.append(f.name)
+
+            with os.scandir(folders[1]) as fold:
+                for f in fold:
+                    if f.name[-3:] in ['txt']:
+                        lbl_list.append(f.name)
+
+            print('- img_list', len(img_list))
+            print('- lbl_list', len(lbl_list))
+            print()
+            random.shuffle(img_list)
+            delimiter = int(len(img_list) * split)
+
+            for i, img in enumerate(img_list):
+                if i <= delimiter:
+                    shutil.copy2(f"{folders[0]}/{img}", f"{save_path}/train/images/{count}.{img[-3:]}")
+                    if f"{img[:-3]}txt" in lbl_list:
+                        # print(f"{i} True - {img} {img[:-3]}txt")
+                        shutil.copy2(f"{folders[1]}/{img[:-3]}txt", f"{save_path}/train/labels/{count}.txt")
+                    else:
+                        # print(f"{i} False -  {img} {img[:-3]}txt")
+                        save_txt(txt='', txt_path=f"{save_path}/train/labels/{count}.txt")
+                else:
+                    shutil.copy2(f"{folders[0]}/{img}", f"{save_path}/val/images/{count}.{img[-3:]}")
+                    if f"{img[:-3]}txt" in lbl_list:
+                        shutil.copy2(f"{folders[1]}/{img[:-3]}txt", f"{save_path}/val/labels/{count}.txt")
+                    else:
+                        save_txt(txt='', txt_path=f"{save_path}/val/labels/{count}.txt")
+
+                if (count + 1) % 200 == 0:
+                    print(f"-- prepared {i + 1} images")
+                    # break
+                count += 1
 
 if __name__ == '__main__':
     # for i in range(1):
@@ -298,7 +371,26 @@ if __name__ == '__main__':
     #         if f.name[-3:] in ['txt']:
     #             shutil.copy2(f"{p}/{f.name}", f"{rp}/labels/{f.name}")
 
+    data = [
+        ['datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01', 'datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01_'],
+        ['datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02', 'datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02_']
+    ]
+    # images = ['datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01', 'datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02']
+    # labels = ['datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01_', 'datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02_']
+    split = 0.85
+    save_path = 'datasets/yolov8'
+
+    DatasetProcessing.form_dataset_for_train(
+        data=data,
+        split=split,
+        save_path=save_path
+    )
+
     DatasetProcessing.put_box_on_image(
-        dataset='datasets/DataSetMat_Yolo/Olesya',
-        save_path='datasets/DataSetMat_Yolo/Olesya/img+lbl'
+        dataset='datasets/yolov8/train',
+        save_path='datasets/yolov8/train/img+lbl'
+    )
+    DatasetProcessing.put_box_on_image(
+        dataset='datasets/yolov8/val',
+        save_path='datasets/yolov8/val/img+lbl'
     )

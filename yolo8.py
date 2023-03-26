@@ -3,7 +3,7 @@ import pickle
 import cv2
 import numpy as np
 import wget
-
+from ultralytics import YOLO
 from tracker import Tracker
 from utils import get_colors, load_dict, add_headline_to_cv_image
 
@@ -96,3 +96,12 @@ def detect_video(model, video_path, save_path):
             )
             cv_img = cv2.cvtColor(fr, cv2.COLOR_RGB2BGR)
             out.write(cv_img)
+
+
+def train(weights='yolo8/yolov8n.pt', config='data_custom.yaml', epochs=50):
+    model = YOLO(weights)
+    model.train(data=config, epochs=epochs)
+
+
+if __name__ == '__main__':
+    train(epochs=100)
