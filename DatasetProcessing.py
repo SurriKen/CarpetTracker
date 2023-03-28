@@ -269,7 +269,7 @@ class DatasetProcessing:
                 )
 
     @staticmethod
-    def form_dataset_for_train(data: list, split: float, save_path: str):
+    def form_dataset_for_train(data: list, split: float, save_path: str, condition: dict = {}):
         """
         :param data: list of lists of 2 str [[image_folder, corresponding_labels_folder], ...]
         """
@@ -301,7 +301,12 @@ class DatasetProcessing:
             with os.scandir(folders[0]) as fold:
                 for f in fold:
                     if f.name[-3:] in ['png', 'jpg']:
-                        img_list.append(f.name)
+                        if condition.get('orig_shape'):
+                            img = Image.open(f"{folders[0]}/{f.name}")
+                            if img.size == condition.get('orig_shape'):
+                                img_list.append(f.name)
+                        else:
+                            img_list.append(f.name)
 
             with os.scandir(folders[1]) as fold:
                 for f in fold:
@@ -309,8 +314,8 @@ class DatasetProcessing:
                         lbl_list.append(f.name)
 
             print('- img_list', len(img_list))
-            print('- lbl_list', len(lbl_list))
-            print()
+            # print('- lbl_list', len(lbl_list))
+            # print()
             random.shuffle(img_list)
             delimiter = int(len(img_list) * split)
 
@@ -377,20 +382,37 @@ if __name__ == '__main__':
     ]
     # images = ['datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01', 'datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02']
     # labels = ['datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01_', 'datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02_']
-    split = 0.85
-    save_path = 'datasets/yolov8'
+    split = 0.9
+    save_path_1 = 'datasets/yolov8_camera_1'
+    save_path_2 = 'datasets/yolov8_camera_2'
 
     DatasetProcessing.form_dataset_for_train(
         data=data,
         split=split,
-        save_path=save_path
+        save_path=save_path_1,
+        condition={'orig_shape': (1920, 1080)}
+    )
+    DatasetProcessing.put_box_on_image(
+        dataset='datasets/yolov8_camera_1/train',
+        save_path='datasets/yolov8_camera_1/train/img+lbl'
+    )
+    DatasetProcessing.put_box_on_image(
+        dataset='datasets/yolov8_camera_1/val',
+        save_path='datasets/yolov8_camera_1/val/img+lbl'
+    )
+
+    DatasetProcessing.form_dataset_for_train(
+        data=data,
+        split=split,
+        save_path=save_path_2,
+        condition={'orig_shape': (640, 360)}
     )
 
     DatasetProcessing.put_box_on_image(
-        dataset='datasets/yolov8/train',
-        save_path='datasets/yolov8/train/img+lbl'
+        dataset='datasets/yolov8_camera_2/train',
+        save_path='datasets/yolov8_camera_2/train/img+lbl'
     )
     DatasetProcessing.put_box_on_image(
-        dataset='datasets/yolov8/val',
-        save_path='datasets/yolov8/val/img+lbl'
+        dataset='datasets/yolov8_camera_2/val',
+        save_path='datasets/yolov8_camera_2/val/img+lbl'
     )

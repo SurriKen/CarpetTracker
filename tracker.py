@@ -6,12 +6,13 @@ from scipy import stats
 import numpy as np
 from torchvision.utils import draw_bounding_boxes
 
-from parameters import MIN_OBJ_SEQUENCE
+from parameters import MIN_OBJ_SEQUENCE, IMAGE_IRRELEVANT_SPACE_PERCENT
 
 
 class Tracker:
 
     def __init__(self):
+        self.obj_tracks = None
         self.coordinates, self.total_count, self.cluster_list = [], [], []
         self.cur_obj, self.obj_count, self.ttc, self.step = 0, 0, 0, 0
         self.id_coords = []
@@ -287,31 +288,50 @@ class Tracker:
             image.save(f'{save_path}')
         return image
 
+    @staticmethod
+    def remove_irrelevant_box(boxes: list, origin_shape: tuple):
+        # bounding box in (ymin, xmin, ymax, xmax) format
+        x_min = int(origin_shape[1] * IMAGE_IRRELEVANT_SPACE_PERCENT)
+        x_max = int(origin_shape[1] - origin_shape[1] * IMAGE_IRRELEVANT_SPACE_PERCENT)
+        y_min = int(origin_shape[0] * IMAGE_IRRELEVANT_SPACE_PERCENT)
+        y_max = int(origin_shape[0] - origin_shape[0] * IMAGE_IRRELEVANT_SPACE_PERCENT)
+        new_boxes = []
+        if boxes[0] < x_min or boxes[1] < y_min or boxes[2] > x_max or boxes[3] > y_max:
+            return []
+        else:
+            return boxes
+
     def process(self, predict):
         cur_coords = []
+        # print(predict[0].im)
         if len(predict[0].boxes):
             self.total_count.append(self.step)
             lines = []
             # pred0 = [torch.clone(predict[0].orig_img)]
-            # lines = []
             for i, det0 in enumerate(predict[0].boxes):
                 # print(det0)
                 *xyxy0, conf0, cls0 = det0.boxes.tolist()[0]
                 xyxy0 = [int(x) for x in xyxy0]
-                xyxy0.extend([conf0, int(cls0)])
-                # xywh0 = (xyxy2xywh(torch.tensor(xyxy0).view(1, 4))).view(-1).to(int).tolist()  # normalized xywh
-                lines.append(xyxy0)
-            self.coordinates.append(lines)
-            cur_coords = lines
-            # print(coords)
+                # print(xyxy0, conf0, cls0)
+                # xyxy0 = Tracker.remove_irrelevant_box(xyxy0, predict[0].orig_shape)
+                if xyxy0:
+                    xyxy0.extend([conf0, int(cls0)])
+                    # xywh0 = (xyxy2xywh(torch.tensor(xyxy0).view(1, 4))).view(-1).to(int).tolist()  # normalized xywh
+                    lines.append(xyxy0)
+            if lines:
+                self.coordinates.append(lines)
+                cur_coords = lines
+
         else:
             self.coordinates.append([])
 
+        # print(self.coordinates)
         if self.ttc != len(self.total_count):
             self.obj_count, clust_coords = Tracker.get_object_count(self.total_count, self.coordinates)
             self.ttc = len(self.total_count)
 
         if cur_coords:
+            # print(self.obj_count, clust_coords, cur_coords)
             self.obj_tracks, id_coords = Tracker.get_obj_id(clust_coords, cur_coords)
             self.id_coords.append(id_coords)
 

@@ -3,6 +3,7 @@ import pickle
 import cv2
 import numpy as np
 import wget
+from PIL import Image
 from ultralytics import YOLO
 from tracker import Tracker
 from utils import get_colors, load_dict, add_headline_to_cv_image
@@ -98,10 +99,59 @@ def detect_video(model, video_path, save_path):
             out.write(cv_img)
 
 
-def train(weights='yolo8/yolov8n.pt', config='data_custom.yaml', epochs=50):
+def train(weights='yolo8/yolov8n.pt', config='data_custom.yaml', epochs=50, batch_size=4, name=None):
     model = YOLO(weights)
-    model.train(data=config, epochs=epochs)
+    model.train(data=config, epochs=epochs, batch=batch_size, name=name)
 
 
 if __name__ == '__main__':
-    train(epochs=100)
+    # TRAIN
+    # train(epochs=50, weights='runs/detect/train_camera1/weights/best.pt', config='data_custom_CAM1.yaml')
+    # train(epochs=50, weights='runs/detect/train_camera2/weights/best.pt', config='data_custom_CAM2.yaml')
+    # train(epochs=50, weights='yolo8/yolov8n.pt', config='data_custom.yaml')
+    train(epochs=50, weights='yolo8/yolov8s.pt', config='data_custom.yaml', batch_size=2, name='train_mix_yolov8s')
+    train(epochs=50, weights='yolo8/yolov8m.pt', config='data_custom.yaml', batch_size=2, name='train_mix_yolov8m')
+    train(epochs=50, weights='yolo8/yolov8l.pt', config='data_custom.yaml', batch_size=2, name='train_mix_yolov8l')
+    train(epochs=50, weights='yolo8/yolov8x.pt', config='data_custom.yaml', batch_size=2, name='train_mix_yolov8x')
+
+    train(epochs=50, weights='yolo8/yolov8s.pt', config='data_custom_CAM1.yaml', batch_size=2, name='camera_1_yolov8s')
+    train(epochs=50, weights='yolo8/yolov8m.pt', config='data_custom_CAM1.yaml', batch_size=2, name='camera_1_yolov8m')
+    train(epochs=50, weights='yolo8/yolov8l.pt', config='data_custom_CAM1.yaml', batch_size=2, name='camera_1_yolov8l')
+    train(epochs=50, weights='yolo8/yolov8x.pt', config='data_custom_CAM1.yaml', batch_size=2, name='camera_1_yolov8x')
+
+    train(epochs=50, weights='yolo8/yolov8s.pt', config='data_custom_CAM2.yaml', batch_size=2, name='camera_2_yolov8s')
+    train(epochs=50, weights='yolo8/yolov8m.pt', config='data_custom_CAM2.yaml', batch_size=2, name='camera_2_yolov8m')
+    train(epochs=50, weights='yolo8/yolov8l.pt', config='data_custom_CAM2.yaml', batch_size=2, name='camera_2_yolov8l')
+    train(epochs=50, weights='yolo8/yolov8x.pt', config='data_custom_CAM2.yaml', batch_size=2, name='camera_2_yolov8x')
+
+    # PREDICT IMAGE
+    # model1 = YOLO('runs/detect/train_camera1/weights/best.pt')
+    # img_path='datasets/DataSetMat_Yolo/Olesya/images/KUP_20-21-frame-0-03-41.44.jpg'
+    # # img_path='datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01/batch_01_001932.jpg'
+    # res = model1(img_path)
+    # print(res[0].boxes)
+    # print(res[0].orig_shape)
+    # img = Image.open(img_path)
+    # print(img.size[::-1])
+
+    # PREDICT VIDEO
+    # for i, l in enumerate(['videos/марш Е, 16.28,камера 1.mp4', 'videos/КЛМ,18-00.mp4', 'videos/ЮЗВ,18,00,КАМ1.mp4']):
+    #     detect_video(
+    #         model=model1,
+    #         video_path=l,
+    #         save_path=f'temp/tracked_CAM1 {i}.mp4'
+    #     )
+    # model2 = YOLO('runs/detect/train_camera2/weights/best.pt')
+    # detect_video(
+    #     model=model2,
+    #     video_path='videos/Е,16.28,кам 2.mp4',
+    #     save_path='temp/tracked_CAM2.mp4'
+    # )
+    # for i, l in enumerate(['videos/Е,16.28,кам 2.mp4', 'videos/КЛМ,18-00 (2).mp4', 'videos/ЮЗВ,18,00,КАМ2.mp4']):
+    #     detect_video(
+    #         model=model2,
+    #         video_path=l,
+    #         save_path=f'temp/tracked_CAM2 {i}.mp4'
+    #     )
+
+    pass
