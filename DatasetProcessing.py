@@ -377,8 +377,8 @@ if __name__ == '__main__':
     #             shutil.copy2(f"{p}/{f.name}", f"{rp}/labels/{f.name}")
 
     data = [
-        ['datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01', 'datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01_'],
-        ['datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02', 'datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02_']
+        ['datasets/batch_01_#108664/obj_train_data/images', 'datasets/batch_01_#108664/obj_train_data/labels'],
+        ['datasets/batch_02_#110902/obj_train_data/images', 'datasets/batch_02_#110902/obj_train_data/labels']
     ]
     # images = ['datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01', 'datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02']
     # labels = ['datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01_', 'datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02_']
@@ -392,14 +392,14 @@ if __name__ == '__main__':
         save_path=save_path_1,
         condition={'orig_shape': (1920, 1080)}
     )
-    DatasetProcessing.put_box_on_image(
-        dataset='datasets/yolov8_camera_1/train',
-        save_path='datasets/yolov8_camera_1/train/img+lbl'
-    )
-    DatasetProcessing.put_box_on_image(
-        dataset='datasets/yolov8_camera_1/val',
-        save_path='datasets/yolov8_camera_1/val/img+lbl'
-    )
+    # DatasetProcessing.put_box_on_image(
+    #     dataset='datasets/yolov8_camera_1/train',
+    #     save_path='datasets/yolov8_camera_1/train/img+lbl'
+    # )
+    # DatasetProcessing.put_box_on_image(
+    #     dataset='datasets/yolov8_camera_1/val',
+    #     save_path='datasets/yolov8_camera_1/val/img+lbl'
+    # )
 
     DatasetProcessing.form_dataset_for_train(
         data=data,
@@ -407,12 +407,11 @@ if __name__ == '__main__':
         save_path=save_path_2,
         condition={'orig_shape': (640, 360)}
     )
-
-    DatasetProcessing.put_box_on_image(
-        dataset='datasets/yolov8_camera_2/train',
-        save_path='datasets/yolov8_camera_2/train/img+lbl'
-    )
-    DatasetProcessing.put_box_on_image(
-        dataset='datasets/yolov8_camera_2/val',
-        save_path='datasets/yolov8_camera_2/val/img+lbl'
-    )
+    # DatasetProcessing.put_box_on_image(
+    #     dataset='datasets/yolov8_camera_2/train',
+    #     save_path='datasets/yolov8_camera_2/train/img+lbl'
+    # )
+    # DatasetProcessing.put_box_on_image(
+    #     dataset='datasets/yolov8_camera_2/val',
+    #     save_path='datasets/yolov8_camera_2/val/img+lbl'
+    # )
