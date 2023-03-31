@@ -14,6 +14,7 @@ class Tracker:
     def __init__(self):
         self.obj_tracks = None
         self.coordinates, self.total_count, self.cluster_list = [], [], []
+        self.coordinates_ = []
         self.cur_obj, self.obj_count, self.ttc, self.step = 0, 0, 0, 0
         self.id_coords = []
         self.cluster_pred = {}
@@ -32,6 +33,7 @@ class Tracker:
                 # included because of the previous iteration).
                 if not res[-1]:  # index -1 means "last element".
                     res[-1].extend((item1, item2))
+                    # print(clust_coords[-1], coords, item1, item2)
                     clust_coords[-1].extend((coords[item1], coords[item2]))
                 else:
                     res[-1].append(item2)
@@ -193,11 +195,12 @@ class Tracker:
                         cur_obj.append(k + max_idx + 1)
                         bb_emp_seq[k + max_idx + 1] = 0
                 else:
+                    # print('cur_obj', cur_obj)
                     if cur_len == len(cl) and cur_len == 1:
-                        # print('cur_len == len(cl) and cur_len == 1', i, cur_obj)
+                        # print('cur_len == len(cl) and cur_len == 1', i, cur_obj, cur_len, len(cl))
                         bbox[cur_obj[0]].append(cl[0])
                     elif cur_len == len(cl):
-                        # print('cur_len == len(cl)', i, cur_obj)
+                        # print('cur_len == len(cl)', i, cur_obj, cur_len, len(cl))
                         box_i = [b for b in range(len(cl))]
                         for k in cur_obj:
                             lb_center = bbox[k][-1][1:3]
@@ -210,7 +213,7 @@ class Tracker:
                             box_i.pop(box_i.index(closest))
                             bbox[k].append(cl[closest])
                     elif cur_len > len(cl):
-                        # print('cur_len > len(cl)', i, cur_obj)
+                        # print('cur_len > len(cl)', i, cur_obj, cur_len, len(cl))
                         box_i = [b for b in range(len(cl))]
                         box_i2 = [b for b in range(len(cl))]
                         cur_obj2 = deepcopy(cur_obj)
@@ -234,7 +237,7 @@ class Tracker:
                                 cur_obj.pop(cur_obj.index(k))
                         cur_len = len(cl)
                     else:
-                        # print('cur_len < len(cl)', i, cur_obj)
+                        # print('cur_len < len(cl)', i, cur_obj, cur_len, len(cl))
                         box_i = [b for b in range(len(cl))]
                         for k in cur_obj:
                             if bbox.get(k):
@@ -248,7 +251,10 @@ class Tracker:
                                 box_i.pop(box_i.index(closest))
                                 bbox[k].append(cl[closest])
                         for idx in box_i:
-                            cur_obj.append(max(cur_obj) + 1)
+                            if cur_obj:
+                                cur_obj.append(max(cur_obj) + 1)
+                            else:
+                                cur_obj.append(1)
                             bbox[cur_obj[-1]] = [cl[idx]]
                             bb_emp_seq[cur_obj[-1]] = 0
                         cur_len = len(cl)
@@ -262,14 +268,14 @@ class Tracker:
         return bbox, coords_id
 
     @staticmethod
-    def put_box_on_image(save_path, results, labels, color_list):
+    def put_box_on_image(save_path, results, labels, color_list, coordinates):
         image = results[0].orig_img[:, :, ::-1].copy()
         image = np.transpose(image, (2, 0, 1))
         w, h = image.shape[:2]
         image = torch.from_numpy(image)
         coord = []
-        for box in results[0].boxes:
-            box = box.boxes.tolist()[0]
+        for box in coordinates[-1]:
+            # box = box.boxes.tolist()[0]
             coord.append([
                 int(box[0]),
                 int(box[1]),
@@ -295,40 +301,48 @@ class Tracker:
         x_max = int(origin_shape[1] - origin_shape[1] * IMAGE_IRRELEVANT_SPACE_PERCENT)
         y_min = int(origin_shape[0] * IMAGE_IRRELEVANT_SPACE_PERCENT)
         y_max = int(origin_shape[0] - origin_shape[0] * IMAGE_IRRELEVANT_SPACE_PERCENT)
-        new_boxes = []
-        if boxes[0] < x_min or boxes[1] < y_min or boxes[2] > x_max or boxes[3] > y_max:
+        # new_boxes = []
+        box_center = (int((boxes[0] + boxes[2]) / 2), int((boxes[1] + boxes[3]) / 2))
+        # if boxes[0] < x_min or boxes[1] < y_min or boxes[2] > x_max or boxes[3] > y_max:
+        #     return []
+        # print(box_center, ((x_min, y_min), (x_max, y_max)))
+        if box_center[0] not in range(x_min, x_max) or box_center[1] not in range(y_min, y_max):
             return []
         else:
             return boxes
 
-    def process(self, predict):
+    def process(self, predict, remove_perimeter_boxes=False):
         cur_coords = []
         # print(predict[0].im)
         if len(predict[0].boxes):
-            self.total_count.append(self.step)
+            # self.total_count.append(self.step)
             lines = []
+            # lines_ = []
             # pred0 = [torch.clone(predict[0].orig_img)]
             for i, det0 in enumerate(predict[0].boxes):
                 # print(det0)
                 *xyxy0, conf0, cls0 = det0.boxes.tolist()[0]
                 xyxy0 = [int(x) for x in xyxy0]
-                # print(xyxy0, conf0, cls0)
-                # xyxy0 = Tracker.remove_irrelevant_box(xyxy0, predict[0].orig_shape)
+                if remove_perimeter_boxes:
+                    xyxy0 = Tracker.remove_irrelevant_box(xyxy0, predict[0].orig_shape)
                 if xyxy0:
                     xyxy0.extend([conf0, int(cls0)])
-                    # xywh0 = (xyxy2xywh(torch.tensor(xyxy0).view(1, 4))).view(-1).to(int).tolist()  # normalized xywh
                     lines.append(xyxy0)
-            if lines:
-                self.coordinates.append(lines)
-                cur_coords = lines
+
+            self.total_count.append(self.step)
+            self.coordinates.append(lines)
+            cur_coords = lines
+            # print(self.total_count, lines)
 
         else:
             self.coordinates.append([])
+            self.coordinates_.append([])
 
-        # print(self.coordinates)
+        # print(self.coordinates[-1], self.coordinates_[-1])
         if self.ttc != len(self.total_count):
             self.obj_count, clust_coords = Tracker.get_object_count(self.total_count, self.coordinates)
             self.ttc = len(self.total_count)
+            # print(self.obj_count, clust_coords)
 
         if cur_coords:
             # print(self.obj_count, clust_coords, cur_coords)

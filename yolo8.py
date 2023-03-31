@@ -35,7 +35,7 @@ def load_kmeans_model(path, name, dict_=False):
     return model, lbl_dict
 
 
-def detect_video(model, video_path, save_path):
+def detect_video(model, video_path, save_path, remove_perimeter_boxes=False):
     # Kmeans_model, Kmeans_cluster_names = load_kmeans_model(
     #     path=KMEANS_MODEL_FOLDER,
     #     dict_=True,
@@ -65,7 +65,7 @@ def detect_video(model, video_path, save_path):
         print(f"Processed {i + 1} / {f} frames")
         ret, frame = vc.read()
         res = model(frame)
-        tracker.process(res)
+        tracker.process(predict=res, remove_perimeter_boxes=remove_perimeter_boxes)
 
         if save_path:
             if tracker.id_coords[-1]:
@@ -75,6 +75,7 @@ def detect_video(model, video_path, save_path):
                     f"# {tracker_id[i]} {model.model.names[coords[i][-1]]} {coords[i][-2]:0.2f}"
                     for i in range(len(tracker_id))
                 ]
+
                 if len(labels) > 1:
                     cl = colors * len(labels)
                 else:
@@ -84,7 +85,8 @@ def detect_video(model, video_path, save_path):
                     save_path=None,
                     results=res,
                     labels=labels,
-                    color_list=cl
+                    color_list=cl,
+                    coordinates=tracker.coordinates
                 )
                 fr = np.array(fr)
             else:
@@ -97,6 +99,8 @@ def detect_video(model, video_path, save_path):
             )
             cv_img = cv2.cvtColor(fr, cv2.COLOR_RGB2BGR)
             out.write(cv_img)
+            # if i > 2500:
+            #     break
 
 
 def train(weights='yolo8/yolov8n.pt', config='data_custom.yaml', epochs=50, batch_size=4, name=None):
@@ -151,7 +155,8 @@ if __name__ == '__main__':
             detect_video(
                 model=model1,
                 video_path=l,
-                save_path=f'temp/tracked_{i}_yolov8{ws[j]}.mp4'
+                save_path=f'temp/tracked_{i}_yolov8{ws[j]}.mp4',
+                remove_perimeter_boxes=True
             )
     # model2 = YOLO('runs/detect/train_camera2/weights/best.pt')
     # detect_video(

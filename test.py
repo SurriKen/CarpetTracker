@@ -109,3 +109,4 @@ def put_box_on_image(save_path, results, labels, color_list):
 #     if count > 300:
 #         break
 
+print(355 in range(100, 500))
