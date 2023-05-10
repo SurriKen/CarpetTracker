@@ -679,7 +679,7 @@ def get_obj_box_squares(clust_coords):
         # if len(vecs) < MIN_OBJ_SEQUENCE:
         #     while len(vecs) < MIN_OBJ_SEQUENCE:
         #         vecs.append(vecs[0])
-    return np.array(vecs)
+    return np.array(vecs), bbox
 
 
 def get_distance(c1: list, c2: list):

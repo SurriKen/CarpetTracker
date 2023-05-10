@@ -15,7 +15,6 @@ yolov7_types = {
                    "link": "https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-e6e.pt"},
 }
 
-
 def set_yolo_v7(v7_mode="yolov7"):
     if not os.path.isdir("yolov7"):
         os.system("git clone https://github.com/WongKinYiu/yolov7.git")
@@ -23,6 +22,15 @@ def set_yolo_v7(v7_mode="yolov7"):
     if not os.path.isdir(f"{v7_mode}/{v7_mode}.pt"):
         url = yolov7_types[v7_mode]["link"]
         wget.download(url, f"{v7_mode}/{v7_mode}.pt")
+
+
+# def set_yolo_v8(v8_mode="yolov8n"):
+#     if not os.path.isdir("yolov8"):
+#         os.system("git clone https://github.com/WongKinYiu/yolov7.git")
+#
+#     if not os.path.isdir(f"{v8_mode}/{v8_mode}.pt"):
+#         url = yolov7_types[v8_mode]["link"]
+#         wget.download(url, f"{v8_mode}/{v8_mode}.pt")
 
 
 def predict_yolo_v7(v7_mode, weights, conf, source, save_path, name):
@@ -58,7 +66,7 @@ def train_yolo_v7(dataset_path, v7_mode, batch, epochs, name, save_path, weights
 #     dataset_path='datasets/mix_yolov7',
 #     v7_mode='yolov7',
 #     batch=2,
-#     epochs=5,
+#     epochs=1,
 #     name='mix_yolov7',
 #     save_path='train',
 #     weights="train/mix_yolov710/weights/last.pt"

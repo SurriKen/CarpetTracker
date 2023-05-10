@@ -1,13 +1,10 @@
 /videos/
-/init_frames/
 /bin/
-/venv/
 /datasets/
-/make-sense/
 /predict/
-/classification_model/
-/yolo_model/
-/models/
 /yolov7/
-/runs/
 /train/
+/yolo8/
+/temp/
+/runs/
+/models/
