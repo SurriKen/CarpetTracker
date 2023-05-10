@@ -13,15 +13,16 @@ class Tracker:
 
     def __init__(self):
         self.obj_tracks = None
-        self.coordinates, self.total_count, self.cluster_list = [], [], []
-        self.coordinates_ = []
+        self.coordinates, self.total_count, self.cluster_list, self.seq_count = [], [], [], []
         self.cur_obj, self.obj_count, self.ttc, self.step = 0, 0, 0, 0
         self.id_coords = []
         self.cluster_pred = {}
         self.tracked_id = []
+        self.clust_coords = []
+        self.coordinates_seq = []
 
     @staticmethod
-    def get_object_count(total_count: list, coords: list):
+    def get_object_count_and_coords(total_count: list, coords: list):
         res = [[]]
         clust_coords = [[]]
         cnt = 0
@@ -33,7 +34,7 @@ class Tracker:
                 # included because of the previous iteration).
                 if not res[-1]:  # index -1 means "last element".
                     res[-1].extend((item1, item2))
-                    # print(clust_coords[-1], coords, item1, item2)
+                    # print(clust_coords[-1])
                     clust_coords[-1].extend((coords[item1], coords[item2]))
                 else:
                     res[-1].append(item2)
@@ -62,6 +63,38 @@ class Tracker:
             if len(cl) < MIN_OBJ_SEQUENCE:
                 clust_coords.pop(clust_coords.index(cl))
         return cnt, clust_coords
+
+    @staticmethod
+    def get_object_count(count_1: list, count_2: list):
+        total_count = []
+        total_count.extend(count_1)
+        total_count.extend(count_2)
+        total_count = sorted(list(set(total_count)))
+
+        res = [[]]
+        res_upd = [[]]
+        cnt = 0
+
+        if total_count:
+            for item1, item2 in zip(total_count, total_count[1:]):  # pairwise iteration
+                if item2 - item1 < MIN_OBJ_SEQUENCE:
+                    # The difference is 1, if we're at the beginning of a sequence add both
+                    # to the result, otherwise just the second one (the first one is already
+                    # included because of the previous iteration).
+                    if not res[-1]:  # index -1 means "last element".
+                        res[-1].extend((item1, item2))
+                    else:
+                        res[-1].append(item2)
+                else:
+                    res.append([])
+
+            res_upd = []
+            for cl in res:
+                if len(cl) >= MIN_OBJ_SEQUENCE:
+                    res_upd.append(cl)
+                    cnt += 1
+
+        return cnt, res_upd
 
     @staticmethod
     def get_distance(c1: list, c2: list):
@@ -259,13 +292,25 @@ class Tracker:
                             bb_emp_seq[cur_obj[-1]] = 0
                         cur_len = len(cl)
 
-        for bb in coords:
-            for k in bbox.keys():
-                if bb == bbox[k][-1]:
-                    coords_id.append(k)
-                    break
+        update_bbox = {}
+        corr_box_keys = {}
+        count = 1
+        for k in sorted(list(bbox.keys())):
+            if len(bbox.get(k)) >= MIN_OBJ_SEQUENCE:
+                update_bbox[count] = bbox.get(k)
+                corr_box_keys[k] = count
+                count += 1
 
-        return bbox, coords_id
+        for bb in coords:
+            # print('bb', bb)
+            for k in bbox.keys():
+                if bb == bbox[k][-1] and k in corr_box_keys.keys():
+                    coords_id.append(corr_box_keys.get(k))
+                    break
+                elif bb == bbox[k][-1]:
+                    coords_id.append(0)
+
+        return update_bbox, coords_id
 
     @staticmethod
     def put_box_on_image(save_path, results, labels, color_list, coordinates):
@@ -333,25 +378,34 @@ class Tracker:
             self.coordinates.append(lines)
             cur_coords = lines
             # print(self.total_count, lines)
+            self.seq_count.append(1)
+            # self.coordinates_seq.append()
 
         else:
             self.coordinates.append([])
-            self.coordinates_.append([])
+            self.seq_count.append(0)
+            # self.coordinates_.append([])
 
         # print(self.coordinates[-1], self.coordinates_[-1])
         if self.ttc != len(self.total_count):
-            self.obj_count, clust_coords = Tracker.get_object_count(self.total_count, self.coordinates)
+            # print(self.total_count)
+            self.obj_count, self.clust_coords = Tracker.get_object_count_and_coords(self.total_count, self.coordinates)
             self.ttc = len(self.total_count)
-            # print(self.obj_count, clust_coords)
 
         if cur_coords:
-            # print(self.obj_count, clust_coords, cur_coords)
-            self.obj_tracks, id_coords = Tracker.get_obj_id(clust_coords, cur_coords)
+            # print('self.obj_count', self.obj_count)
+            # print('clust_coords', clust_coords)
+            # print('cur_coords', cur_coords)
+            self.obj_tracks, id_coords = Tracker.get_obj_id(self.clust_coords, cur_coords)
             self.id_coords.append(id_coords)
 
         else:
             self.id_coords.append([])
 
+        # print('id_coords', self.id_coords)
+        # print('total_count', self.total_count)
+        # print('cur_coords', cur_coords)
+        # print('coordinates', self.coordinates[-1])
         # vecs = Tracker.get_obj_box_squares(clust_coords)
         # if vecs.any():
         #     # _, lbl_pred = kmeans_predict(
