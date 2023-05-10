@@ -1,10 +1,8 @@
 /videos/
-/bin/
 /datasets/
 /predict/
-/yolov7/
 /train/
 /yolo8/
 /temp/
 /runs/
-/models/
+/bin/
