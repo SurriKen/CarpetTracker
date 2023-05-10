@@ -5,6 +5,7 @@ import os
 import pickle
 import random
 from copy import deepcopy
+import logging
 
 import cv2
 import numpy as np
@@ -13,6 +14,13 @@ from PIL import Image, ImageDraw, ImageFont
 from scipy import stats
 
 from parameters import MIN_OBJ_SEQUENCE
+
+logging.basicConfig(
+    level=logging.DEBUG, filename="py_log.log", filemode="w", format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger("carpet tracker")
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler())
+# logger.debug("carpet tracker started")
 
 
 def save_dict(dict_, file_path, filename):
