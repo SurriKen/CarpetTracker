@@ -347,7 +347,7 @@ if __name__ == '__main__':
     # train(epochs=50, weights='yolo8/yolov8x.pt', config='data_custom_CAM2.yaml', batch_size=2, name='camera_2_yolov8x')
 
     PREDICT_IMAGE = True
-    # model1 = YOLO('runs/detect/train_camera1/weights/best.pt')
+    model1 = YOLO('runs/detect/train_camera1/weights/best.pt')
     # img_path='datasets/DataSetMat_Yolo/Olesya/images/KUP_20-21-frame-0-03-41.44.jpg'
     # # img_path='datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01/batch_01_001932.jpg'
     # res = model1(img_path)
