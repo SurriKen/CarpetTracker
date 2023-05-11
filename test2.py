@@ -80,7 +80,7 @@ class Tracker:
         for cur_b in cur_boxes.keys():
             for b_tr in boxes_for_track.keys():
                 d = Tracker.get_distance(cur_boxes[cur_b], boxes_for_track[b_tr])
-                distances.append((d, (x, y)))
+                distances.append((d, (cur_b, b_tr)))
 
         unused_id_keys = list(cur_boxes.keys())
         unused_boxes_keys = list(boxes_for_track.keys())
@@ -108,7 +108,7 @@ class Tracker:
 
         # if carpet track is started
         if (bb1 or bb2) and self.empty_seq and (frame_id - self.empty_seq[-1] >= MIN_OBJ_SEQUENCE):
-            print(frame_id, self.empty_seq[-1], MIN_OBJ_SEQUENCE)
+            # print(frame_id, self.empty_seq[-1], MIN_OBJ_SEQUENCE)
             self.carpet_seq.append(frame_id)
             self.empty_seq = []
             empty = False
@@ -117,18 +117,18 @@ class Tracker:
             self.carpet_seq.append(frame_id)
             empty = True
             carpet = True
-        elif bb1 or bb2 and not self.empty_seq:
+        elif (bb1 or bb2) and not self.empty_seq:
             self.carpet_seq.append(frame_id)
             empty = False
             carpet = True
 
         # if carpet track is ended
-        elif not bb1 and not bb2 and self.carpet_seq and frame_id - self.carpet_seq[-1] >= MIN_OBJ_SEQUENCE:
+        elif (not bb1 and not bb2) and self.carpet_seq and (frame_id - self.carpet_seq[-1] >= MIN_OBJ_SEQUENCE):
             self.empty_seq.append(frame_id)
             self.carpet_seq = []
             empty = True
             carpet = False
-        elif not bb1 and not bb2 and self.carpet_seq and frame_id - self.carpet_seq[-1] < MIN_OBJ_SEQUENCE:
+        elif (not bb1 and not bb2) and self.carpet_seq and (frame_id - self.carpet_seq[-1] < MIN_OBJ_SEQUENCE):
             self.empty_seq.append(frame_id)
             empty = True
             carpet = True
