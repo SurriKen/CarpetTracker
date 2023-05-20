@@ -14,7 +14,7 @@ from torchvision.io import read_image
 from PIL import Image
 
 from prepare_dataset import PrepareDataset
-from utils import save_dict, load_dict, get_colors, save_txt
+from utils import save_dict, load_dict, get_colors, save_txt, logger
 
 
 class DatasetProcessing:
@@ -89,7 +89,7 @@ class DatasetProcessing:
             carpet_size = data['Размер']
             start_frame = data['Кадр начала']
             end_frame = data['Кадр конца']
-            print(len(carpet_size), len(start_frame), len(end_frame))
+            # print(len(carpet_size), len(start_frame), len(end_frame))
 
             cls = carpet_size.unique()
             for cl in cls:
@@ -100,11 +100,18 @@ class DatasetProcessing:
             cam_1, cam_2 = video_links[i]
             vc1 = cv2.VideoCapture()
             vc1.open(cam_1)
+            w1 = int(vc1.get(cv2.CAP_PROP_FRAME_WIDTH))
+            h1 = int(vc1.get(cv2.CAP_PROP_FRAME_HEIGHT))
             frames1 = int(vc1.get(cv2.CAP_PROP_FRAME_COUNT))
+
             vc2 = cv2.VideoCapture()
             vc2.open(cam_2)
             frames2 = int(vc2.get(cv2.CAP_PROP_FRAME_COUNT))
-            # print(frames1, frames2)
+            w2 = int(vc2.get(cv2.CAP_PROP_FRAME_WIDTH))
+            h2 = int(vc2.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+            w = min([w1, w2])
+            h = min([h1, h2])
 
             for j in range(min([frames1, frames2])):
                 _, frame1 = vc1.read()
@@ -112,25 +119,30 @@ class DatasetProcessing:
 
                 if j == start_frame[obj]:
                     # print('start', obj, j)
-                    size1 = (frame1.shape[1], frame1.shape[0])
-                    size2 = (frame2.shape[1], frame2.shape[0])
                     cs = carpet_size[obj].replace('*', 'x')
 
                     out1 = cv2.VideoWriter(
-                        os.path.join(save_folder, cs, f"{count}_cam1.mp4"), cv2.VideoWriter_fourcc(*'DIVX'), 25, size1
+                        os.path.join(save_folder, cs, f"{count}.mp4"), cv2.VideoWriter_fourcc(*'mp4v'), 25, (w, h*2)
                     )
-                    out2 = cv2.VideoWriter(
-                        os.path.join(save_folder, cs, f"{count}_cam2.mp4"), cv2.VideoWriter_fourcc(*'DIVX'), 25, size2
-                    )
+                    # out2 = cv2.VideoWriter(
+                    #     os.path.join(save_folder, cs, f"{count}_cam2.mp4"), cv2.VideoWriter_fourcc(*'DIVX'), 25, size2
+                    # )
 
                 if start_frame[obj] <= j <= end_frame[obj]:
-                    out1.write(frame1)
-                    out2.write(frame2)
+                    size1 = (frame1.shape[1], frame1.shape[0])
+                    if size1 != (w, h):
+                        frame1 = cv2.resize(frame1, (w, h))
+                    size2 = (frame2.shape[1], frame2.shape[0])
+                    if size2 != (w, h):
+                        frame2 = cv2.resize(frame2, (w, h))
+                    frame = np.concatenate((frame1, frame2), axis=0)
+                    out1.write(frame)
+                    # out2.write(frame2)
 
                 if j == end_frame[obj]:
                     # print('end', obj, j)
                     out1.release()
-                    out2.release()
+                    # out2.release()
                     obj += 1
                     count += 1
 
@@ -376,10 +388,15 @@ class DatasetProcessing:
                 )
 
     @staticmethod
-    def form_dataset_for_train(data: list, split: float, save_path: str, condition: dict = {}):
+    def form_dataset_for_train(data: list, split: float, save_path: str, condition=None):
         """
-        :param data: list of lists of 2 str [[image_folder, corresponding_labels_folder], ...]
+        :param data: list of lists of 2 str and 1 float [[image_folder, corresponding_labels_folder, 0.5], ...]
+        :param split: float between 0 and 1
+        :param save_path: str
+        :param condition: dict
         """
+        if condition is None:
+            condition = {}
         try:
             os.mkdir(save_path)
             os.mkdir(f"{save_path}/train")
@@ -418,15 +435,25 @@ class DatasetProcessing:
                     if f.name[-3:] in ['txt']:
                         lbl_list.append(f.name)
 
-            print('- img_list', len(img_list))
-            # print('- lbl_list', len(lbl_list))
-            # print()
+            try:
+                if 0 < float(folders[2]) <= 1:
+                    take_num = int(len(img_list) * float(folders[2]))
+                else:
+                    take_num = len(img_list)
+            except:
+                take_num = len(img_list)
+
+            ids = list(range(len(img_list)))
+            z = np.random.choice(ids, take_num, replace=False)
+            img_list = [img_list[i] for i in z]
+            logger.info(f'\n- img_list: {len(img_list)}\n- lbl_list: {len(lbl_list)}\n')
+
             random.shuffle(img_list)
             delimiter = int(len(img_list) * split)
 
             for i, img in enumerate(img_list):
                 if i <= delimiter:
-                    shutil.copy2(f"{folders[0]}/{img}", f"{save_path}/train/images/{count}.{img[-3:]}")
+                    shutil.copy2(f"{folders[0]}/{img}", f"{save_path}/train/images/{count}.jpg")
                     if f"{img[:-3]}txt" in lbl_list:
                         # print(f"{i} True - {img} {img[:-3]}txt")
                         shutil.copy2(f"{folders[1]}/{img[:-3]}txt", f"{save_path}/train/labels/{count}.txt")
@@ -434,14 +461,14 @@ class DatasetProcessing:
                         # print(f"{i} False -  {img} {img[:-3]}txt")
                         save_txt(txt='', txt_path=f"{save_path}/train/labels/{count}.txt")
                 else:
-                    shutil.copy2(f"{folders[0]}/{img}", f"{save_path}/val/images/{count}.{img[-3:]}")
+                    shutil.copy2(f"{folders[0]}/{img}", f"{save_path}/val/images/{count}.jpg")
                     if f"{img[:-3]}txt" in lbl_list:
                         shutil.copy2(f"{folders[1]}/{img[:-3]}txt", f"{save_path}/val/labels/{count}.txt")
                     else:
                         save_txt(txt='', txt_path=f"{save_path}/val/labels/{count}.txt")
 
                 if (count + 1) % 200 == 0:
-                    print(f"-- prepared {i + 1} images")
+                    logger.info(f"-- prepared {i + 1} images")
                     # break
                 count += 1
 
@@ -476,55 +503,49 @@ if __name__ == '__main__':
     #     )
 
     PREPARE_DATASET = True
-    # data = [
-    #         ['datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01',
-    #          'datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01_'],
-    #         ['datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02',
-    #          'datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02_'],
-    #         ['datasets/От разметчиков/batch_03_#112497/obj_train_data/batch_03',
-    #          'datasets/От разметчиков/batch_03_#112497/obj_train_data/batch_03_'],
-    #         ['datasets/От разметчиков/batch_04_#119178/obj_train_data/batch_04',
-    #          'datasets/От разметчиков/batch_04_#119178/obj_train_data/batch_04_'],
-    #         ['datasets/От разметчиков/batch_05_#147536/batch_05',
-    #          'datasets/От разметчиков/batch_05_#147536/batch_05_'],
-    #     ]
-    # split = 0.9
-    # save_path_1 = 'datasets/yolov8_camera_1'
-    # save_path_2 = 'datasets/yolov8_camera_2'
-    #
-    # DatasetProcessing.form_dataset_for_train(
-    #     data=data,
-    #     split=split,
-    #     save_path=save_path_1,
-    #     condition={'orig_shape': (1920, 1080)}
-    # )
-    # DatasetProcessing.put_box_on_image(
-    #     images='datasets/yolov8_camera_1/train/images',
-    #     labels='datasets/yolov8_camera_1/train/labels',
-    #     save_path='datasets/yolov8_camera_1/train/img+lbl'
-    # )
-    # DatasetProcessing.put_box_on_image(
-    #     images='datasets/yolov8_camera_1/val/images',
-    #     labels='datasets/yolov8_camera_1/val/labels',
-    #     save_path='datasets/yolov8_camera_1/val/img+lbl'
-    # )
-    #
-    # DatasetProcessing.form_dataset_for_train(
-    #     data=data,
-    #     split=split,
-    #     save_path=save_path_2,
-    #     condition={'orig_shape': (640, 360)}
-    # )
-    # DatasetProcessing.put_box_on_image(
-    #     images='datasets/yolov8_camera_2/train/images',
-    #     labels='datasets/yolov8_camera_2/train/labels',
-    #     save_path='datasets/yolov8_camera_2/train/img+lbl'
-    # )
-    # DatasetProcessing.put_box_on_image(
-    #     images='datasets/yolov8_camera_2/val/images',
-    #     labels='datasets/yolov8_camera_2/val/labels',
-    #     save_path='datasets/yolov8_camera_2/val/img+lbl'
-    # )
+    data = [
+            ['datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01',
+             'datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01_', 1.0],
+            ['datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02',
+             'datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02_', 1.0],
+            ['datasets/От разметчиков/batch_03_#112497/obj_train_data/batch_03',
+             'datasets/От разметчиков/batch_03_#112497/obj_train_data/batch_03_', 1.0],
+            ['datasets/От разметчиков/batch_04_#119178/obj_train_data/batch_04',
+             'datasets/От разметчиков/batch_04_#119178/obj_train_data/batch_04_', 1.0],
+            ['datasets/От разметчиков/batch_05_#147536/batch_05',
+             'datasets/От разметчиков/batch_05_#147536/batch_05_', 1.0],
+            ['datasets/От разметчиков/batch_mine/obj_train_data/batch_01',
+             'datasets/От разметчиков/batch_mine/obj_train_data/batch_01_', 1.0],
+        ]
+    split = 0.9
+    save_path_1 = 'datasets/yolov8_camera_1'
+    save_path_2 = 'datasets/yolov8_camera_2'
+
+    DatasetProcessing.form_dataset_for_train(
+        data=data,
+        split=split,
+        save_path=save_path_1,
+        condition={'orig_shape': (1920, 1080)}
+    )
+    # for l in ['train', 'val']:
+    #     DatasetProcessing.put_box_on_image(
+    #         images=f'datasets/yolov8_camera_1/{l}/images',
+    #         labels=f'datasets/yolov8_camera_1/{l}/labels',
+    #         save_path=f'datasets/yolov8_camera_1/{l}/img+lbl'
+    #     )
+
+    DatasetProcessing.form_dataset_for_train(
+        data=data,
+        split=split,
+        save_path=save_path_2,
+        condition={'orig_shape': (640, 360)}
+    )
+    # for l in ['train', 'val']:
+    #     DatasetProcessing.put_box_on_image(
+    #         images=f'datasets/yolov8_camera_2/{l}/images',
+    #         labels=f'datasets/yolov8_camera_2/{l}/labels',
+    #         save_path=f'datasets/yolov8_camera_2/{l}/img+lbl'
+    #     )
 
     CHANGE_FPS = True
     # vid = [
@@ -548,24 +569,24 @@ if __name__ == '__main__':
     #     os.remove('test.mp4')
 
     CUT_VIDEOS_TO_FRAMES = True
-    vid = [
-        # 'videos/test 1_cam 1.mp4', 'videos/test 1_cam 2.mp4',
-        # 'videos/test 2_cam 1.mp4', 'videos/test 2_cam 2.mp4',
-        # 'videos/test 3_cam 1.mp4', 'videos/test 3_cam 2.mp4',
-        # 'videos/test 4_cam 1.mp4', 'videos/test 4_cam 2.mp4',
-        # 'videos/test 5_cam 1.mp4', 'videos/test 5_cam 2.mp4',
-        # 'videos/classification_videos/13_05 ВО.mp4', 'videos/classification_videos/13_05 ВО_2.mp4',
-        # 'videos/classification_videos/16-10 ЦП.mp4', 'videos/classification_videos/16-10 ЦП_2.mp4',
-        # 'videos/classification_videos/МОС,19-40.mp4', 'videos/classification_videos/МОС,19-40_2.mp4',
-        # 'videos/classification_videos/НОЧЬ,20-11.mp4', 'videos/classification_videos/НОЧЬ,20-11_2.mp4',
-        # 'videos/classification_videos/13_05 ВО_sync.mp4', 'videos/classification_videos/13_05 ВО_2_sync.mp4',
-        # 'videos/classification_videos/16-10 ЦП_sync.mp4', 'videos/classification_videos/16-10 ЦП_2_sync.mp4',
-        # 'videos/classification_videos/МОС,19-40_sync.mp4', 'videos/classification_videos/МОС,19-40_2_sync.mp4',
-        # 'videos/classification_videos/НОЧЬ,20-11_sync.mp4', 'videos/classification_videos/НОЧЬ,20-11_2_sync.mp4',
-    ]
+    # vid = [
+    #     # 'videos/test 1_cam 1.mp4', 'videos/test 1_cam 2.mp4',
+    #     # 'videos/test 2_cam 1.mp4', 'videos/test 2_cam 2.mp4',
+    #     # 'videos/test 3_cam 1.mp4', 'videos/test 3_cam 2.mp4',
+    #     # 'videos/test 4_cam 1.mp4', 'videos/test 4_cam 2.mp4',
+    #     # 'videos/test 5_cam 1.mp4', 'videos/test 5_cam 2.mp4',
+    #     # 'videos/classification_videos/13-05 ВО_cam1.mp4', 'videos/classification_videos/13-05 ВО_cam2.mp4',
+    #     # 'videos/classification_videos/16-10 ЦП_cam1.mp4', 'videos/classification_videos/16-10 ЦП_cam2.mp4',
+    #     # 'videos/classification_videos/МОС 19-40_cam1.mp4', 'videos/classification_videos/МОС 19-40_cam2.mp4',
+    #     # 'videos/classification_videos/Ночь 20-11_cam1.mp4', 'videos/classification_videos/Ночь 20-11_cam2.mp4',
+    #     # 'videos/classification_videos/13_05 ВО_sync.mp4', 'videos/classification_videos/13_05 ВО_2_sync.mp4',
+    #     # 'videos/classification_videos/16-10 ЦП_sync.mp4', 'videos/classification_videos/16-10 ЦП_2_sync.mp4',
+    #     # 'videos/classification_videos/МОС,19-40_sync.mp4', 'videos/classification_videos/МОС,19-40_2_sync.mp4',
+    #     # 'videos/classification_videos/НОЧЬ,20-11_sync.mp4', 'videos/classification_videos/НОЧЬ,20-11_2_sync.mp4',
+    #     # 'videos/sync_test/test 5_cam 1_sync.mp4', 'videos/sync_test/test 5_cam 2_sync.mp4'
+    # ]
 
     # for v in vid:
-    #     sp = v.split('/')[-1].split('.')[0]
     #     DatasetProcessing.video2frames(
     #         video_path=v,
     #         save_path=f"datasets",
@@ -574,37 +595,37 @@ if __name__ == '__main__':
     #     )
 
     SYNCHRONIZE_VIDEOS = True
-    sync_data = {
-        'videos/test 1_cam 1.mp4': [519, '18:00:10'],
-        'videos/test 1_cam 2.mp4': [42, '18:00:10'],
-        'videos/test 2_cam 1.mp4': [94, '16:28:08'],
-        'videos/test 2_cam 2.mp4': [45, '16:28:08'],
-        'videos/test 3_cam 1.mp4': [693, '18:00:27'],
-        'videos/test 3_cam 2.mp4': [297, '18:00:27'],
-        # 'videos/test 4_cam 1.mp4': [22, '13:05:21'],
-        # 'videos/test 4_cam 2.mp4': [976, '13:05:21'],
-        'videos/test 5_cam 1.mp4': [376, '13:41:57'],
-        'videos/test 5_cam 2.mp4': [400, '13:41:56'],
+    # sync_data = {
+    #     # 'videos/test 1_cam 1.mp4': [519, '18:00:10'],
+    #     # 'videos/test 1_cam 2.mp4': [42, '18:00:10'],
+    #     # 'videos/test 2_cam 1.mp4': [94, '16:28:08'],
+    #     # 'videos/test 2_cam 2.mp4': [45, '16:28:08'],
+    #     # 'videos/test 3_cam 1.mp4': [693, '18:00:27'],
+    #     # 'videos/test 3_cam 2.mp4': [297, '18:00:27'],
+    #     # 'videos/test 4_cam 1.mp4': [22, '13:05:21'],
+    #     # 'videos/test 4_cam 2.mp4': [976, '13:05:21'],
+    #     # 'videos/test 5_cam 1.mp4': [376, '13:41:57'],
+    #     # 'videos/test 5_cam 2.mp4': [400, '13:41:56'],
     #     'videos/classification_videos/13-05 ВО_cam1.mp4': [32, '13:05:21'],
     #     'videos/classification_videos/13-05 ВО_cam2.mp4': [986, '13:05:21'],
-    #     'videos/classification_videos/16-10 ЦП_cam1.mp4': [504, '16:08:56'],
+    #     'videos/classification_videos/16-10 ЦП_cam1.mp4': [476, '16:08:55'],
     #     'videos/classification_videos/16-10 ЦП_cam2.mp4': [8, '16:08:56'],
-    #     'videos/classification_videos/МОС 19-40_cam1.mp4': [120, '19:40:52'],
+    #     'videos/classification_videos/МОС 19-40_cam1.mp4': [110, '19:40:52'],
     #     'videos/classification_videos/МОС 19-40_cam2.mp4': [16, '19:40:52'],
-    #     'videos/classification_videos/Ночь 20-11_cam1.mp4': [201, '20:11:13'],
+    #     'videos/classification_videos/Ночь 20-11_cam1.mp4': [193, '20:11:13'],
     #     'videos/classification_videos/Ночь 20-11_cam2.mp4': [8, '20:11:13'],
-    }
-    sync_videos = [
-        {'camera 1': 'videos/test 1_cam 1.mp4', 'camera 2': 'videos/test 1_cam 2.mp4'},
-        {'camera 1': 'videos/test 2_cam 1.mp4', 'camera 2': 'videos/test 2_cam 2.mp4'},
-        {'camera 1': 'videos/test 3_cam 1.mp4', 'camera 2': 'videos/test 3_cam 2.mp4'},
-        # {'camera 1': 'videos/test 4_cam 1.mp4', 'camera 2': 'videos/test 4_cam 2.mp4'},
-        {'camera 1': 'videos/test 5_cam 1.mp4', 'camera 2': 'videos/test 5_cam 2.mp4'},
-        # {'camera 1': 'videos/classification_videos/13-05 ВО_cam1.mp4', 'camera 2': 'videos/classification_videos/13-05 ВО_cam2.mp4'},
-        # {'camera 1': 'videos/classification_videos/16-10 ЦП_cam1.mp4', 'camera 2': 'videos/classification_videos/16-10 ЦП_cam2.mp4'},
-        # {'camera 1': 'videos/classification_videos/МОС 19-40_cam1.mp4', 'camera 2': 'videos/classification_videos/МОС 19-40_cam2.mp4'},
-        # {'camera 1': 'videos/classification_videos/Ночь 20-11_cam1.mp4', 'camera 2': 'videos/classification_videos/Ночь 20-11_cam2.mp4'},
-    ]
+    # }
+    # sync_videos = [
+    #     # {'camera 1': 'videos/test 1_cam 1.mp4', 'camera 2': 'videos/test 1_cam 2.mp4'},
+    #     # {'camera 1': 'videos/test 2_cam 1.mp4', 'camera 2': 'videos/test 2_cam 2.mp4'},
+    #     # {'camera 1': 'videos/test 3_cam 1.mp4', 'camera 2': 'videos/test 3_cam 2.mp4'},
+    #     # {'camera 1': 'videos/test 4_cam 1.mp4', 'camera 2': 'videos/test 4_cam 2.mp4'},
+    #     # {'camera 1': 'videos/test 5_cam 1.mp4', 'camera 2': 'videos/test 5_cam 2.mp4'},
+    #     {'camera 1': 'videos/classification_videos/13-05 ВО_cam1.mp4', 'camera 2': 'videos/classification_videos/13-05 ВО_cam2.mp4'},
+    #     {'camera 1': 'videos/classification_videos/16-10 ЦП_cam1.mp4', 'camera 2': 'videos/classification_videos/16-10 ЦП_cam2.mp4'},
+    #     {'camera 1': 'videos/classification_videos/МОС 19-40_cam1.mp4', 'camera 2': 'videos/classification_videos/МОС 19-40_cam2.mp4'},
+    #     {'camera 1': 'videos/classification_videos/Ночь 20-11_cam1.mp4', 'camera 2': 'videos/classification_videos/Ночь 20-11_cam2.mp4'},
+    # ]
     # for pair in sync_videos:
     #     save_name_1 = f"{pair.get('camera 1').split('/')[-1].split('.')[0]}_sync.mp4"
     #     DatasetProcessing.synchronize_video(
@@ -627,10 +648,10 @@ if __name__ == '__main__':
     #     'videos/classification_videos/Ночь 20-11.csv',
     # ]
     # video_links = [
-    #     ['videos/classification_videos/13-05 ВО_cam1_sync.mp4', 'videos/classification_videos/13-05 ВО_cam2_sync.mp4'],
-    #     ['videos/classification_videos/16-10 ЦП_cam1_sync.mp4', 'videos/classification_videos/16-10 ЦП_cam2_sync.mp4'],
-    #     ['videos/classification_videos/МОС 19-40_cam1_sync.mp4', 'videos/classification_videos/МОС 19-40_cam2_sync.mp4'],
-    #     ['videos/classification_videos/Ночь 20-11_cam1_sync.mp4', 'videos/classification_videos/Ночь 20-11_cam2_sync.mp4'],
+    #     ['videos/sync_test/13-05 ВО_cam1_sync.mp4', 'videos/sync_test/13-05 ВО_cam2_sync.mp4'],
+    #     ['videos/sync_test/16-10 ЦП_cam1_sync.mp4', 'videos/sync_test/16-10 ЦП_cam2_sync.mp4'],
+    #     ['videos/sync_test/МОС 19-40_cam1_sync.mp4', 'videos/sync_test/МОС 19-40_cam2_sync.mp4'],
+    #     ['videos/sync_test/Ночь 20-11_cam1_sync.mp4', 'videos/sync_test/Ночь 20-11_cam2_sync.mp4'],
     # ]
     # save_folder = 'datasets/class_videos'
     #

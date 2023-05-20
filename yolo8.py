@@ -134,6 +134,8 @@ def detect_synchro_video(
         video_paths: dict,
         save_path: str,
         remove_perimeter_boxes: dict = {'model_1': True, "model_2": False},
+        start: int = 0,
+        finish: int = 0,
 ):
     """
     Detect two synchronized videos and save them as one video with boxes to save_path.
@@ -191,7 +193,6 @@ def detect_synchro_video(
         vc1 = cv2.VideoCapture()
         vc1.open(video_paths.get("model_1"))
         f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
-        fps1 = vc1.get(cv2.CAP_PROP_FPS)
 
     if fps2 != 25:
         shutil.move(video_paths.get("model_2"), 'test.mp4')
@@ -204,7 +205,6 @@ def detect_synchro_video(
         vc2 = cv2.VideoCapture()
         vc2.open(video_paths.get("model_2"))
         f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
-        fps2 = vc2.get(cv2.CAP_PROP_FPS)
 
     # model = YOLO('runs/detect/train21/weights/best.pt')
     if save_path:
@@ -215,102 +215,106 @@ def detect_synchro_video(
         'model_1': {}, "model_2": {}
     }
     f = min([f1, f2])
+    finish = int(f) if finish == 0 or finish < start else finish
     ttc, clusters = 0, []
-    for i in range(int(f)):
-        logger.info(f"Processed {i + 1} / {f} frames")
+    for i in range(0, finish):
         ret1, frame1 = vc1.read()
-        res1 = models.get('model_1')(frame1)
-        result['model_1'][i] = {'boxes': res1[0].boxes, 'orig_shape': res1[0].orig_shape}
-        tracker_1.process(predict=res1, remove_perimeter_boxes=remove_perimeter_boxes.get('model_1'))
-
         ret2, frame2 = vc2.read()
-        res2 = models.get('model_2')(frame2)
-        result['model_2'][i] = {'boxes': res2[0].boxes, 'orig_shape': res2[0].orig_shape}
-        tracker_2.process(predict=res2, remove_perimeter_boxes=remove_perimeter_boxes.get('model_2'))
 
-        ttc, clusters = Tracker().get_object_count(
-            count_1=tracker_1.total_count,
-            count_2=tracker_2.total_count
-        )
+        if i >= start:
+            logger.info(f"Processed {i + 1} / {f} frames")
 
-        if save_path:
-            if tracker_1.id_coords[-1]:
-                tracker_id = tracker_1.id_coords[-1]
-                coords = tracker_1.coordinates[-1]
-                labels = [
-                    f"# {tracker_id[i]} {models.get('model_1').model.names[coords[i][-1]]} {coords[i][-2]:0.2f}"
-                    for i in range(len(tracker_1.coordinates[-1]))
-                ]
+            res1 = models.get('model_1')(frame1)
+            result['model_1'][i] = {'boxes': res1[0].boxes, 'orig_shape': res1[0].orig_shape}
+            tracker_1.process(predict=res1, remove_perimeter_boxes=remove_perimeter_boxes.get('model_1'))
 
-                if len(labels) > 1:
-                    cl = colors * len(labels)
-                else:
-                    cl = colors
+            res2 = models.get('model_2')(frame2)
+            result['model_2'][i] = {'boxes': res2[0].boxes, 'orig_shape': res2[0].orig_shape}
+            tracker_2.process(predict=res2, remove_perimeter_boxes=remove_perimeter_boxes.get('model_2'))
 
-                fr1 = tracker_1.put_box_on_image(
-                    save_path=None,
-                    results=res1,
-                    labels=labels,
-                    color_list=cl,
-                    coordinates=tracker_1.coordinates
-                )
-                fr1 = np.array(fr1)
-            else:
-                fr1 = res1[0].orig_img[:, :, ::-1].copy()
-            # headline = f"Обнаружено объектов: {ttc}\n"
-            if fr1.shape[:2] != (h, w):
-                # print('fr1.shape', fr1.shape, (h, w, 3))
-                fr1 = cv2.resize(fr1, (w, h))
-            # fr1 = add_headline_to_cv_image(
-            #     image=fr1,
-            #     headline=headline
-            # )
-
-            if tracker_2.id_coords[-1]:
-                tracker_id = tracker_2.id_coords[-1]
-                coords = tracker_2.coordinates[-1]
-                labels = [
-                    f"# {tracker_id[i]} {models.get('model_2').model.names[coords[i][-1]]} {coords[i][-2]:0.2f}"
-                    for i in range(len(tracker_2.coordinates[-1]))
-                ]
-
-                if len(labels) > 1:
-                    cl = colors * len(labels)
-                else:
-                    cl = colors
-
-                fr2 = tracker_2.put_box_on_image(
-                    save_path=None,
-                    results=res2,
-                    labels=labels,
-                    color_list=cl,
-                    coordinates=tracker_2.coordinates
-                )
-                fr2 = np.array(fr2)
-            else:
-                fr2 = res2[0].orig_img[:, :, ::-1].copy()
-            if fr2.shape[:2] != (h, w):
-                # print('fr2.shape', fr2.shape, (h, w, 3))
-                fr2 = cv2.resize(fr2, (w, h))
-
-            # headline = f"Обнаружено объектов: {ttc}\n"
-            # fr2 = add_headline_to_cv_image(
-            #     image=fr2,
-            #     headline=headline
-            # )
-
-            fr = np.concatenate((fr1, fr2), axis=0)
-            # print('fr.shape', fr.shape)
-            headline = f"Обнаружено ковров: {ttc}"
-            fr = add_headline_to_cv_image(
-                image=fr,
-                headline=headline
+            ttc, clusters = Tracker().get_object_count(
+                count_1=tracker_1.total_count,
+                count_2=tracker_2.total_count
             )
 
-            cv_img = cv2.cvtColor(fr, cv2.COLOR_RGB2BGR)
-            out.write(cv_img)
-            # if i > 10:
-            #     break
+            if save_path:
+                if tracker_1.id_coords[-1]:
+                    tracker_id = tracker_1.id_coords[-1]
+                    coords = tracker_1.coordinates[-1]
+                    labels = [
+                        f"# {tracker_id[i]} {models.get('model_1').model.names[coords[i][-1]]} {coords[i][-2]:0.2f}"
+                        for i in range(len(tracker_1.coordinates[-1]))
+                    ]
+
+                    if len(labels) > 1:
+                        cl = colors * len(labels)
+                    else:
+                        cl = colors
+
+                    fr1 = tracker_1.put_box_on_image(
+                        save_path=None,
+                        results=res1,
+                        labels=labels,
+                        color_list=cl,
+                        coordinates=tracker_1.coordinates
+                    )
+                    fr1 = np.array(fr1)
+                else:
+                    fr1 = res1[0].orig_img[:, :, ::-1].copy()
+                # headline = f"Обнаружено объектов: {ttc}\n"
+                if fr1.shape[:2] != (h, w):
+                    # print('fr1.shape', fr1.shape, (h, w, 3))
+                    fr1 = cv2.resize(fr1, (w, h))
+                # fr1 = add_headline_to_cv_image(
+                #     image=fr1,
+                #     headline=headline
+                # )
+
+                if tracker_2.id_coords[-1]:
+                    tracker_id = tracker_2.id_coords[-1]
+                    coords = tracker_2.coordinates[-1]
+                    labels = [
+                        f"# {tracker_id[i]} {models.get('model_2').model.names[coords[i][-1]]} {coords[i][-2]:0.2f}"
+                        for i in range(len(tracker_2.coordinates[-1]))
+                    ]
+
+                    if len(labels) > 1:
+                        cl = colors * len(labels)
+                    else:
+                        cl = colors
+
+                    fr2 = tracker_2.put_box_on_image(
+                        save_path=None,
+                        results=res2,
+                        labels=labels,
+                        color_list=cl,
+                        coordinates=tracker_2.coordinates
+                    )
+                    fr2 = np.array(fr2)
+                else:
+                    fr2 = res2[0].orig_img[:, :, ::-1].copy()
+                if fr2.shape[:2] != (h, w):
+                    # print('fr2.shape', fr2.shape, (h, w, 3))
+                    fr2 = cv2.resize(fr2, (w, h))
+
+                # headline = f"Обнаружено объектов: {ttc}\n"
+                # fr2 = add_headline_to_cv_image(
+                #     image=fr2,
+                #     headline=headline
+                # )
+
+                fr = np.concatenate((fr1, fr2), axis=0)
+                # print('fr.shape', fr.shape)
+                headline = f"Обнаружено ковров: {ttc}"
+                fr = add_headline_to_cv_image(
+                    image=fr,
+                    headline=headline
+                )
+
+                cv_img = cv2.cvtColor(fr, cv2.COLOR_RGB2BGR)
+                out.write(cv_img)
+            if i > finish:
+                break
 
         # if i > 1000:
     logger.info(f"-- tracker 1: {tracker_1.obj_count}, {tracker_1.coordinates}")
@@ -328,8 +332,13 @@ def train(weights='yolo8/yolov8n.pt', config='data_custom.yaml', epochs=50, batc
 
 if __name__ == '__main__':
     TRAIN = True
-    # train(epochs=100, weights='yolo8/yolov8n.pt', config='data_custom_CAM1.yaml', name='camera_1_mix+_8n_100ep')
-    # train(epochs=100, weights='yolo8/yolov8n.pt', config='data_custom_CAM2.yaml', name='camera_2_mix+_8n_100ep')
+    # train(epochs=100, weights='yolo8/yolov8n.pt', config='data_custom_CAM1.yaml', name='camera_1_mix_l+_8n_100ep')
+    # train(epochs=100, weights='yolo8/yolov8n.pt', config='data_custom_CAM2.yaml', name='camera_2_mix_l+_8n_100ep')
+    train(epochs=50, weights='runs/detect/camera_1_mix++_8n_150ep/weights/best.pt', config='data_custom_CAM1.yaml',
+          name='camera_1_mix++_8n_200ep')
+    train(epochs=50, weights='runs/detect/camera_2_mix++_8n_150ep/weights/best.pt', config='data_custom_CAM2.yaml',
+          name='camera_2_mix++_8n_200ep')
+
     # train(epochs=50, weights='yolo8/yolov8n.pt', config='data_custom.yaml')
     # train(epochs=50, weights='yolo8/yolov8s.pt', config='data_custom.yaml', batch_size=2, name='train_mix_yolov8s')
     # train(epochs=50, weights='yolo8/yolov8m.pt', config='data_custom.yaml', batch_size=2, name='train_mix_yolov8m')
@@ -357,12 +366,12 @@ if __name__ == '__main__':
     # print(img.size[::-1])
 
     PREDICT_VIDEO = True
-    # model1 = YOLO('runs/detect/camera_1_mix+_8n_100ep/weights/best.pt')
+    # model1 = YOLO('runs/detect/camera_1_mix_s+_8n_100ep/weights/best.pt')
     # test_vid = [
-    #     'videos/sync_test/test 1_cam 1_sync.mp4',
-    #     'videos/sync_test/test 2_cam 1_sync.mp4',
-    #     'videos/sync_test/test 3_cam 1_sync.mp4',
-    #     'videos/sync_test/test 4_cam 1_sync.mp4',
+    #     # 'videos/sync_test/test 1_cam 1_sync.mp4',
+    #     # 'videos/sync_test/test 2_cam 1_sync.mp4',
+    #     # 'videos/sync_test/test 3_cam 1_sync.mp4',
+    #     # 'videos/sync_test/test 4_cam 1_sync.mp4',
     #     'videos/sync_test/test 5_cam 1_sync.mp4',
     # ]
     # for i, l in enumerate(test_vid):
@@ -373,12 +382,12 @@ if __name__ == '__main__':
     #         save_path=f'temp/pred_{n}',
     #         remove_perimeter_boxes=True
     #     )
-    # model2 = YOLO('runs/detect/camera_2_mix+_8n_100ep/weights/best.pt')
+    # model2 = YOLO('runs/detect/camera_2_mix_s+_8n_100ep/weights/best.pt')
     # test_vid_2 = [
-    #     'videos/sync_test/test 1_cam 2_sync.mp4',
-    #     'videos/sync_test/test 2_cam 2_sync.mp4',
-    #     'videos/sync_test/test 3_cam 2_sync.mp4',
-    #     'videos/sync_test/test 4_cam 2_sync.mp4',
+    #     # 'videos/sync_test/test 1_cam 2_sync.mp4',
+    #     # 'videos/sync_test/test 2_cam 2_sync.mp4',
+    #     # 'videos/sync_test/test 3_cam 2_sync.mp4',
+    #     # 'videos/sync_test/test 4_cam 2_sync.mp4',
     #     'videos/sync_test/test 5_cam 2_sync.mp4',
     # ]
     # for i, l in enumerate(test_vid_2):
@@ -390,43 +399,45 @@ if __name__ == '__main__':
     #     )
 
     PREDICT_SYNCH_VIDEO = True
-    models = {
-        'model_1': YOLO('runs/detect/camera_1_mix+_8n_100ep/weights/best.pt'),
-        'model_2': YOLO('runs/detect/camera_2_mix+_8n_100ep/weights/best.pt')
-    }
-    video_paths = [
-        # {
-        #     'model_1': 'videos/sync_test/test 1_cam 1_sync.mp4',
-        #     'model_2': 'videos/sync_test/test 1_cam 2_sync.mp4',
-        # },
-        # {
-        #     'model_1': 'videos/sync_test/test 2_cam 1_sync.mp4',
-        #     'model_2': 'videos/sync_test/test 2_cam 2_sync.mp4',
-        # },
-        # {
-        #     'model_1': 'videos/sync_test/test 3_cam 1_sync.mp4',
-        #     'model_2': 'videos/sync_test/test 3_cam 2_sync.mp4',
-        # },
-        # {
-        #     'model_1': 'videos/sync_test/test 4_cam 1_sync.mp4',
-        #     'model_2': 'videos/sync_test/test 4_cam 2_sync.mp4',
-        # },
-        {
-            'model_1': 'videos/sync_test/test 5_cam 1_sync.mp4',
-            'model_2': 'videos/sync_test/test 5_cam 2_sync.mp4',
-        },
-    ]
-    save_path = [
-        # f'temp/pred_test 1.mp4',
-        # f'temp/pred_test 2.mp4',
-        # f'temp/pred_test 3.mp4',
-        # f'temp/pred_test 4.mp4',
-        f'temp/pred_test 5.mp4',
-    ]
-    for i in range(len(video_paths)):
-        detect_synchro_video(
-            models=models,
-            video_paths=video_paths[i],
-            save_path=save_path[i],
-        )
+    # models = {
+    #     'model_1': YOLO('runs/detect/camera_1_mix_m+_8n_100ep/weights/best.pt'),
+    #     'model_2': YOLO('runs/detect/camera_2_mix_m+_8n_100ep/weights/best.pt')
+    # }
+    # video_paths = [
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 1_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 1_cam 2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 2_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 2_cam 2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 3_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 3_cam 2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 4_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 4_cam 2_sync.mp4',
+    #     # },
+    #     {
+    #         'model_1': 'videos/sync_test/test 5_cam 1_sync.mp4',
+    #         'model_2': 'videos/sync_test/test 5_cam 2_sync.mp4',
+    #     },
+    # ]
+    # save_path = [
+    #     # f'temp/pred_test 1.mp4',
+    #     # f'temp/pred_test 2.mp4',
+    #     # f'temp/pred_test 3.mp4',
+    #     # f'temp/pred_test 4.mp4',
+    #     f'temp/pred_test 5.mp4',
+    # ]
+    # for i in range(len(video_paths)):
+    #     detect_synchro_video(
+    #         models=models,
+    #         video_paths=video_paths[i],
+    #         save_path=save_path[i],
+    #         start=0,
+    #         finish=0
+    #     )
     pass
