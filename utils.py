@@ -235,5 +235,43 @@ def get_obj_box_squares(clust_coords):
     return np.array(vecs)
 
 
+def read_xml(xml_path: str, shrink=False, new_width: int = 416, new_height: int = 416) -> dict:
+    with open(xml_path, 'r') as xml:
+        lines = xml.readlines()
+    xml = ''
+    for l in lines:
+        xml = f"{xml}{l}"
+    filename = xml.split("<filename>")[1].split("</filename>")[0]
+    size = xml.split("<size>")[1].split("</size>")[0]
+    width = int(size.split("<width>")[1].split("</width>")[0])
+    height = int(size.split("<height>")[1].split("</height>")[0])
+    objects = xml.split('<object>')[1:]
+    coords = []
+    for obj in objects:
+        name = obj.split("<name>")[1].split("</name>")[0]
+        if shrink:
+            xmin = int(int(obj.split("<xmin>")[1].split("</xmin>")[0]) / width * new_width)
+            ymin = int(int(obj.split("<ymin>")[1].split("</ymin>")[0]) / height * new_height)
+            xmax = int(int(obj.split("<xmax>")[1].split("</xmax>")[0]) / width * new_width)
+            ymax = int(int(obj.split("<ymax>")[1].split("</ymax>")[0]) / height * new_height)
+        else:
+            xmin = int(obj.split("<xmin>")[1].split("</xmin>")[0])
+            ymin = int(obj.split("<ymin>")[1].split("</ymin>")[0])
+            xmax = int(obj.split("<xmax>")[1].split("</xmax>")[0])
+            ymax = int(obj.split("<ymax>")[1].split("</ymax>")[0])
+        coords.append([xmin, ymin, xmax, ymax, name])
+    return {"width": width, "height": height, "coords": coords, "filename": filename}
+
+
+def remove_empty_xml(xml_folder):
+    xml_list = []
+    with os.scandir(xml_folder) as fold:
+        for f in fold:
+            xml_list.append(f.name)
+    for xml in xml_list:
+        box_info = read_xml(f"{xml_folder}/{xml}")
+        if not box_info['coords']:
+            os.remove(f"{xml_folder}/{xml}")
+
 if __name__ == '__main__':
     pass
