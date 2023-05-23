@@ -3,12 +3,17 @@ import random
 import re
 import shutil
 import time
+from collections import Counter
+
 import pandas as pd
+import skvideo
 import torch
 import torchvision
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from torchvision.utils import draw_bounding_boxes
 from torchvision.io import read_image
+
+from parameters import ROOT_DIR
 from utils import *
 
 
@@ -18,7 +23,18 @@ class DatasetProcessing:
         pass
 
     @staticmethod
-    def cut_video(video_path: str, save_path: str = 'datasets', from_time=0, to_time=1000):
+    def cut_video(video_path: str, save_path: str = 'datasets', from_time=0, to_time=1000) -> str:
+        """
+        Cut video in given time range.
+
+        Args:
+            video_path: path to video file
+            save_path: path to save folder
+            from_time: time to start cut in seconds
+            to_time: time to finish cut in seconds
+
+        Returns: path to saved video file
+        """
         try:
             os.mkdir(save_path)
         except:
@@ -146,6 +162,7 @@ class DatasetProcessing:
 
     @staticmethod
     def change_fps(video_path: str, save_path: str, set_fps=25):
+
         clip = VideoFileClip(video_path)
         clip.write_videofile(save_path, fps=set_fps)
 
@@ -466,6 +483,58 @@ class DatasetProcessing:
                     logger.info(f"-- prepared {i + 1} images")
                     # break
                 count += 1
+
+
+    @staticmethod
+    def video_to_array(video_path: str) -> np.ndarray:
+        """
+        Transform video to numpy array
+        """
+        return skvideo.io.vread(os.path.join(ROOT_DIR, video_path))
+
+    @staticmethod
+    def ohe_from_list(data: list[int], num: int) -> np.ndarray:
+        """Transform list of labels to one hot encoding array"""
+        targets = np.array([data]).reshape(-1)
+        return np.eye(num)[targets]
+
+    @staticmethod
+    def create_video_class_dataset(folder_path: str, split: float) -> dict:
+        st = time.time()
+        classes = os.listdir(os.path.join(ROOT_DIR, folder_path))
+        classes = sorted(classes)
+        data, lbl, stat_lbl = [], [], []
+        stat = dict(train={}, val={}, classes=classes)
+        for cl in classes:
+            content = os.listdir(os.path.join(ROOT_DIR, folder_path, cl))
+            content = sorted(content)
+            lbl.extend([classes.index(cl)] * len(content))
+            for file in content:
+                vid = DatasetProcessing.video_to_array(os.path.join(folder_path, cl, file))
+                data.append(vid)
+
+        zip_data = list(zip(data, lbl))
+        random.shuffle(zip_data)
+        train, val = zip_data[:int(split * len(lbl))], zip_data[int(split * len(lbl)):]
+        x_train, y_train = list(zip(*train))
+        x_val, y_val = list(zip(*val))
+
+        ytr = dict(Counter(y_train))
+        stat_ytr = {}
+        for k, v in ytr.items():
+            stat_ytr[classes[k]] = v
+        stat['train'] = stat_ytr
+
+        yv = dict(Counter(y_val))
+        stat_yv = {}
+        for k, v in yv.items():
+            stat_yv[classes[k]] = v
+        stat['val'] = stat_yv
+
+        y_train = DatasetProcessing.ohe_from_list(y_train, len(classes))
+        y_val = DatasetProcessing.ohe_from_list(y_val, len(classes))
+        print(f"Total dataset processing time = {round(time.time() - st, 1)} sec")
+        return dict(x_train=x_train, y_train=y_train, x_val=x_val, y_val=y_val, stat=stat)
 
 
 if __name__ == '__main__':

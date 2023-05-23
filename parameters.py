@@ -1,3 +1,5 @@
+ROOT_DIR = '/Users/denyurchuck/Desktop/CarpetTracker'
+
 CLASSIFICATION_MODEL_PATH = 'models/class 95.6%/model'
 # CLASSIFICATION_MODEL_PATH = "E:/AI/TerraSur/Project/training/carpet class 94.8%/model"
 YOLO_MODEL_PATH = "models/yolo4 99.6%/model"
