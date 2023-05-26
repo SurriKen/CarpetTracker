@@ -1,29 +1,13 @@
-# https://newtechaudit.ru/kak-predskazyvat-budushhee-s-pomoshhyu-keras/
+import os.path
 from random import shuffle
-
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from dataset_processing import DatasetProcessing, VideoClass
 import time
-from utils import logger
-
-# st = time.time()
-vid_ex = 'datasets/class_videos/60x90/7.mp4'
-
-arr = DatasetProcessing.video_to_array(vid_ex)
-arr = np.expand_dims(arr, 0) / 255
-# arr = arr / 255
-lbl = DatasetProcessing.ohe_from_list([1], 5)
-
-
-# print(arr.shape)
-# logger.info(f"-- Video processing time = {round(time.time() - st, 1)} sec")
-
-#
-# print(arr.shape, lbl)
-# arr.shape[2:]
+from parameters import ROOT_DIR
+from utils import logger, time_converter
 
 
 class Net(nn.Module):
@@ -47,17 +31,28 @@ class Net(nn.Module):
 
 class VideoClassifier:
 
-    def __init__(self, model_path: str = None, device: str = 'cuda:0'):
+    def __init__(self, name: str = 'model', weights: str = None, device: str = 'cuda:0', frame_size: tuple = (255, 255)):
         self.device = device
+        self.frame_size = frame_size
         self.torch_device = torch.device(device)
-        self.load_weights(model_path)
+        self.weights = weights
+        self.load_model(weights)
+        try:
+            os.mkdir(os.path.join(ROOT_DIR, 'video_class_train'))
+        except:
+            pass
+        self.name = name
 
-    def load_weights(self, weights: str = '') -> None:
+    def load_model(self, weights: str = '') -> None:
         if weights and weights.split('.')[-1] == 'pt':
             self.model = torch.jit.load(weights)
         else:
             self.model = Net(device=self.device)
             self.model.zero_grad()
+
+    def save_model(self, mode: str = 'last'):
+        model_scripted = torch.jit.script(self.model)  # Export to TorchScript
+        model_scripted.save(os.path.join(ROOT_DIR, 'video_class_train', self.name, f"{mode}.pt"))  # Save
 
     def get_x_batch(self, video_path: str, frame_size: tuple[int, int] = (255, 255)) -> torch.Tensor:
         x_train = DatasetProcessing.video_to_array(video_path)
@@ -70,6 +65,21 @@ class VideoClassifier:
         else:
             return x_train
 
+    def numpy_to_torch(self, array: np.ndarray, frame_size: tuple[int, int] = (255, 255)) -> torch.Tensor:
+        if len(array.shape) == 4:
+            array = np.expand_dims(array, 0)
+
+        if array.max() > 1.:
+            array = array / 255
+
+        array = torch.from_numpy(array)
+        array = array.permute(0, 4, 1, 2, 3)
+        array = F.interpolate(array, size=(array.size()[2], frame_size[0], frame_size[1]))
+        if 'cuda' in self.device:
+            return array.to(self.torch_device, dtype=torch.float)
+        else:
+            return array
+
     def get_y_batch(self, label: int, num_labels: int) -> torch.Tensor:
         lbl = DatasetProcessing.ohe_from_list([label], num_labels)
         if 'cuda' in self.device:
@@ -78,11 +88,23 @@ class VideoClassifier:
             lbl = torch.tensor(lbl, dtype=torch.float)
         return lbl.view(1, -1)
 
-    def train(self, dataset: VideoClass, epochs: int, frame_size: tuple = (255, 255), weights: str = '',
+    def train(self, dataset: VideoClass, epochs: int, weights: str = '',
               lr: float = 0.001) -> None:
 
         if weights:
-            self.load_weights(weights)
+            self.load_model(weights)
+
+        stop = False
+        i = 1
+        name = f"{self.name}{i}"
+        while not stop:
+            if self.name in os.listdir(os.path.join(ROOT_DIR, 'video_class_train')):
+                name = f"{self.name}{i}"
+                i += 1
+            else:
+                os.mkdir(os.path.join(ROOT_DIR, 'video_class_train', name))
+                stop = True
+
         st = time.time()
         num_classes = len(dataset.classes)
         num_train_batches = len(dataset.x_train)
@@ -90,7 +112,7 @@ class VideoClassifier:
         num_val_batches = len(dataset.x_val)
         optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
         criterion = nn.CrossEntropyLoss()
-        train_loss = 0.
+        best_loss = 10000.
 
         logger_batch_markers = []
         for i in range(10):
@@ -99,9 +121,10 @@ class VideoClassifier:
         for epoch in range(epochs):
             st_ep = time.time()
             shuffle(train_seq)
+            train_loss = 0.
             for batch in range(num_train_batches):
                 st_b = time.time()
-                x_train = self.get_x_batch(video_path=dataset.x_train[train_seq[batch]], frame_size=frame_size)
+                x_train = self.get_x_batch(video_path=dataset.x_train[train_seq[batch]], frame_size=self.frame_size)
                 y_train = self.get_y_batch(label=dataset.y_train[train_seq[batch]], num_labels=num_classes)
                 optimizer.zero_grad()
                 output = self.model(x_train)
@@ -113,62 +136,94 @@ class VideoClassifier:
                     logger.info(f"  -- Epoch {epoch+1}, batch {batch+1} / {num_train_batches}, "
                                 f"train_loss= {train_loss / batch + 1}"
                                 f"aver. batch time = {round((time.time() - st_b) / (batch+1), 2)} sec\n")
-            logger.info(f"\nEpoch {epoch + 1}, train_loss= {train_loss / num_train_batches}"
-                        f"epoch time = {round((time.time() - st_ep) / num_train_batches, 2)} sec\n")
+            # logger.info(f"\nEpoch {epoch + 1}, train_loss= {train_loss / num_train_batches}"
+            #             f"epoch time = {round((time.time() - st_ep) / num_train_batches, 2)} sec\n")
+
+            val_loss = 0
+
+            for val_batch in range(num_val_batches):
+                x_val = self.get_x_batch(video_path=dataset.x_val[train_seq[val_batch]], frame_size=self.frame_size)
+                y_val = self.get_y_batch(label=dataset.y_val[train_seq[val_batch]], num_labels=num_classes)
+                output = self.model(x_val)
+                loss = criterion(output, y_val)
+                val_loss += loss
+
+            self.save_model(mode='last')
+            if val_loss / num_val_batches <= best_loss:
+                self.save_model('best')
+
+            logger.info(f"\nEpoch {epoch + 1}, train_loss= {train_loss / num_train_batches},"
+                        f"val_loss = {val_loss / num_val_batches},"
+                        f"epoch time = {round((time.time() - st_ep), 2)} sec\n")
+
+        logger.info(f"Training is finished, "
+                    f"train time = {time_converter(int(time.time() - st))}\n")
+
+    def predict(self, array, weights: str = '', classes: list = None) -> list:
+        if classes is None:
+            classes = []
+        if weights or weights != self.weights:
+            self.load_model(weights)
+        array = self.numpy_to_torch(array, self.frame_size)
+        output = self.model(array)
+        output = output.cpu().detach().numpy() if self.device != 'cpu' else output.detach().numpy()
+        if classes:
+            return [classes[i] for i in list(np.argmax(output, axis=-1))]
+        return list(np.argmax(output, axis=-1))
 
 
+if __name__ == "__main__":
+    vid_ex = 'datasets/class_videos/60x90/7.mp4'
 
+    arr = DatasetProcessing.video_to_array(vid_ex)
+    arr = np.expand_dims(arr, 0) / 255
+    # arr = arr / 255
+    lbl = DatasetProcessing.ohe_from_list([1], 5)
 
-def train_video_class_model(model: nn.Module, dataset: dict, epochs: int, frame_size: tuple = (255, 255)):
-    print("Training video class model")
-    pass
-
-
-def predict_video_class(model, array):
-    pass
-
-
-st = time.time()
-net = Net(device='cuda:0')
-net.zero_grad()
-# print(net)
-params = list(net.parameters())
-# print(len(params))
-# print(params[0].size())
-
-cuda0 = torch.device('cuda:0')
-arr = torch.from_numpy(arr)
-arr = arr.permute(0, 4, 1, 2, 3)
-arr = F.interpolate(arr, size=(arr.size()[2], 256, 256))
-print(f"-- Input size: {arr.size()}\n")
-arr = arr.to(cuda0, dtype=torch.float)
-optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
-output = net(arr)
-print(f"-- Output tensor: {output}")
-logger.info(f"-- Pretrain process time = {round(time.time() - st, 2)} sec\n")
-
-for i in range(2):
     st = time.time()
-    optimizer.zero_grad()
-    output = net(arr)
-    target = torch.tensor(lbl, dtype=torch.float, device=cuda0)
-    target = target.view(1, -1)
-    criterion = nn.CrossEntropyLoss()
-    loss = criterion(output, target)
-    # print(f" --- weights before {list(net.parameters())[0][0][0][0][0]}")
-    loss.backward()
-    # print(f" --- weights after {list(net.parameters())[0][0][0][0][0]}")
-    optimizer.step()
-    # print(f" --- weights after optim {list(net.parameters())[0][0][0][0][0]}")
-    print(f"-- loss={loss}")
-    # print(f"-- Output size: {output.cpu().size()}")
+    # device = 'cuda:0'
+    device = 'cpu'
+    net = Net(device=device)
+    net.zero_grad()
+    # print(net)
+    params = list(net.parameters())
+    # print(len(params))
+    # print(params[0].size())
+
+    cuda0 = torch.device(device)
+    arr = torch.from_numpy(arr)
+    arr = arr.permute(0, 4, 1, 2, 3)
+    arr = F.interpolate(arr, size=(arr.size()[2], 256, 256))
+    print(f"-- Input size: {arr.size()}\n")
+    arr = arr.to(cuda0, dtype=torch.float)
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
     output = net(arr)
     print(f"-- Output tensor: {output}")
-    logger.info(f"-- Predict time = {round(time.time() - st, 2)} sec\n")
+    logger.info(f"-- Pretrain process time = {round(time.time() - st, 2)} sec\n")
 
-model_scripted = torch.jit.script(net)  # Export to TorchScript
-model_scripted.save('model_scripted.pt')  # Save
+    for i in range(2):
+        st = time.time()
+        optimizer.zero_grad()
+        output = net(arr)
+        target = torch.tensor(lbl, dtype=torch.float, device=cuda0)
+        target = target.view(1, -1)
+        criterion = nn.CrossEntropyLoss()
+        loss = criterion(output, target)
+        # print(f" --- weights before {list(net.parameters())[0][0][0][0][0]}")
+        loss.backward()
+        # print(f" --- weights after {list(net.parameters())[0][0][0][0][0]}")
+        optimizer.step()
+        # print(f" --- weights after optim {list(net.parameters())[0][0][0][0][0]}")
+        print(f"-- loss={loss}")
+        # print(f"-- Output size: {output.cpu().size()}")
+        output = net(arr)
+        print(f"-- Output tensor: {output}")
+        logger.info(f"-- Predict time = {round(time.time() - st, 2)} sec\n")
 
-model = torch.jit.load('model_scripted.pt')
-out2 = model(arr)
-print(f"-- Output tensor for loaded model: {out2}")
+    model_scripted = torch.jit.script(net)  # Export to TorchScript
+    model_scripted.save('model_scripted.pt')  # Save
+
+    model = torch.jit.load('model_scripted.pt')
+    out2 = model(arr)
+    lbl = np.argmax(out2.detach().numpy(), axis=-1) if device=='cpu' else np.argmax(out2.cpu().detach().numpy(), axis=-1)
+    print(f"-- Output tensor for loaded model: {out2}, label={lbl[0]}", type(lbl))

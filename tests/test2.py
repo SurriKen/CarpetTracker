@@ -9,9 +9,8 @@
 # x_batch, y_batch = DatasetProcessing.generate_video_class_batch(generator_dict=generator_dict, iteration=0, mode='train')
 # print(x_batch.shape, y_batch.shape, y_batch)
 from random import shuffle
-x = 125
-c = []
-for i in range(10):
-    c.append((int(x * (i + 1) / 10), '10 %'))
 
-print(c)
+import numpy as np
+
+xxx = np.random.random((1, 23, 24, 22))
+print(xxx.max())

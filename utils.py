@@ -23,6 +23,13 @@ logger.addHandler(logging.StreamHandler())
 # logger.debug("carpet tracker started")
 
 
+def time_converter(time_sec: int) -> str:
+    sec = time_sec % 60
+    min = time_sec // 60
+    hours = min // 60
+    min = min % 60
+    return f"{hours} h {min} min {sec} sec"
+
 def save_dict(dict_: dict, file_path: str, filename: str) -> None:
     """Save a dictionary to a file"""
     with open(os.path.join(file_path, f"{filename}.dict"), 'wb') as handle:

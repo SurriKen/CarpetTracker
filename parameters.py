@@ -1,5 +1,5 @@
-# ROOT_DIR = '/Users/denyurchuck/Desktop/CarpetTracker'
-ROOT_DIR = '/media/deny/Новый том/AI/CarpetTracker'
+ROOT_DIR = '/Users/denyurchuck/Desktop/CarpetTracker'
+# ROOT_DIR = '/media/deny/Новый том/AI/CarpetTracker'
 
 CLASSIFICATION_MODEL_PATH = 'models/class 95.6%/model'
 YOLO_MODEL_PATH = "models/yolo4 99.6%/model"
