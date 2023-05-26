@@ -23,40 +23,41 @@ logger.addHandler(logging.StreamHandler())
 # logger.debug("carpet tracker started")
 
 
-def save_dict(dict_, file_path, filename):
+def save_dict(dict_: dict, file_path: str, filename: str) -> None:
+    """Save a dictionary to a file"""
     with open(os.path.join(file_path, f"{filename}.dict"), 'wb') as handle:
         pickle.dump(dict_, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def load_dict(pickle_path):
+def load_dict(pickle_path: str) -> dict:
+    """Load a dictionary from saved file"""
     with open(pickle_path, 'rb') as handle:
         b = pickle.load(handle)
     return b
 
 
-def save_txt(txt, txt_path):
+def save_txt(txt: str, txt_path: str) -> None:
+    """Save a text to a file"""
     with open(txt_path, 'w') as f:
         f.write(txt)
 
 
-def load_txt(txt_path):
+def load_txt(txt_path: str) -> list[str]:
+    """Load a text from saved file"""
     with open(txt_path, 'r') as handle:
-        b = handle.readlines()
-    return b
+        text = handle.readlines()
+    return text
 
 
-def save_yaml(dict_, yaml_path):
-    with io.open(yaml_path, 'w', encoding='utf8') as outfile:
-        yaml.dump(dict_, outfile, default_flow_style=False, allow_unicode=True)
+def get_colors(name_classes: list) -> list[tuple]:
+    """
+    Get colors for a given label in list of labels
 
+    Args:
+        name_classes: list of labels
 
-def load_yaml(yaml_path):
-    with open(yaml_path, 'r') as stream:
-        data_loaded = yaml.safe_load(stream)
-    return data_loaded
-
-
-def get_colors(name_classes: list):
+    Returns: list of colors as RGB tuples
+    """
     length = 10 * len(name_classes)
     hsv_tuples = [(x / length, 1., 1.) for x in range(length)]
     colors = list(map(lambda x: colorsys.hsv_to_rgb(*x), hsv_tuples))
@@ -65,7 +66,17 @@ def get_colors(name_classes: list):
     return colors[:len(name_classes)]
 
 
-def get_distance(c1: list, c2: list):
+def get_distance(c1: list, c2: list) -> float:
+    """
+    Get distance between two 2D points
+
+    Args:
+        c1: (x, y) coordinates of point 1
+        c2: (x, y) coordinates of point 2
+
+    Returns: distance
+
+    """
     return ((c1[0] - c2[0]) ** 2 + (c1[1] - c2[1]) ** 2) ** 0.5
 
 
@@ -230,7 +241,6 @@ def get_obj_box_squares(clust_coords):
         x = sorted(x, reverse=True)
         x = x[:MIN_OBJ_SEQUENCE]
         x = [i[1] for i in x]
-        # print(k, len(np.array(sq[k])[x]), np.mean(np.array(sq[k])[x]))
         vecs.append(np.array(sq[k])[x])
     return np.array(vecs)
 
@@ -272,6 +282,7 @@ def remove_empty_xml(xml_folder):
         box_info = read_xml(f"{xml_folder}/{xml}")
         if not box_info['coords']:
             os.remove(f"{xml_folder}/{xml}")
+
 
 if __name__ == '__main__':
     pass

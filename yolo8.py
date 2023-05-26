@@ -21,9 +21,15 @@ yolov8_types = {
 }
 
 
-def load_yolo_v8(v8_mode="yolov8n"):
-    # if not os.path.isdir("yolov7"):
-    #     os.system("git clone https://github.com/WongKinYiu/yolov7.git")
+def load_yolo_v8(v8_mode="yolov8n") -> None:
+    """
+
+    Args:
+        v8_mode:
+
+    Returns:
+
+    """
 
     if not os.path.isdir(f"yolov8/{v8_mode}.pt"):
         url = yolov8_types[v8_mode]["link"]
@@ -387,46 +393,51 @@ if __name__ == '__main__':
     #     )
 
     PREDICT_SYNCH_VIDEO = True
-    # models = {
-    #     'model_1': YOLO('runs/detect/camera_1_mix_m+_8n_100ep/weights/best.pt'),
-    #     'model_2': YOLO('runs/detect/camera_2_mix_m+_8n_100ep/weights/best.pt')
-    # }
-    # video_paths = [
-    #     # {
-    #     #     'model_1': 'videos/sync_test/test 1_cam 1_sync.mp4',
-    #     #     'model_2': 'videos/sync_test/test 1_cam 2_sync.mp4',
-    #     # },
-    #     # {
-    #     #     'model_1': 'videos/sync_test/test 2_cam 1_sync.mp4',
-    #     #     'model_2': 'videos/sync_test/test 2_cam 2_sync.mp4',
-    #     # },
-    #     # {
-    #     #     'model_1': 'videos/sync_test/test 3_cam 1_sync.mp4',
-    #     #     'model_2': 'videos/sync_test/test 3_cam 2_sync.mp4',
-    #     # },
-    #     # {
-    #     #     'model_1': 'videos/sync_test/test 4_cam 1_sync.mp4',
-    #     #     'model_2': 'videos/sync_test/test 4_cam 2_sync.mp4',
-    #     # },
-    #     {
-    #         'model_1': 'videos/sync_test/test 5_cam 1_sync.mp4',
-    #         'model_2': 'videos/sync_test/test 5_cam 2_sync.mp4',
-    #     },
-    # ]
-    # save_path = [
-    #     # f'temp/pred_test 1.mp4',
-    #     # f'temp/pred_test 2.mp4',
-    #     # f'temp/pred_test 3.mp4',
-    #     # f'temp/pred_test 4.mp4',
-    #     f'temp/pred_test 5.mp4',
-    # ]
-    # for i in range(len(video_paths)):
-    #     detect_synchro_video(
-    #         models=models,
-    #         video_paths=video_paths[i],
-    #         save_path=save_path[i],
-    #         start=0,
-    #         finish=0,
-    #         speed_limit=SPEED_LIMIT_PERCENT
-    #     )
+    models = {
+        'model_1': YOLO('runs/detect/camera_1_mix++_8n_200ep/weights/best.pt'),
+        'model_2': YOLO('runs/detect/camera_2_mix++_8n_200ep/weights/best.pt')
+    }
+    video_paths = [
+        # {
+        #     'model_1': 'videos/sync_test/test 1_cam 1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 1_cam 2_sync.mp4',
+        # },
+        # {
+        #     'model_1': 'videos/sync_test/test 2_cam 1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 2_cam 2_sync.mp4',
+        # },
+        # {
+        #     'model_1': 'videos/sync_test/test 3_cam 1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 3_cam 2_sync.mp4',
+        # },
+        # {
+        #     'model_1': 'videos/sync_test/test 4_cam 1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 4_cam 2_sync.mp4',
+        # },
+        # {
+        #     'model_1': 'videos/sync_test/test 5_cam 1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 5_cam 2_sync.mp4',
+        # },
+        {
+            'model_1': 'videos/sync_test/test 6_cam 1_sync.mp4',
+            'model_2': 'videos/sync_test/test 6_cam 2_sync.mp4',
+        },
+    ]
+    save_path = [
+        # f'temp/pred_test 1.mp4',
+        # f'temp/pred_test 2.mp4',
+        # f'temp/pred_test 3.mp4',
+        # f'temp/pred_test 4.mp4',
+        # f'temp/pred_test 5.mp4',
+        f'temp/pred_test 6.mp4',
+    ]
+    for i in range(len(video_paths)):
+        detect_synchro_video(
+            models=models,
+            video_paths=video_paths[i],
+            save_path=save_path[i],
+            start=0,
+            finish=0,
+            speed_limit=SPEED_LIMIT_PERCENT
+        )
     pass

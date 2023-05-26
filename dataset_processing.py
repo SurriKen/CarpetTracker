@@ -1,12 +1,10 @@
-import os
-import random
 import re
 import shutil
 import time
 from collections import Counter
-
+from dataclasses import dataclass
 import pandas as pd
-import skvideo
+import skvideo.io
 import torch
 import torchvision
 from moviepy.video.io.VideoFileClip import VideoFileClip
@@ -15,6 +13,20 @@ from torchvision.io import read_image
 
 from parameters import ROOT_DIR
 from utils import *
+
+
+@dataclass
+class VideoClass:
+
+    def __init__(self):
+        self.x_train = []
+        self.y_train = []
+        self.x_val = []
+        self.y_val = []
+        self.classes = []
+        self.train_stat = []
+        self.val_stat = []
+
 
 
 class DatasetProcessing:
@@ -129,15 +141,11 @@ class DatasetProcessing:
                 _, frame2 = vc2.read()
 
                 if j == start_frame[obj]:
-                    # print('start', obj, j)
                     cs = carpet_size[obj].replace('*', 'x')
 
                     out1 = cv2.VideoWriter(
-                        os.path.join(save_folder, cs, f"{count}.mp4"), cv2.VideoWriter_fourcc(*'mp4v'), 25, (w, h*2)
+                        os.path.join(save_folder, cs, f"{count}.mp4"), cv2.VideoWriter_fourcc(*'mp4v'), 25, (w, h * 2)
                     )
-                    # out2 = cv2.VideoWriter(
-                    #     os.path.join(save_folder, cs, f"{count}_cam2.mp4"), cv2.VideoWriter_fourcc(*'DIVX'), 25, size2
-                    # )
 
                 if start_frame[obj] <= j <= end_frame[obj]:
                     size1 = (frame1.shape[1], frame1.shape[0])
@@ -148,12 +156,9 @@ class DatasetProcessing:
                         frame2 = cv2.resize(frame2, (w, h))
                     frame = np.concatenate((frame1, frame2), axis=0)
                     out1.write(frame)
-                    # out2.write(frame2)
 
                 if j == end_frame[obj]:
-                    # print('end', obj, j)
                     out1.release()
-                    # out2.release()
                     obj += 1
                     count += 1
 
@@ -172,7 +177,6 @@ class DatasetProcessing:
         video_capture = cv2.VideoCapture()
         video_capture.open(video_path)
         fps = video_capture.get(cv2.CAP_PROP_FPS)  # OpenCV v2.x used "CV_CAP_PROP_FPS"
-        # print(video_path, fps)
         frame_count = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
         print(f"fps = {fps}, frame_count = {frame_count}")
         duration = int(frame_count / fps)
@@ -242,13 +246,11 @@ class DatasetProcessing:
         print(f"Start processing...\n")
         out = cv2.VideoWriter(
             f'{save_path}/{video_name}.mp4', cv2.VideoWriter_fourcc(*'DIVX'), parameters['fps'], parameters['size'])
-        # print(f'{save_path}/{video_name}.mp4')
         for img in image_list:
             if (count + 1) % int(len(image_list) * 0.1) == 0:
                 print(f"{round((count + 1) * 100 / len(image_list), 0)}% images were processed...")
             name = img.split(".")[0]
             if box_path:
-                # print(img)
                 if box_type == 'xml':
                     if resize:
                         box_info = read_xml(
@@ -260,7 +262,6 @@ class DatasetProcessing:
                     else:
                         box_info = read_xml(xml_path=f"{box_path}/{f'{name}.xml'}")
                     boxes, labels = [], []
-                    # print(box_info)
                     for b in box_info["coords"]:
                         boxes.append(b[:-1])
                         labels.append(b[-1])
@@ -268,12 +269,9 @@ class DatasetProcessing:
                     image = read_image(f"{frames_path}/{img}")
                     image_true = draw_bounding_boxes(image, bbox, width=3, labels=labels, colors=color_list, fill=True)
                     image = torchvision.transforms.ToPILImage()(image_true)
-                    # image = torchvision.transforms.ToPILImage()(image_true)
-                    # image_true.save(f"{tmp_folder}/{img}")
                 if box_type == 'txt':
                     box_info = read_xml(xml_path=f"{box_path}/{f'{name}.xml'}")
                     boxes, labels = [], []
-                    # print(box_info)
                     for b in box_info["coords"]:
                         boxes.append(b[:-1])
                         labels.append(b[-1])
@@ -281,43 +279,21 @@ class DatasetProcessing:
                     image = read_image(f"{frames_path}/{img}")
                     image_true = draw_bounding_boxes(image, bbox, width=3, labels=labels, colors=color_list, fill=True)
                     image = torchvision.transforms.ToPILImage()(image_true)
-                    # image = torchvision.transforms.ToPILImage()(image_true)
-                    # image_true.save(f"{tmp_folder}/{img}")
                 elif box_type == 'terra':
                     image = Image.open(f"{frames_path}/{img}")
-                    # image = image.resize(parameters['size'])
                 else:
                     image = Image.open(f"{frames_path}/{img}")
-                    # image = image.resize(parameters['size'])
             else:
                 if resize:
                     image = Image.open(f"{frames_path}/{img}")
                     image = image.resize(parameters['size'])
-                    # new_image.save(f"{tmp_folder}/{img}")
                 else:
                     image = Image.open(f"{frames_path}/{img}")
-                    # shutil.copy2(f"{frames_path}/{img}", f"{tmp_folder}/{img}")
             cv_img = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
             out.write(cv_img)
             count += 1
         out.release()
         print(f"\nProcessing is finished! Processing time = {round(time.time() - st, 1)}s\n")
-
-        # out = cv2.VideoWriter(
-        #     f'{save_path}/{video_name}.mp4', cv2.VideoWriter_fourcc(*'DIVX'), parameters['fps'], parameters['size'])
-        # count = 0
-        # st = time.time()
-        # print("Writing video is started...\n")
-        # for filename in image_list:
-        #     if (count + 1) % int(len(image_list) * 0.1) == 0:
-        #         print(f"{round((count + 1) * 100 / len(image_list), 0)}% images were writed in video...")
-        #     img = cv2.imread(f"{tmp_folder}/{filename}")
-        #     out.write(img)
-        #     count += 1
-        # out.release()
-        # print(f"Video is ready! Path to video: {f'{save_path}/{video_name}.mp4'}. "
-        #       f"Writing time={round(time.time() - st, 1)}s")
-        # shutil.rmtree(tmp_folder, ignore_errors=True)
 
     @staticmethod
     def put_box_on_image(images: str, labels: str, save_path: str):
@@ -329,47 +305,38 @@ class DatasetProcessing:
 
         lbl = ['carpet']
         color_list = get_colors(lbl)
-        # dataset = 'datasets/DataSetMat_Yolo/train_63sec'
         img_names = []
-        # save_path = 'datasets/DataSetMat_Yolo/train_63sec/img+box'
         empty_box, fill_box = 0, 0
         with os.scandir(images) as folder:
             for f in folder:
                 img_names.append(f.name[:-4])
-        # print('img_names', img_names)
         for name in img_names:
             img_path = f'{images}/{name}.jpg'
             box_path = f'{labels}/{name}.txt'
             img = Image.open(img_path)
             with open(box_path, 'r') as handle:
                 box_info = handle.readlines()
-                # print('box_info', box_info)
                 if box_info:
                     fill_box += 1
                     box_info = [re.sub(f'\n', ' ', b) for b in box_info]
                 else:
                     empty_box += 1
 
-            # print('box_info', box_info)
             coord = []
             if box_info:
                 for box in box_info:
                     if box:
                         box = box.split(" ")
-                        # print(box, len(box))
                         coord.append([
                             int((float(box[1]) - float(box[3]) / 2) * img.size[0]),
                             int((float(box[2]) - float(box[4]) / 2) * img.size[1]),
                             int((float(box[1]) + float(box[3]) / 2) * img.size[0]),
                             int((float(box[2]) + float(box[4]) / 2) * img.size[1]),
                         ])
-                # print('coord', coord)
                 bbox = torch.tensor(coord, dtype=torch.int)
                 image = read_image(img_path)
                 lbl2 = lbl * len(coord)
                 color_list2 = color_list * len(coord)
-                # print(lbl, color_list, len(coord))
-                # print()
                 image_true = draw_bounding_boxes(image, bbox, width=3, labels=lbl2, colors=color_list2, fill=True)
                 image = torchvision.transforms.ToPILImage()(image_true)
                 image.save(f'{save_path}/{name}.png')
@@ -467,10 +434,8 @@ class DatasetProcessing:
                 if i <= delimiter:
                     shutil.copy2(f"{folders[0]}/{img}", f"{save_path}/train/images/{count}.jpg")
                     if f"{img[:-3]}txt" in lbl_list:
-                        # print(f"{i} True - {img} {img[:-3]}txt")
                         shutil.copy2(f"{folders[1]}/{img[:-3]}txt", f"{save_path}/train/labels/{count}.txt")
                     else:
-                        # print(f"{i} False -  {img} {img[:-3]}txt")
                         save_txt(txt='', txt_path=f"{save_path}/train/labels/{count}.txt")
                 else:
                     shutil.copy2(f"{folders[0]}/{img}", f"{save_path}/val/images/{count}.jpg")
@@ -481,9 +446,7 @@ class DatasetProcessing:
 
                 if (count + 1) % 200 == 0:
                     logger.info(f"-- prepared {i + 1} images")
-                    # break
                 count += 1
-
 
     @staticmethod
     def video_to_array(video_path: str) -> np.ndarray:
@@ -499,46 +462,59 @@ class DatasetProcessing:
         return np.eye(num)[targets]
 
     @staticmethod
-    def create_video_class_dataset(folder_path: str, split: float) -> dict:
-        st = time.time()
+    def create_video_class_dataset_generator(folder_path: str, split: float) -> VideoClass:
+        # st = time.time()
+        vc = VideoClass()
         classes = os.listdir(os.path.join(ROOT_DIR, folder_path))
         classes = sorted(classes)
+        vc.classes = classes
         data, lbl, stat_lbl = [], [], []
-        stat = dict(train={}, val={}, classes=classes)
+        # stat = dict(train={}, val={}, classes=classes)
         for cl in classes:
             content = os.listdir(os.path.join(ROOT_DIR, folder_path, cl))
             content = sorted(content)
             lbl.extend([classes.index(cl)] * len(content))
             for file in content:
-                vid = DatasetProcessing.video_to_array(os.path.join(folder_path, cl, file))
-                data.append(vid)
+                # vid = DatasetProcessing.video_to_array(os.path.join(folder_path, cl, file))
+                # data.append(vid / 255)
+                data.append(os.path.join(folder_path, cl, file))
+            logging.info(f"-- Class {cl}, processed {len(content)} videos")
 
         zip_data = list(zip(data, lbl))
         random.shuffle(zip_data)
         train, val = zip_data[:int(split * len(lbl))], zip_data[int(split * len(lbl)):]
-        x_train, y_train = list(zip(*train))
-        x_val, y_val = list(zip(*val))
+        vc.x_train, vc.y_train = list(zip(*train))
+        vc.x_val, vc.y_val = list(zip(*val))
 
-        ytr = dict(Counter(y_train))
+        ytr = dict(Counter(vc.y_train))
         stat_ytr = {}
         for k, v in ytr.items():
             stat_ytr[classes[k]] = v
-        stat['train'] = stat_ytr
+        vc.train_stat = stat_ytr
+        # stat['train'] = stat_ytr
 
-        yv = dict(Counter(y_val))
+        yv = dict(Counter(vc.y_val))
         stat_yv = {}
         for k, v in yv.items():
             stat_yv[classes[k]] = v
-        stat['val'] = stat_yv
+        vc.val_stat = stat_yv
+        # stat['val'] = stat_yv
 
-        y_train = DatasetProcessing.ohe_from_list(y_train, len(classes))
-        y_val = DatasetProcessing.ohe_from_list(y_val, len(classes))
-        print(f"Total dataset processing time = {round(time.time() - st, 1)} sec")
-        return dict(x_train=x_train, y_train=y_train, x_val=x_val, y_val=y_val, stat=stat)
+        # y_train = DatasetProcessing.ohe_from_list(y_train, len(classes))
+        # y_val = DatasetProcessing.ohe_from_list(y_val, len(classes))
+        # logger.info(f"Total dataset processing time = {round(time.time() - st, 1)} sec")
+        return vc
+
+    @staticmethod
+    def generate_video_class_batch(generator_dict: dict, iteration: int, mode: str = 'train'
+                                   ) -> tuple[np.ndarray, np.ndarray]:
+        num_classes = len(generator_dict.get('stat').get('classes'))
+        x_array = DatasetProcessing.video_to_array(generator_dict.get(f'x_{mode}')[iteration])
+        y_array = DatasetProcessing.ohe_from_list([generator_dict.get(f'y_{mode}')[iteration]], num=num_classes)
+        return np.expand_dims(np.array(x_array), axis=0), np.array(y_array)
 
 
 if __name__ == '__main__':
-
     CHECK_BOXES_IN_DATASET = True
     # data = [
     #     # ['datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01',
@@ -567,30 +543,30 @@ if __name__ == '__main__':
     #     )
 
     PREPARE_DATASET = True
-    data = [
-            ['datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01',
-             'datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01_', 1.0],
-            ['datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02',
-             'datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02_', 1.0],
-            ['datasets/От разметчиков/batch_03_#112497/obj_train_data/batch_03',
-             'datasets/От разметчиков/batch_03_#112497/obj_train_data/batch_03_', 1.0],
-            ['datasets/От разметчиков/batch_04_#119178/obj_train_data/batch_04',
-             'datasets/От разметчиков/batch_04_#119178/obj_train_data/batch_04_', 1.0],
-            ['datasets/От разметчиков/batch_05_#147536/batch_05',
-             'datasets/От разметчиков/batch_05_#147536/batch_05_', 1.0],
-            ['datasets/От разметчиков/batch_mine/obj_train_data/batch_01',
-             'datasets/От разметчиков/batch_mine/obj_train_data/batch_01_', 1.0],
-        ]
-    split = 0.9
-    save_path_1 = 'datasets/yolov8_camera_1'
-    save_path_2 = 'datasets/yolov8_camera_2'
-
-    DatasetProcessing.form_dataset_for_train(
-        data=data,
-        split=split,
-        save_path=save_path_1,
-        condition={'orig_shape': (1920, 1080)}
-    )
+    # data = [
+    #         ['datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01',
+    #          'datasets/От разметчиков/batch_01_#108664/obj_train_data/batch_01_', 1.0],
+    #         ['datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02',
+    #          'datasets/От разметчиков/batch_02_#110902/obj_train_data/batch_02_', 1.0],
+    #         ['datasets/От разметчиков/batch_03_#112497/obj_train_data/batch_03',
+    #          'datasets/От разметчиков/batch_03_#112497/obj_train_data/batch_03_', 1.0],
+    #         ['datasets/От разметчиков/batch_04_#119178/obj_train_data/batch_04',
+    #          'datasets/От разметчиков/batch_04_#119178/obj_train_data/batch_04_', 1.0],
+    #         ['datasets/От разметчиков/batch_05_#147536/batch_05',
+    #          'datasets/От разметчиков/batch_05_#147536/batch_05_', 1.0],
+    #         ['datasets/От разметчиков/batch_mine/obj_train_data/batch_01',
+    #          'datasets/От разметчиков/batch_mine/obj_train_data/batch_01_', 1.0],
+    #     ]
+    # split = 0.9
+    # save_path_1 = 'datasets/yolov8_camera_1'
+    # save_path_2 = 'datasets/yolov8_camera_2'
+    #
+    # DatasetProcessing.form_dataset_for_train(
+    #     data=data,
+    #     split=split,
+    #     save_path=save_path_1,
+    #     condition={'orig_shape': (1920, 1080)}
+    # )
     # for l in ['train', 'val']:
     #     DatasetProcessing.put_box_on_image(
     #         images=f'datasets/yolov8_camera_1/{l}/images',
@@ -598,12 +574,12 @@ if __name__ == '__main__':
     #         save_path=f'datasets/yolov8_camera_1/{l}/img+lbl'
     #     )
 
-    DatasetProcessing.form_dataset_for_train(
-        data=data,
-        split=split,
-        save_path=save_path_2,
-        condition={'orig_shape': (640, 360)}
-    )
+    # DatasetProcessing.form_dataset_for_train(
+    #     data=data,
+    #     split=split,
+    #     save_path=save_path_2,
+    #     condition={'orig_shape': (640, 360)}
+    # )
     # for l in ['train', 'val']:
     #     DatasetProcessing.put_box_on_image(
     #         images=f'datasets/yolov8_camera_2/{l}/images',
@@ -618,10 +594,11 @@ if __name__ == '__main__':
     #     # 'videos/test 3_cam 1.mp4', 'videos/test 3_cam 2.mp4',
     #     # 'videos/test 4_cam 1.mp4', 'videos/test 4_cam 2.mp4',
     #     # 'videos/test 5_cam 1.mp4', 'videos/test 5_cam 2.mp4',
-    #     'videos/classification_videos/13_05 ВО.mp4', 'videos/classification_videos/13_05 ВО_2.mp4',
-    #     'videos/classification_videos/16-10 ЦП.mp4', 'videos/classification_videos/16-10 ЦП_2.mp4',
-    #     'videos/classification_videos/МОС,19-40.mp4', 'videos/classification_videos/МОС,19-40_2.mp4',
-    #     'videos/classification_videos/НОЧЬ,20-11.mp4', 'videos/classification_videos/НОЧЬ,20-11_2.mp4'
+    #     # 'videos/classification_videos/13_05 ВО.mp4', 'videos/classification_videos/13_05 ВО_2.mp4',
+    #     # 'videos/classification_videos/16-10 ЦП.mp4', 'videos/classification_videos/16-10 ЦП_2.mp4',
+    #     # 'videos/classification_videos/МОС,19-40.mp4', 'videos/classification_videos/МОС,19-40_2.mp4',
+    #     # 'videos/classification_videos/НОЧЬ,20-11.mp4', 'videos/classification_videos/НОЧЬ,20-11_2.mp4',
+    #     'videos/test 6_cam 1.mp4', 'videos/test 6_cam 2.mp4',
     # ]
     # for v in vid:
     #     shutil.move(v, 'test.mp4')
@@ -647,7 +624,8 @@ if __name__ == '__main__':
     #     # 'videos/classification_videos/16-10 ЦП_sync.mp4', 'videos/classification_videos/16-10 ЦП_2_sync.mp4',
     #     # 'videos/classification_videos/МОС,19-40_sync.mp4', 'videos/classification_videos/МОС,19-40_2_sync.mp4',
     #     # 'videos/classification_videos/НОЧЬ,20-11_sync.mp4', 'videos/classification_videos/НОЧЬ,20-11_2_sync.mp4',
-    #     # 'videos/sync_test/test 5_cam 1_sync.mp4', 'videos/sync_test/test 5_cam 2_sync.mp4'
+    #     # 'videos/sync_test/test 5_cam 1_sync.mp4', 'videos/sync_test/test 5_cam 2_sync.mp4',
+    #     'videos/test 6_cam 1.mp4', 'videos/test 6_cam 2.mp4',
     # ]
 
     # for v in vid:
@@ -655,7 +633,7 @@ if __name__ == '__main__':
     #         video_path=v,
     #         save_path=f"datasets",
     #         from_time=0,
-    #         to_time=60
+    #         to_time=120
     #     )
 
     SYNCHRONIZE_VIDEOS = True
@@ -670,14 +648,16 @@ if __name__ == '__main__':
     #     # 'videos/test 4_cam 2.mp4': [976, '13:05:21'],
     #     # 'videos/test 5_cam 1.mp4': [376, '13:41:57'],
     #     # 'videos/test 5_cam 2.mp4': [400, '13:41:56'],
-    #     'videos/classification_videos/13-05 ВО_cam1.mp4': [32, '13:05:21'],
-    #     'videos/classification_videos/13-05 ВО_cam2.mp4': [986, '13:05:21'],
-    #     'videos/classification_videos/16-10 ЦП_cam1.mp4': [476, '16:08:55'],
-    #     'videos/classification_videos/16-10 ЦП_cam2.mp4': [8, '16:08:56'],
-    #     'videos/classification_videos/МОС 19-40_cam1.mp4': [110, '19:40:52'],
-    #     'videos/classification_videos/МОС 19-40_cam2.mp4': [16, '19:40:52'],
-    #     'videos/classification_videos/Ночь 20-11_cam1.mp4': [193, '20:11:13'],
-    #     'videos/classification_videos/Ночь 20-11_cam2.mp4': [8, '20:11:13'],
+    #     # 'videos/classification_videos/13-05 ВО_cam1.mp4': [32, '13:05:21'],
+    #     # 'videos/classification_videos/13-05 ВО_cam2.mp4': [986, '13:05:21'],
+    #     # 'videos/classification_videos/16-10 ЦП_cam1.mp4': [476, '16:08:55'],
+    #     # 'videos/classification_videos/16-10 ЦП_cam2.mp4': [8, '16:08:56'],
+    #     # 'videos/classification_videos/МОС 19-40_cam1.mp4': [110, '19:40:52'],
+    #     # 'videos/classification_videos/МОС 19-40_cam2.mp4': [16, '19:40:52'],
+    #     # 'videos/classification_videos/Ночь 20-11_cam1.mp4': [193, '20:11:13'],
+    #     # 'videos/classification_videos/Ночь 20-11_cam2.mp4': [8, '20:11:13'],
+    #     'videos/test 6_cam 1.mp4': [31, '13:30:01'],
+    #     'videos/test 6_cam 2.mp4': [2159, '13:30:02'],
     # }
     # sync_videos = [
     #     # {'camera 1': 'videos/test 1_cam 1.mp4', 'camera 2': 'videos/test 1_cam 2.mp4'},
@@ -685,10 +665,11 @@ if __name__ == '__main__':
     #     # {'camera 1': 'videos/test 3_cam 1.mp4', 'camera 2': 'videos/test 3_cam 2.mp4'},
     #     # {'camera 1': 'videos/test 4_cam 1.mp4', 'camera 2': 'videos/test 4_cam 2.mp4'},
     #     # {'camera 1': 'videos/test 5_cam 1.mp4', 'camera 2': 'videos/test 5_cam 2.mp4'},
-    #     {'camera 1': 'videos/classification_videos/13-05 ВО_cam1.mp4', 'camera 2': 'videos/classification_videos/13-05 ВО_cam2.mp4'},
-    #     {'camera 1': 'videos/classification_videos/16-10 ЦП_cam1.mp4', 'camera 2': 'videos/classification_videos/16-10 ЦП_cam2.mp4'},
-    #     {'camera 1': 'videos/classification_videos/МОС 19-40_cam1.mp4', 'camera 2': 'videos/classification_videos/МОС 19-40_cam2.mp4'},
-    #     {'camera 1': 'videos/classification_videos/Ночь 20-11_cam1.mp4', 'camera 2': 'videos/classification_videos/Ночь 20-11_cam2.mp4'},
+    #     # {'camera 1': 'videos/classification_videos/13-05 ВО_cam1.mp4', 'camera 2': 'videos/classification_videos/13-05 ВО_cam2.mp4'},
+    #     # {'camera 1': 'videos/classification_videos/16-10 ЦП_cam1.mp4', 'camera 2': 'videos/classification_videos/16-10 ЦП_cam2.mp4'},
+    #     # {'camera 1': 'videos/classification_videos/МОС 19-40_cam1.mp4', 'camera 2': 'videos/classification_videos/МОС 19-40_cam2.mp4'},
+    #     # {'camera 1': 'videos/classification_videos/Ночь 20-11_cam1.mp4', 'camera 2': 'videos/classification_videos/Ночь 20-11_cam2.mp4'},
+    #     {'camera 1': 'videos/test 6_cam 1.mp4', 'camera 2': 'videos/test 6_cam 2.mp4'},
     # ]
     # for pair in sync_videos:
     #     save_name_1 = f"{pair.get('camera 1').split('/')[-1].split('.')[0]}_sync.mp4"

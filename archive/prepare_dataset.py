@@ -1,11 +1,24 @@
+import io
 import os
 import random
 import shutil
 import time
 
 import numpy as np
+import yaml
 from PIL import Image
-from utils import save_txt, load_yaml, save_yaml
+from utils import save_txt
+
+
+def save_yaml(dict_: dict, yaml_path: str) -> None:
+    with io.open(yaml_path, 'w', encoding='utf8') as outfile:
+        yaml.dump(dict_, outfile, default_flow_style=False, allow_unicode=True)
+
+
+def load_yaml(yaml_path):
+    with open(yaml_path, 'r') as stream:
+        data_loaded = yaml.safe_load(stream)
+    return data_loaded
 
 
 class PrepareDataset:
@@ -92,7 +105,8 @@ class PrepareDataset:
         print(f"Object detection dataset is ready! Dataset path: '{f'{save_path}/{dataset_name}'}'")
 
     @staticmethod
-    def xml2yolov7_dataset(project_paths: list, dataset_name: str, save_path: str, limit=500, resize=(0, 0), val_percent=0.2, v7_mode="yolov7"):
+    def xml2yolov7_dataset(project_paths: list, dataset_name: str, save_path: str, limit=500, resize=(0, 0),
+                           val_percent=0.2, v7_mode="yolov7"):
         print("\nPreparing dataset for yolov7 object detection...")
         # if not os.path.isdir(f"{save_path}/{dataset_name}"):
         #     os.mkdir(f"{save_path}/{dataset_name}")
@@ -156,7 +170,7 @@ class PrepareDataset:
             ext_length = len(img[1].split('.')[-1]) + 1
             if (img[0], f"{img[1][:-ext_length]}.xml") in xml_list:
                 xml_count += 1
-                if xml_count < int(limit*(1 - val_percent)):
+                if xml_count < int(limit * (1 - val_percent)):
                     dirct = "train"
                 else:
                     dirct = "val"
@@ -197,7 +211,7 @@ class PrepareDataset:
                         shutil.copy2(f"{pr_path}/frames/{img_name}", f"{data_folder}/{dirct}/images/{i}.png")
                     save_txt("", f"{data_folder}/{dirct}/labels/{i}.txt")
             if (xml_count + img_count) % int(limit * 2 * 0.01) == 0:
-                print(f"{int((xml_count + img_count) * 100 / limit / 2 )}% ({i + 1}/{limit * 2 }) complete...")
+                print(f"{int((xml_count + img_count) * 100 / limit / 2)}% ({i + 1}/{limit * 2}) complete...")
             if xml_count == limit and img_count == limit:
                 break
 
@@ -328,7 +342,7 @@ class PrepareDataset:
             if (img[0], f"{name}.xml") in lbl_list:
                 xml_info = PrepareDataset.read_xml(xml_path=f"{img[0]}/xml_labels/{name}.xml")
                 bb = random.choice(xml_info['coords'])
-                box_center = (bb[0] + int((bb[2]-bb[0])/2), bb[1] + int((bb[3]-bb[1])/2))
+                box_center = (bb[0] + int((bb[2] - bb[0]) / 2), bb[1] + int((bb[3] - bb[1]) / 2))
                 box = True
             else:
                 xml = random.choice(lbl_list)
