@@ -1,6 +1,5 @@
 import colorsys
 import copy
-import io
 import os
 import pickle
 import random
@@ -9,26 +8,71 @@ import logging
 
 import cv2
 import numpy as np
-import yaml
 from PIL import Image, ImageDraw, ImageFont
+from matplotlib import pyplot as plt
 from scipy import stats
+from sklearn.metrics import confusion_matrix
+
 
 from parameters import MIN_OBJ_SEQUENCE
 
 logging.basicConfig(
     level=logging.DEBUG, filename="py_log.log", filemode="w", format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("carpet tracker")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
-# logger.debug("carpet tracker started")
 
 
 def time_converter(time_sec: int) -> str:
-    sec = time_sec % 60
-    min = time_sec // 60
-    hours = min // 60
-    min = min % 60
-    return f"{hours} h {min} min {sec} sec"
+    seconds = time_sec % 60
+    minutes = time_sec // 60
+    hours = minutes // 60
+    minutes = minutes % 60
+    if hours:
+        return f"{hours} h {minutes} min {seconds} sec"
+    if minutes:
+        return f"{minutes} min {seconds} sec"
+    if seconds:
+        return f"{seconds} sec"
+
+
+def plot_and_save_gragh(data: list, xlabel: str, ylabel: str, title: str, save_folder: str) -> None:
+    plt.plot(data)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.savefig(os.path.join(save_folder, f'{title}.jpg'))
+    plt.close()
+
+
+def save_dict_to_table_txt(data: dict, save_path: str) -> None:
+    keys = data.keys()
+    file = ''
+    n = 0
+    for k in keys:
+        file = f'{file}{"{:<10} ".format(k)}'
+        if len(data.get(k)) > n:
+            n = len(data.get(k))
+    file = f"{file}\n"
+
+    for i in range(n):
+        for k in data.keys():
+            file = f'{file}{"{:<10} ".format(data.get(k)[i])}'
+        file = f"{file}\n"
+    save_txt(txt=file[:-2], txt_path=save_path)
+
+
+def get_confusion_matrix(y_true, y_pred, get_percent=True) -> tuple:
+    cm = confusion_matrix(y_true, y_pred)
+    cm_percent = None
+    if get_percent:
+        cm_percent = np.zeros_like(cm).astype('float')
+        for i in range(len(cm)):
+            total = np.sum(cm[i])
+            for j in range(len(cm[i])):
+                cm_percent[i][j] = round(cm[i][j] * 100 / total, 1)
+    return cm.astype('float').tolist(), cm_percent.astype('float').tolist()
+
 
 def save_dict(dict_: dict, file_path: str, filename: str) -> None:
     """Save a dictionary to a file"""

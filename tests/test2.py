@@ -1,16 +1,52 @@
-# from dataset_processing import DatasetProcessing
-#
-# generator_dict = DatasetProcessing.create_video_class_dataset_generator(folder_path='datasets/class_videos', split=0.9)
-# print(generator_dict.keys())
-# print(generator_dict.get('stat'))
-# print(generator_dict.get('x_train')[:10])
-# print(generator_dict.get('y_train')[:10])
-#
-# x_batch, y_batch = DatasetProcessing.generate_video_class_batch(generator_dict=generator_dict, iteration=0, mode='train')
-# print(x_batch.shape, y_batch.shape, y_batch)
-from random import shuffle
+from dataset_processing import DatasetProcessing
+from tests.test import VideoClassifier
+from utils import logger
 
-import numpy as np
 
-xxx = np.random.random((1, 23, 24, 22))
-print(xxx.max())
+logger.info("\n    --- Running test2.py ---    \n")
+
+
+videos = 'datasets/class_videos'
+dataset = DatasetProcessing.create_video_class_dataset_generator(
+    folder_path=videos, split=0.8
+)
+logger.info(f'Dataset generator was formed\nclasses {dataset.classes}\ntrain_stat {dataset.train_stat}\n'
+            f'val_stat {dataset.val_stat}\nparameters: {dataset.params}\n')
+
+vc = VideoClassifier(num_classes=len(dataset.classes))
+vc.train(
+    dataset=dataset,
+    epochs=20,
+    lr=0.005
+)
+
+# y_true = dataset.y_train
+# logger.info(f"y_true = {y_true}")
+# y_pred = []
+#
+# for i, link in enumerate(dataset.x_train):
+#     x_train = vc.get_x_batch(video_path=link, frame_size=vc.frame_size)
+#     output = vc.model(x_train)
+#     y_pred.append(np.argmax(output.cpu().detach().numpy(), axis=-1)[0])
+#     # if i == 10:
+#     #     break
+# logger.info(f"y_pred = {y_pred}")
+# vc.predict(weights='video_class_train/model6/best.pt')
+# classes = ['115x200', '115x400', '150x300', '60x90', '85x150']
+# y_true = (4, 4, 2, 0, 0, 2, 0, 0, 0, 2, 3, 0, 2, 0, 4, 2, 4, 0, 4, 4, 2, 0, 0, 4, 3, 0, 4, 0, 0, 4, 0, 4, 4, 1, 0, 4, 4, 4, 2, 0, 1, 0, 4, 4, 0, 0, 4, 3, 3, 4, 4, 2, 4, 0, 0, 4, 0, 4, 2, 4, 3, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 4, 2, 0, 4, 0, 0, 0, 0, 0, 4, 3, 4, 2, 0, 4, 2, 2, 0, 0, 4, 4, 0, 2, 4, 4, 0, 0, 2, 0, 0, 2, 0, 0, 4, 0, 0, 0, 0, 2, 4, 2, 2, 0, 0, 0, 4, 0, 0, 4, 4, 4, 0, 4, 4, 0, 2, 3, 0, 4, 4, 4, 4, 4, 0, 4, 0, 0, 2, 2, 4, 4, 4, 0, 0, 0, 0, 2, 4, 0, 0, 3, 0, 4, 2, 2, 0, 0, 4, 4, 4, 0, 4, 4, 4, 0, 4, 3, 4, 0, 4, 4, 0, 1, 4, 0, 2, 0, 0, 0, 4, 4, 0, 4, 0, 0, 4, 0, 3, 4, 4, 4, 2, 4, 0, 0, 0, 4, 4, 4, 0, 0, 3, 0, 2, 4, 2, 3, 4, 0, 4, 3, 2, 0, 2, 2, 2, 0, 2, 2, 0, 4, 0, 4, 1, 4, 2, 0, 0, 2, 2, 2, 0, 4, 2, 2, 4, 0, 4, 4, 2, 3, 0, 0, 0, 2, 0, 4, 2, 0, 0, 4, 3, 2, 0, 0, 0, 2, 0, 4, 4, 0, 0, 4, 0, 2, 2, 4, 4, 2, 0, 0, 0, 4, 0, 0, 2, 2, 0, 0, 0, 4, 4, 0, 4, 2, 4, 0, 2, 0, 0, 4, 0, 2, 0, 4, 0, 4, 0, 0, 4, 4, 0, 0, 4, 3, 0, 4, 4, 4, 4, 2, 4, 2, 0, 0, 2, 4, 4, 4, 2, 4, 0, 2, 4, 0, 0, 4, 3, 0, 1, 4, 0, 4, 0, 3, 4, 2, 3, 4, 4, 0, 0, 4, 2, 0, 4, 0, 0, 2, 0, 4, 4, 0, 0, 4, 2, 4, 1, 4, 4, 4, 2, 4, 4, 4, 4, 0, 4, 0, 2, 0, 0, 2, 3, 4, 0, 4, 0, 4, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 3, 4, 4, 4, 4, 4, 0, 4, 0, 4, 0, 2, 4, 4, 4, 4, 0, 4, 2, 3, 4, 0, 3, 4, 0, 3, 0, 2, 3, 0, 4, 4, 2, 0, 3, 4, 0, 4, 4, 4, 2, 4, 0, 4, 0, 0, 4, 4, 0, 4, 0, 0, 0, 0, 2, 0, 0, 4, 0, 3, 0, 4, 4, 4, 0, 0, 2, 0, 0, 2, 0, 2, 4, 0, 2, 0, 4, 4, 2, 1, 0, 0, 0, 4, 2, 4, 3, 4, 3, 4, 2, 0, 1, 0, 3, 0, 2, 0, 2, 3, 0, 0, 2, 0, 0, 2, 2, 0, 4, 4, 0, 0, 0, 4, 2, 4, 0, 0, 4, 0, 3, 2, 2, 0, 0, 0, 4, 2, 4, 0, 2, 0, 4, 4, 2, 0, 0, 2, 0, 0, 3, 2, 4, 0, 0, 0, 0, 0, 4, 2, 4, 4, 2, 2, 0, 0, 4, 0, 0, 0, 0, 4, 0, 0, 2, 3, 4, 4, 4, 0, 1, 4, 0, 4, 4, 0, 0, 4, 4, 4, 0, 3, 4, 0, 4)
+# y_pred = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+#
+# from sklearn.metrics import ConfusionMatrixDisplay
+# from sklearn.metrics import confusion_matrix
+#
+# y_true_lbl, y_pred_lbl = [], []
+# for i in range(len(y_pred)):
+#     y_true_lbl.append(classes[y_true[i]])
+#     y_pred_lbl.append(classes[y_pred[i]])
+#
+# cm = confusion_matrix(y_true_lbl, y_pred_lbl, labels=classes)
+# disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
+# disp.plot()
+# plt.savefig('112.jpg')
+# # plt.show()
+# # print(disp)

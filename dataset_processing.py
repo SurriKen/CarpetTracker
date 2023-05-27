@@ -1,18 +1,24 @@
+import os
+import random
 import re
 import shutil
 import time
 from collections import Counter
 from dataclasses import dataclass
+
+import cv2
+import numpy as np
 import pandas as pd
 import skvideo.io
 import torch
 import torchvision
+from PIL import Image
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from torchvision.utils import draw_bounding_boxes
 from torchvision.io import read_image
 
 from parameters import ROOT_DIR
-from utils import *
+from utils import save_dict, load_dict, remove_empty_xml, read_xml, get_colors, logger, save_txt
 
 
 @dataclass
@@ -26,6 +32,7 @@ class VideoClass:
         self.classes = []
         self.train_stat = []
         self.val_stat = []
+        self.params = {}
 
 
 
@@ -463,22 +470,20 @@ class DatasetProcessing:
 
     @staticmethod
     def create_video_class_dataset_generator(folder_path: str, split: float) -> VideoClass:
-        # st = time.time()
         vc = VideoClass()
+        vc.params['split'] = split
+        vc.params['folder_path'] = folder_path
         classes = os.listdir(os.path.join(ROOT_DIR, folder_path))
         classes = sorted(classes)
         vc.classes = classes
         data, lbl, stat_lbl = [], [], []
-        # stat = dict(train={}, val={}, classes=classes)
         for cl in classes:
             content = os.listdir(os.path.join(ROOT_DIR, folder_path, cl))
             content = sorted(content)
             lbl.extend([classes.index(cl)] * len(content))
             for file in content:
-                # vid = DatasetProcessing.video_to_array(os.path.join(folder_path, cl, file))
-                # data.append(vid / 255)
                 data.append(os.path.join(folder_path, cl, file))
-            logging.info(f"-- Class {cl}, processed {len(content)} videos")
+            logger.info(f"-- Class {cl}, processed {len(content)} videos")
 
         zip_data = list(zip(data, lbl))
         random.shuffle(zip_data)
@@ -491,18 +496,12 @@ class DatasetProcessing:
         for k, v in ytr.items():
             stat_ytr[classes[k]] = v
         vc.train_stat = stat_ytr
-        # stat['train'] = stat_ytr
 
         yv = dict(Counter(vc.y_val))
         stat_yv = {}
         for k, v in yv.items():
             stat_yv[classes[k]] = v
         vc.val_stat = stat_yv
-        # stat['val'] = stat_yv
-
-        # y_train = DatasetProcessing.ohe_from_list(y_train, len(classes))
-        # y_val = DatasetProcessing.ohe_from_list(y_val, len(classes))
-        # logger.info(f"Total dataset processing time = {round(time.time() - st, 1)} sec")
         return vc
 
     @staticmethod

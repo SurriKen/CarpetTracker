@@ -398,7 +398,7 @@ if __name__ == "__main__":
     kmeans, stat2 = Clusterizator.train_kmeans(
         array=vec,
         num_clusters=NUM_CLUSTERS,
-        save_path='../kmean_model',
+        save_path='kmean_model',
         name=KMEANS_MODEL_NAME,
     )
     print(stat2)

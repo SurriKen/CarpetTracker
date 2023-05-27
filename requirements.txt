@@ -5,5 +5,6 @@ torch
 torchvision
 moviepy
 opencv-python
+tabulate
 
 # pip install -r requirements.txt
