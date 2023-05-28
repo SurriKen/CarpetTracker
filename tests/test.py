@@ -12,6 +12,7 @@ from parameters import ROOT_DIR
 from utils import logger, time_converter, plot_and_save_gragh, save_dict_to_table_txt
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import confusion_matrix
+import skvideo.io
 
 logger.info("\n    --- Running test.py ---    \n")
 
@@ -24,7 +25,7 @@ class Net(nn.Module):
         self.conv3d_1 = nn.Conv3d(in_channels=3, out_channels=32, kernel_size=5, padding='same', device=device)
         self.conv3d_2 = nn.Conv3d(in_channels=32, out_channels=64, kernel_size=5, padding='same', device=device)
         self.conv3d_3 = nn.Conv3d(in_channels=64, out_channels=128, kernel_size=5, padding='same', device=device)
-        self.dense = nn.Linear(128*32*32, num_classes, device=device)
+        self.dense = nn.Linear(128 * 32 * 32, num_classes, device=device)
 
     def forward(self, x):
         x = F.max_pool3d(F.relu(F.normalize(self.conv3d_1(x))), 2)
@@ -36,16 +37,51 @@ class Net(nn.Module):
         return x
 
 
+class ResNet3D(nn.Module):
+    def __init__(self, device='cpu', num_classes: int = 5):
+        super(ResNet3D, self).__init__()
+        self.model = None
+        self.load_resnet3d(device)
+        self.dense = nn.Linear(400, num_classes, device=device)
+        self.post_act = torch.nn.Softmax(dim=1)
+
+    def load_resnet3d(self, device) -> None:
+        name = "slow_r50 "
+
+        # Local path to the parent folder of hubconf.py in the pytorchvideo codebase
+        # path = '/media/deny/Новый том/AI/CarpetTracker/pytorchvideo'
+        # /media/deny/Новый том/AI/CarpetTracker/tests/pytorchvideo/hubconf.py
+        model = torch.hub.load('facebookresearch/pytorchvideo', 'slow_r50', pretrained=True)
+
+        model_url = "https://dl.fbaipublicfiles.com/pytorchvideo/model_zoo/kinetics/SLOW_8x8_R50.pyth"
+        checkpoint = torch.hub.load_state_dict_from_url(model_url, map_location=device)
+        state_dict = checkpoint["model_state"]
+
+        # Apply the state dict to the model
+        model.load_state_dict(state_dict)
+        model = model.eval()
+        self.model = model.to(device)
+
+    def forward(self, x):
+        return self.post_act(self.dense(self.model(x)))
+
+
 class VideoClassifier:
 
-    def __init__(self, num_classes: int = 5, name: str = 'model', weights: str = None, device: str = 'cuda:0',
-                 frame_size: tuple = (256, 256)):
+    def __init__(self, num_classes: int = 5, name: str = 'model', model_type: str = 'Net', weights: str = None,
+                 device: str = 'cuda:0', frame_size: tuple = (256, 256)):
         self.num_classes = num_classes
         self.device = device
         self.frame_size = frame_size
         self.torch_device = torch.device(device)
         self.weights = weights
-        self.load_model(weights)
+        self.model_type = model_type
+        self.model = None
+        if weights:
+            self.load_model(weights)
+        elif model_type == 'ResNet3D':
+            self.load_resnet3d()
+            self.name = "slow_r50 "
         self.history = {}
         try:
             os.mkdir(os.path.join(ROOT_DIR, 'video_class_train'))
@@ -59,6 +95,10 @@ class VideoClassifier:
         else:
             self.model = Net(device=self.device, num_classes=self.num_classes)
             self.model.zero_grad()
+
+    def load_resnet3d(self) -> None:
+        self.model = ResNet3D(device=self.device, num_classes=self.num_classes)
+        self.model.zero_grad()
 
     def save_model(self, name, mode: str = 'last'):
         model_scripted = torch.jit.script(self.model)  # Export to TorchScript
@@ -74,6 +114,24 @@ class VideoClassifier:
             return x_train.to(self.torch_device, dtype=torch.float)
         else:
             return x_train
+
+    @staticmethod
+    def resnet3d_dataset(link: str) -> torch.FloatTensor:
+        side_size = 256
+        mean = [0.45, 0.45, 0.45]
+        std = [0.225, 0.225, 0.225]
+        crop_size = 256
+        num_frames = 8
+
+        video = skvideo.io.vread(os.path.join(ROOT_DIR, link))
+        x_train = video / 255
+        x_train = torch.from_numpy(x_train)
+        x_train = x_train.permute(3, 0, 1, 2)
+        x_train = F.interpolate(x_train, size=(side_size, side_size))
+        mean = torch.as_tensor(mean, dtype=x_train.dtype, device=x_train.device)
+        std = torch.as_tensor(std, dtype=x_train.dtype, device=x_train.device)
+        x_train.sub_(mean[:, None, None, None]).div_(std[:, None, None, None])
+        return x_train.type(torch.FloatTensor)
 
     def numpy_to_torch(self, array: np.ndarray, frame_size: tuple[int, int] = (255, 255)) -> torch.Tensor:
         if len(array.shape) == 4:
@@ -120,8 +178,7 @@ class VideoClassifier:
             self.history['train_loss'].append(train_loss)
             self.history['val_loss'].append(val_loss)
 
-    def train(self, dataset: VideoClass, epochs: int, weights: str = '',
-              lr: float = 0.001) -> None:
+    def train(self, dataset: VideoClass, epochs: int, weights: str = '', lr: float = 0.001) -> None:
         try:
             if weights:
                 self.load_model(weights)
@@ -172,7 +229,11 @@ class VideoClassifier:
                 train_loss = 0.
                 y_true, y_pred = [], []
                 for batch in range(num_train_batches):
-                    x_train = self.get_x_batch(video_path=dataset.x_train[train_seq[batch]], frame_size=self.frame_size)
+                    if self.model_type == 'ResNet3D':
+                        x_train = self.resnet3d_dataset(link=dataset.x_train[train_seq[batch]])
+                    else:
+                        x_train = self.get_x_batch(video_path=dataset.x_train[train_seq[batch]],
+                                                   frame_size=self.frame_size)
                     y_train = self.get_y_batch(label=dataset.y_train[train_seq[batch]], num_labels=num_classes)
                     y_true.append(dataset.classes[dataset.y_train[train_seq[batch]]])
                     optimizer.zero_grad()
@@ -183,10 +244,12 @@ class VideoClassifier:
                     loss.backward()
                     optimizer.step()
                     if batch + 1 in logger_batch_markers:
-                        logger.info(f"  -- Epoch {epoch + 1}, batch {batch + 1} / {num_train_batches}, "
-                                    f"train_loss= {round(train_loss / (batch + 1), 4)}, "
-                                    f"average batch time = {round((time.time() - st_ep) * 1000 / (batch + 1), 1)} ms, "
-                                    f"time passed = {time_converter(int(time.time() - st))}")
+                        logger.info(
+                            f"  -- Epoch {epoch + 1}, batch {batch + 1} / {num_train_batches}, "
+                            f"train_loss= {round(train_loss / (batch + 1), 4)}, "
+                            f"average batch time = {round((time.time() - st_ep) * 1000 / (batch + 1), 1)} ms, "
+                            f"time passed = {time_converter(int(time.time() - st))}"
+                        )
 
                 save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, f'Ep{epoch + 1}_Train_Confusion Matrix.jpg')
                 self.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm)
@@ -216,7 +279,8 @@ class VideoClassifier:
                     train_loss=round(train_loss / num_train_batches, 4),
                     val_loss=round(val_loss / num_val_batches, 4),
                 )
-                save_dict_to_table_txt(self.history, os.path.join(ROOT_DIR, 'video_class_train', name, 'train_history.txt'))
+                save_dict_to_table_txt(
+                    self.history, os.path.join(ROOT_DIR, 'video_class_train', name, 'train_history.txt'))
 
                 self.save_model(name=name, mode='last')
                 if val_loss / num_val_batches <= best_loss:
@@ -249,36 +313,37 @@ class VideoClassifier:
 if __name__ == "__main__":
     vid_ex = 'datasets/class_videos/60x90/7.mp4'
 
-    arr = DatasetProcessing.video_to_array(vid_ex)
-    arr = np.expand_dims(arr, 0) / 255
+    # arr = DatasetProcessing.video_to_array(vid_ex)
+    # arr = np.expand_dims(arr, 0) / 255
+    arr = VideoClassifier.resnet3d_dataset(vid_ex)
     # arr = arr / 255
     lbl = DatasetProcessing.ohe_from_list([1], 5)
 
     st = time.time()
     device = 'cuda:0'
     # device = 'cpu'
-    net = Net(device=device, num_classes=5)
+    net = ResNet3D(device=device, num_classes=5)
     net.zero_grad()
     # print(net)
-    params = list(net.parameters())
+    # params = list(net.parameters())
     # print(len(params))
     # print(params[0].size())
 
     cuda0 = torch.device(device)
-    arr = torch.from_numpy(arr)
-    arr = arr.permute(0, 4, 1, 2, 3)
-    arr = F.interpolate(arr, size=(arr.size()[2], 256, 256))
+    # arr = torch.from_numpy(arr)
+    # arr = arr.permute(0, 4, 1, 2, 3)
+    # arr = F.interpolate(arr, size=(arr.size()[2], 256, 256))
     logger.info(f"-- Input size: {arr.size()}\n")
-    arr = arr.to(cuda0, dtype=torch.float)
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.01)
-    output = net(arr)
+    arr = arr.to(cuda0)
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.005)
+    output = net(arr[None, ...])
     logger.info(f"-- Output tensor: {output}")
     logger.info(f"-- Pretrain process time = {round(time.time() - st, 2)} sec\n")
 
     for i in range(5):
         st = time.time()
         optimizer.zero_grad()
-        output = net(arr)
+        output = net(arr[None, ...])
         target = torch.tensor(lbl, dtype=torch.float, device=cuda0)
         target = target.view(1, -1)
         criterion = nn.MSELoss()
