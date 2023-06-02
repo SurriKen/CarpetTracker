@@ -1,6 +1,7 @@
 import os
 import pickle
 import shutil
+import time
 
 import cv2
 import numpy as np
@@ -10,7 +11,7 @@ from ultralytics import YOLO
 from dataset_processing import DatasetProcessing
 from tracker import Tracker
 from parameters import SPEED_LIMIT_PERCENT
-from utils import get_colors, load_dict, add_headline_to_cv_image, logger
+from utils import get_colors, load_dict, add_headline_to_cv_image, logger, time_converter, save_txt
 
 yolov8_types = {
     "yolov8n": {"Test Size": 640, "link": "https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8n.pt"},
@@ -214,7 +215,9 @@ def detect_synchro_video(
 
     f = min([f1, f2])
     finish = int(f) if finish == 0 or finish < start else finish
+    cur_bb_1, cur_bb_2 = [], []
     for i in range(0, finish):
+        logger.info(f'-- Process {i+1} / {finish} frame')
         ret1, frame1 = vc1.read()
         ret2, frame2 = vc2.read()
 
@@ -222,7 +225,7 @@ def detect_synchro_video(
             logger.info(f"Processed {i + 1} / {f} frames")
 
             res1 = models.get('model_1')(frame1)
-            result = {'boxes': res1[0].boxes.boxes.tolist(), 'orig_shape': res1[0].orig_shape}
+            result = {'boxes': res1[0].boxes.data.tolist(), 'orig_shape': res1[0].orig_shape}
             tracker_1.process(
                 frame_id=i,
                 predict_camera_1=result,
@@ -231,15 +234,16 @@ def detect_synchro_video(
             )
 
             res2 = models.get('model_2')(frame2)
-            result = {'boxes': res2[0].boxes.boxes.tolist(), 'orig_shape': res2[0].orig_shape}
+            result = {'boxes': res2[0].boxes.data.tolist(), 'orig_shape': res2[0].orig_shape}
             tracker_2.process(
                 frame_id=i,
                 predict_camera_1=result,
                 remove_perimeter_boxes=remove_perimeter_boxes.get('model_2'),
                 speed_limit_percent=speed_limit
             )
-
-            patterns = Tracker().get_pattern(
+            cur_bb_1.append(tracker_1.current_boxes)
+            cur_bb_2.append(tracker_2.current_boxes)
+            patterns = Tracker.get_pattern(
                 input=Tracker.join_frame_id(
                     tracker_dict_1=tracker_1.tracker_dict,
                     tracker_dict_2=tracker_2.tracker_dict
@@ -318,6 +322,11 @@ def detect_synchro_video(
                 out.release()
                 break
 
+    print('tracker_1.tracker_dict', tracker_1.tracker_dict)
+    print('tracker_2.tracker_dict', tracker_2.tracker_dict)
+    print('pattern', patterns)
+    print('cur_bb_1', cur_bb_1)
+    print('cur_bb_2', cur_bb_2)
 
 def train(weights='yolo8/yolov8n.pt', config='data_custom.yaml', epochs=50, batch_size=4, name=None):
     model = YOLO(weights)
@@ -393,10 +402,24 @@ if __name__ == '__main__':
     #     )
 
     PREDICT_SYNCH_VIDEO = True
-    models = {
-        'model_1': YOLO('runs/detect/camera_1_mix++_8n_200ep/weights/best.pt'),
-        'model_2': YOLO('runs/detect/camera_2_mix++_8n_200ep/weights/best.pt')
+    model1 = {
+        # 'model_1': YOLO('runs/detect/camera_1_mix++_8n_200ep/weights/best.pt'),
+        # 'model_2': YOLO('runs/detect/camera_2_mix++_8n_200ep/weights/best.pt')
+        #
+        'model_1': YOLO('runs/detect/camera_1_mix+_8n_100ep/weights/best.pt'),
+        'model_2': YOLO('runs/detect/camera_2_mix+_8n_100ep/weights/best.pt')
     }
+    model2 = {
+        # 'model_1': YOLO('runs/detect/camera_1_mix++_8n_200ep/weights/best.pt'),
+        # 'model_2': YOLO('runs/detect/camera_2_mix++_8n_200ep/weights/best.pt')
+        #
+        'model_1': YOLO('runs/detect/camera_1_mix++_8n_150ep/weights/best.pt'),
+        'model_2': YOLO('runs/detect/camera_2_mix++_8n_150ep/weights/best.pt')
+    }
+    models = [
+        (model1, "(mix+ 100ep, F% Acc% Sen%)"),
+        # (model2, "(mix++ 150ep, F% Acc% Sen%)"),
+    ]
     video_paths = [
         # {
         #     'model_1': 'videos/sync_test/test 1_cam 1_sync.mp4',
@@ -418,9 +441,37 @@ if __name__ == '__main__':
         #     'model_1': 'videos/sync_test/test 5_cam 1_sync.mp4',
         #     'model_2': 'videos/sync_test/test 5_cam 2_sync.mp4',
         # },
+        # {
+        #     'model_1': 'videos/sync_test/test 6_cam 1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 6_cam 2_sync.mp4',
+        # },
+        # {
+        #     'model_1': 'videos/sync_test/test 7_cam1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 7_cam2_sync.mp4',
+        # },
+        # {
+        #     'model_1': 'videos/sync_test/test 8_cam1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 8_cam2_sync.mp4',
+        # },
+        # {
+        #     'model_1': 'videos/sync_test/test 10_cam1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 10_cam2_sync.mp4',
+        # },
+        # {
+        #     'model_1': 'videos/sync_test/test 11_cam1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 11_cam2_sync.mp4',
+        # },
+        # {
+        #     'model_1': 'videos/sync_test/test 12_cam1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 12_cam2_sync.mp4',
+        # },
+        # {
+        #     'model_1': 'videos/sync_test/test 13_cam1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 13_cam2_sync.mp4',
+        # },
         {
-            'model_1': 'videos/sync_test/test 6_cam 1_sync.mp4',
-            'model_2': 'videos/sync_test/test 6_cam 2_sync.mp4',
+            'model_1': 'videos/short/test 12_cam1_sync.mp4',
+            'model_2': 'videos/short/test 12_cam2_sync.mp4',
         },
     ]
     save_path = [
@@ -429,15 +480,55 @@ if __name__ == '__main__':
         # f'temp/pred_test 3.mp4',
         # f'temp/pred_test 4.mp4',
         # f'temp/pred_test 5.mp4',
-        f'temp/pred_test 6.mp4',
+        # 'temp/pred_test 6.mp4',
+        # 'temp/test 7.mp4',
+        # 'temp/test 8.mp4',
+        # 'temp/test 10.mp4',
+        # 'temp/test 11.mp4',
+        # 'temp/test 12.mp4',
+        # 'temp/test 13.mp4',
+        'videos/short/test 12_pred.mp4'
     ]
-    for i in range(len(video_paths)):
-        detect_synchro_video(
-            models=models,
-            video_paths=video_paths[i],
-            save_path=save_path[i],
-            start=0,
-            finish=0,
-            speed_limit=SPEED_LIMIT_PERCENT
-        )
-    pass
+    msg = ''
+    for mod in models:
+        for i in range(len(video_paths)):
+            st = time.time()
+            sp = f"{save_path[i].split('.')[0]} {mod[1]}.mp4"
+            detect_synchro_video(
+                models=mod[0],
+                video_paths=video_paths[i],
+                save_path=sp,
+                start=0,
+                finish=0,
+                speed_limit=SPEED_LIMIT_PERCENT
+            )
+            txt = f"Predict is finished. Model {mod[1]}. Video {save_path[i]}. " \
+                  f"Process time: {time_converter(int(time.time() - st))}"
+            logger.info(f"Predict is finished. Model {mod[1]}. Video {save_path[i]}")
+            msg = f"{txt}\n"
+    save_txt(txt=msg, txt_path='temp/log.txt')
+
+    CREATE_CLASSIFICATION_VIDEO = True
+    # models = {
+    #         'model_1': YOLO('runs/detect/camera_1_mix+_8n_100ep/weights/best.pt'),
+    #         'model_2': YOLO('runs/detect/camera_2_mix+_8n_100ep/weights/best.pt')
+    # }
+    # csv_files = [
+    #     'videos/classification_videos/13-05 ВО.csv',
+    #     'videos/classification_videos/16-10 ЦП.csv',
+    #     'videos/classification_videos/МОС 19-40.csv',
+    #     'videos/classification_videos/Ночь 20-11.csv',
+    # ]
+    # video_links = [
+    #     ['videos/sync_test/13-05 ВО_cam1_sync.mp4', 'videos/sync_test/13-05 ВО_cam2_sync.mp4'],
+    #     ['videos/sync_test/16-10 ЦП_cam1_sync.mp4', 'videos/sync_test/16-10 ЦП_cam2_sync.mp4'],
+    #     ['videos/sync_test/МОС 19-40_cam1_sync.mp4', 'videos/sync_test/МОС 19-40_cam2_sync.mp4'],
+    #     ['videos/sync_test/Ночь 20-11_cam1_sync.mp4', 'videos/sync_test/Ночь 20-11_cam2_sync.mp4'],
+    # ]
+    # DatasetProcessing.video_class_dataset(
+    #     csv_files=csv_files,
+    #     video_links=video_links,
+    #     save_folder='datasets/class_videos',
+    #     yolo_models=models,
+    #     box_save_folder='datasets/class_boxes'
+    # )
