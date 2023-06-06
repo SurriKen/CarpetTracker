@@ -2,6 +2,7 @@ import os
 import pickle
 import shutil
 import time
+from datetime import datetime
 
 import cv2
 import numpy as np
@@ -11,7 +12,7 @@ from ultralytics import YOLO
 from dataset_processing import DatasetProcessing
 from tracker import Tracker
 from parameters import SPEED_LIMIT_PERCENT
-from utils import get_colors, load_dict, add_headline_to_cv_image, logger, time_converter, save_txt
+from utils import get_colors, load_data, add_headline_to_cv_image, logger, time_converter, save_txt, save_data
 
 yolov8_types = {
     "yolov8n": {"Test Size": 640, "link": "https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8n.pt"},
@@ -42,7 +43,7 @@ def load_kmeans_model(path, name, dict_=False):
         model = pickle.load(f)
     lbl_dict = {}
     if dict_:
-        lbl_dict = load_dict(pickle_path=f"{path}/{name}.dict")
+        lbl_dict = load_data(pickle_path=f"{path}/{name}.dict")
     return model, lbl_dict
 
 
@@ -143,7 +144,9 @@ def detect_synchro_video(
         remove_perimeter_boxes=None,
         start: int = 0,
         finish: int = 0,
-        speed_limit: float = SPEED_LIMIT_PERCENT
+        speed_limit: float = SPEED_LIMIT_PERCENT,
+        iou: float = 0.3,
+        conf: float = 0.5
 ):
     """
     Detect two synchronized videos and save them as one video with boxes to save_path.
@@ -216,41 +219,60 @@ def detect_synchro_video(
     f = min([f1, f2])
     finish = int(f) if finish == 0 or finish < start else finish
     cur_bb_1, cur_bb_2 = [], []
+    true_bb_1, true_bb_2 = [], []
+    cur_count = 0
+    patterns = []
     for i in range(0, finish):
-        logger.info(f'-- Process {i+1} / {finish} frame')
+        fr_time = time.time()
+        logger.info(f'-- Process {i + 1} / {finish} frame')
         ret1, frame1 = vc1.read()
         ret2, frame2 = vc2.read()
 
         if i >= start:
             logger.info(f"Processed {i + 1} / {f} frames")
-
-            res1 = models.get('model_1')(frame1)
+            res1 = models.get('model_1').predict(frame1, iou=iou, conf=conf)
             result = {'boxes': res1[0].boxes.data.tolist(), 'orig_shape': res1[0].orig_shape}
+            true_bb_1.append(res1[0].boxes.data.tolist())
             tracker_1.process(
                 frame_id=i,
-                predict_camera_1=result,
+                predict=result,
                 remove_perimeter_boxes=remove_perimeter_boxes.get('model_1'),
                 speed_limit_percent=speed_limit
             )
 
-            res2 = models.get('model_2')(frame2)
+            res2 = models.get('model_2').predict(frame2, iou=iou, conf=conf)
             result = {'boxes': res2[0].boxes.data.tolist(), 'orig_shape': res2[0].orig_shape}
+            true_bb_2.append(res2[0].boxes.data.tolist())
             tracker_2.process(
                 frame_id=i,
-                predict_camera_1=result,
+                predict=result,
                 remove_perimeter_boxes=remove_perimeter_boxes.get('model_2'),
                 speed_limit_percent=speed_limit
             )
+
+            input = Tracker.join_frame_id(tracker_dict_1=tracker_1.tracker_dict, tracker_dict_2=tracker_2.tracker_dict)
             cur_bb_1.append(tracker_1.current_boxes)
             cur_bb_2.append(tracker_2.current_boxes)
-            patterns = Tracker.get_pattern(
-                input=Tracker.join_frame_id(
-                    tracker_dict_1=tracker_1.tracker_dict,
-                    tracker_dict_2=tracker_2.tracker_dict
-                )
-            )
-            logger.info(f"-- patterns: {len(patterns)}")
+            patterns = Tracker.get_pattern(input=input)
 
+            # patterns = Tracker.update_pattern(
+            #     pattern=patterns,
+            #     tracker_1_dict=tracker_1.tracker_dict,
+            #     tracker_2_dict=tracker_2.tracker_dict
+            # )
+            # print("time Tracker.update_pattern:", time_converter(time.time() - x))
+            # if patterns:
+            #     # print("test_patterns:", test_patterns)
+            #     old_pattern_count, patterns, old_pat = Tracker.clean_tracks(
+            #         frame=i,
+            #         pattern=patterns,
+            #         tracker_1_dict=tracker_1.tracker_dict,
+            #         tracker_2_dict=tracker_2.tracker_dict
+            #     )
+            #     cur_count += old_pattern_count
+            # if old_pat:
+            #     old_patterns.extend(old_pat)
+            # x = time.time()
             if save_path:
                 if tracker_1.current_id:
                     tracker_id = tracker_1.current_id
@@ -306,7 +328,7 @@ def detect_synchro_video(
                     fr2 = cv2.resize(fr2, (w, h))
 
                 fr = np.concatenate((fr1, fr2), axis=0)
-                headline = f"Обнаружено ковров: {len(patterns)}"
+                headline = f"Обнаружено ковров: {cur_count + len(patterns)}"
                 fr = add_headline_to_cv_image(
                     image=fr,
                     headline=headline
@@ -314,10 +336,14 @@ def detect_synchro_video(
 
                 cv_img = cv2.cvtColor(fr, cv2.COLOR_RGB2BGR)
                 out.write(cv_img)
-                tracker_1.current_id = []
-                tracker_1.current_boxes = []
-                tracker_2.current_id = []
-                tracker_2.current_boxes = []
+            tracker_1.current_id = []
+            tracker_1.current_boxes = []
+            tracker_2.current_id = []
+            tracker_2.current_boxes = []
+
+            # print("time save_path:", time_converter(time.time() - x))
+            print("frame time:", time_converter(time.time() - fr_time), '\n')
+            logger.info(f"-- patterns: {cur_count + len(patterns)}")
             if i >= finish - 1:
                 out.release()
                 break
@@ -327,6 +353,15 @@ def detect_synchro_video(
     print('pattern', patterns)
     print('cur_bb_1', cur_bb_1)
     print('cur_bb_2', cur_bb_2)
+    print('true_bb_1', true_bb_1)
+    print('true_bb_2', true_bb_2)
+    # path = '/media/deny/Новый том/AI/CarpetTracker/tests'
+    # save_data(data=tracker_1.tracker_dict, file_path=path, filename='tracker_1_dict')
+    # save_data(data=tracker_2.tracker_dict, file_path=path, filename='tracker_2_dict')
+    # save_data(data=patterns, file_path=path, filename='patterns')
+    # save_data(data=true_bb_1, file_path=path, filename='true_bb_1')
+    # save_data(data=true_bb_2, file_path=path, filename='true_bb_2')
+
 
 def train(weights='yolo8/yolov8n.pt', config='data_custom.yaml', epochs=50, batch_size=4, name=None):
     model = YOLO(weights)
@@ -403,22 +438,16 @@ if __name__ == '__main__':
 
     PREDICT_SYNCH_VIDEO = True
     model1 = {
-        # 'model_1': YOLO('runs/detect/camera_1_mix++_8n_200ep/weights/best.pt'),
-        # 'model_2': YOLO('runs/detect/camera_2_mix++_8n_200ep/weights/best.pt')
-        #
         'model_1': YOLO('runs/detect/camera_1_mix+_8n_100ep/weights/best.pt'),
         'model_2': YOLO('runs/detect/camera_2_mix+_8n_100ep/weights/best.pt')
     }
     model2 = {
-        # 'model_1': YOLO('runs/detect/camera_1_mix++_8n_200ep/weights/best.pt'),
-        # 'model_2': YOLO('runs/detect/camera_2_mix++_8n_200ep/weights/best.pt')
-        #
         'model_1': YOLO('runs/detect/camera_1_mix++_8n_150ep/weights/best.pt'),
         'model_2': YOLO('runs/detect/camera_2_mix++_8n_150ep/weights/best.pt')
     }
     models = [
-        (model1, "(mix+ 100ep, F% Acc% Sen%)"),
-        # (model2, "(mix++ 150ep, F% Acc% Sen%)"),
+        # (model1, "(mix+ 100ep, F% Acc% Sen%)"),
+        (model2, "(mix++ 150ep, F% Acc% Sen%)"),
     ]
     video_paths = [
         # {
@@ -470,9 +499,21 @@ if __name__ == '__main__':
         #     'model_2': 'videos/sync_test/test 13_cam2_sync.mp4',
         # },
         {
-            'model_1': 'videos/short/test 12_cam1_sync.mp4',
-            'model_2': 'videos/short/test 12_cam2_sync.mp4',
+            'model_1': 'videos/sync_test/test 14_cam 1_sync.mp4',
+            'model_2': 'videos/sync_test/test 14_cam 2_sync.mp4',
         },
+        {
+            'model_1': 'videos/sync_test/test 15_cam 1_sync.mp4',
+            'model_2': 'videos/sync_test/test 15_cam 2_sync.mp4',
+        },
+        # {
+        #     'model_1': 'videos/short/test 12_cam1_sync.mp4',
+        #     'model_2': 'videos/short/test 12_cam2_sync.mp4',
+        # },
+        # {
+        #     'model_1': 'videos/short/test 12_cam1_sync_32s_40s.mp4',
+        #     'model_2': 'videos/short/test 12_cam2_sync_32s_40s.mp4',
+        # },
     ]
     save_path = [
         # f'temp/pred_test 1.mp4',
@@ -487,26 +528,33 @@ if __name__ == '__main__':
         # 'temp/test 11.mp4',
         # 'temp/test 12.mp4',
         # 'temp/test 13.mp4',
-        'videos/short/test 12_pred.mp4'
+        'temp/test 14.mp4',
+        'temp/test 15.mp4',
+        # 'videos/short/test 12_pred.mp4',
+        # 'videos/short/test 12_pred_32s_40s.mp4'
     ]
-    msg = ''
+    # msg = ''
     for mod in models:
         for i in range(len(video_paths)):
+            conf = 0.3
             st = time.time()
-            sp = f"{save_path[i].split('.')[0]} {mod[1]}.mp4"
+            sp = f"{save_path[i].split('.')[0]} {mod[1]} conf={conf}.mp4"
             detect_synchro_video(
                 models=mod[0],
                 video_paths=video_paths[i],
                 save_path=sp,
                 start=0,
                 finish=0,
-                speed_limit=SPEED_LIMIT_PERCENT
+                speed_limit=SPEED_LIMIT_PERCENT,
+                iou=0.,
+                conf=conf
             )
-            txt = f"Predict is finished. Model {mod[1]}. Video {save_path[i]}. " \
-                  f"Process time: {time_converter(int(time.time() - st))}"
+            txt = f"Predict is finished. Model {mod[1]}. Video {save_path[i]}. Saves as '{sp}'" \
+                  f"Process time: {time_converter(time.time() - st)}"
             logger.info(f"Predict is finished. Model {mod[1]}. Video {save_path[i]}")
-            msg = f"{txt}\n"
-    save_txt(txt=msg, txt_path='temp/log.txt')
+            dt = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            msg = f"{dt}   {txt}\n\n"
+            save_txt(txt=msg, txt_path='temp/log.txt', mode='a')
 
     CREATE_CLASSIFICATION_VIDEO = True
     # models = {

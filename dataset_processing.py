@@ -19,7 +19,7 @@ from torchvision.io import read_image
 
 from parameters import ROOT_DIR, SPEED_LIMIT_PERCENT
 from tracker import Tracker
-from utils import save_dict, load_dict, remove_empty_xml, read_xml, get_colors, logger, save_txt
+from utils import save_data, load_data, remove_empty_xml, read_xml, get_colors, logger, save_txt
 
 
 @dataclass
@@ -64,7 +64,9 @@ class DatasetProcessing:
         frame_count = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
 
         duration = int(frame_count / fps)
-        saved_video_path = f"{save_path}/{video_path.split('/')[-1]}"
+        name = video_path.split('/')[-1].split('.')[0]
+        ext = video_path.split('.')[-1]
+        saved_video_path = f"{save_path}/{name}_{from_time}s_{to_time}s.{ext}"
         if to_time and to_time < duration:
             clip = VideoFileClip(video_path).subclip(from_time, to_time)
             clip.write_videofile(saved_video_path)
@@ -96,7 +98,7 @@ class DatasetProcessing:
         out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
         for i in range(frame_count):
             if (i + 1) % 200 == 0:
-                print(f"{i + 1} frames are ready")
+                print(f"{i + 1} / {frame_count} frames are ready")
             ret, frame = video_capture.read()
             if from_frame and i >= from_frame:
                 out.write(frame)
@@ -287,11 +289,16 @@ class DatasetProcessing:
     @staticmethod
     def change_fps(video_path: str, save_path: str, set_fps=25):
         video_capture = cv2.VideoCapture()
-        video_capture.open(video_path)
+        video_capture.open(os.path.join(ROOT_DIR, video_path))
         fps = video_capture.get(cv2.CAP_PROP_FPS)
         logger.info(f"Current fps = {fps}")
-        clip = VideoFileClip(video_path)
-        clip.write_videofile(save_path, fps=set_fps)
+        if fps != set_fps:
+            clip = VideoFileClip(video_path)
+            clip.write_videofile(os.path.join(ROOT_DIR, save_path), fps=set_fps)
+            logger.info(f"Video fps is set to {set_fps}")
+        else:
+            shutil.move('test.mp4', os.path.join(ROOT_DIR, save_path))
+            logger.info(f"Video fps is already {set_fps} and does not need to change")
 
     @staticmethod
     def video2frames(video_path: str, save_path: str = 'datasets', from_time=0, to_time=1000):
@@ -340,12 +347,12 @@ class DatasetProcessing:
             "fps": int(fps), "frames": int(frames), 'size': size
         }
         print(f"frames were got: fps - {int(fps)}, total frames - {int(frames)}, frame size - {size}")
-        save_dict(video_data, to_path, 'data')
+        save_data(video_data, to_path, 'data')
 
     @staticmethod
     def frames2video(frames_path: str, save_path: str, video_name: str,
                      params: str, box_path: str = None, resize=False, box_type='xml'):
-        parameters = load_dict(params)
+        parameters = load_data(params)
         image_list, box_list, lbl_list, color_list = [], [], [], []
         with os.scandir(frames_path) as folder:
             for f in folder:
@@ -630,37 +637,37 @@ class DatasetProcessing:
 
 if __name__ == '__main__':
     CUT_VIDEO = True
-    vid = [
-        # 'videos/test 1_cam 1.mp4', 'videos/test 1_cam 2.mp4',
-        # 'videos/test 2_cam 1.mp4', 'videos/test 2_cam 2.mp4',
-        # 'videos/test 3_cam 1.mp4', 'videos/test 3_cam 2.mp4',
-        # 'videos/test 4_cam 1.mp4', 'videos/test 4_cam 2.mp4',
-        # 'videos/test 5_cam 1.mp4', 'videos/test 5_cam 2.mp4',
-        # 'videos/classification_videos/13-05 ВО_cam1.mp4', 'videos/classification_videos/13-05 ВО_cam2.mp4',
-        # 'videos/classification_videos/16-10 ЦП_cam1.mp4', 'videos/classification_videos/16-10 ЦП_cam2.mp4',
-        # 'videos/classification_videos/МОС 19-40_cam1.mp4', 'videos/classification_videos/МОС 19-40_cam2.mp4',
-        # 'videos/classification_videos/Ночь 20-11_cam1.mp4', 'videos/classification_videos/Ночь 20-11_cam2.mp4',
-        # 'videos/classification_videos/13-05 ВО_cam1_sync.mp4', 'videos/classification_videos/13-05 ВО_cam2_sync.mp4',
-        # 'videos/classification_videos/16-10 ЦП_cam1_sync.mp4', 'videos/classification_videos/16-10 ЦП_cam2_sync.mp4',
-        # 'videos/classification_videos/МОС 19-40_cam1_sync.mp4', 'videos/classification_videos/МОС 19-40_cam2_sync.mp4',
-        # 'videos/classification_videos/Ночь 20-11_cam1_sync.mp4', 'videos/classification_videos/Ночь 20-11_cam2_sync.mp4',
-        # 'videos/sync_test/test 5_cam 1_sync.mp4', 'videos/sync_test/test 5_cam 2_sync.mp4',
-        # 'videos/test 6_cam 1.mp4', 'videos/test 6_cam 2.mp4',
-        # 'videos/test 7_cam1.mp4', 'videos/test 7_cam2.mp4',
-        # 'videos/test 8_cam1.mp4', 'videos/test 8_cam2.mp4',
-        # 'videos/test 10_cam1.mp4', 'videos/test 10_cam2.mp4',
-        # 'videos/test 11_cam1.mp4', 'videos/test 11_cam2.mp4',
-        'videos/sync_test/test 12_cam1_sync.mp4', 'videos/sync_test/test 12_cam2_sync.mp4',
-        # 'videos/test 13_cam1.mp4', 'videos/test 13_cam2.mp4',
-    ]
-    for i, v in enumerate(vid):
-        # sp = f"videos/short"
-        DatasetProcessing.cut_video(
-            video_path=v,
-            save_path=f"videos/short",
-            from_time=575,
-            to_time=595
-        )
+    # vid = [
+    #     # 'videos/test 1_cam 1.mp4', 'videos/test 1_cam 2.mp4',
+    #     # 'videos/test 2_cam 1.mp4', 'videos/test 2_cam 2.mp4',
+    #     # 'videos/test 3_cam 1.mp4', 'videos/test 3_cam 2.mp4',
+    #     # 'videos/test 4_cam 1.mp4', 'videos/test 4_cam 2.mp4',
+    #     # 'videos/test 5_cam 1.mp4', 'videos/test 5_cam 2.mp4',
+    #     # 'videos/classification_videos/13-05 ВО_cam1.mp4', 'videos/classification_videos/13-05 ВО_cam2.mp4',
+    #     # 'videos/classification_videos/16-10 ЦП_cam1.mp4', 'videos/classification_videos/16-10 ЦП_cam2.mp4',
+    #     # 'videos/classification_videos/МОС 19-40_cam1.mp4', 'videos/classification_videos/МОС 19-40_cam2.mp4',
+    #     # 'videos/classification_videos/Ночь 20-11_cam1.mp4', 'videos/classification_videos/Ночь 20-11_cam2.mp4',
+    #     # 'videos/classification_videos/13-05 ВО_cam1_sync.mp4', 'videos/classification_videos/13-05 ВО_cam2_sync.mp4',
+    #     # 'videos/classification_videos/16-10 ЦП_cam1_sync.mp4', 'videos/classification_videos/16-10 ЦП_cam2_sync.mp4',
+    #     # 'videos/classification_videos/МОС 19-40_cam1_sync.mp4', 'videos/classification_videos/МОС 19-40_cam2_sync.mp4',
+    #     # 'videos/classification_videos/Ночь 20-11_cam1_sync.mp4', 'videos/classification_videos/Ночь 20-11_cam2_sync.mp4',
+    #     # 'videos/sync_test/test 5_cam 1_sync.mp4', 'videos/sync_test/test 5_cam 2_sync.mp4',
+    #     # 'videos/test 6_cam 1.mp4', 'videos/test 6_cam 2.mp4',
+    #     # 'videos/test 7_cam1.mp4', 'videos/test 7_cam2.mp4',
+    #     # 'videos/test 8_cam1.mp4', 'videos/test 8_cam2.mp4',
+    #     # 'videos/test 10_cam1.mp4', 'videos/test 10_cam2.mp4',
+    #     # 'videos/test 11_cam1.mp4', 'videos/test 11_cam2.mp4',
+    #     'videos/sync_test/test 12_cam1_sync.mp4', 'videos/sync_test/test 12_cam2_sync.mp4',
+    #     # 'videos/test 13_cam1.mp4', 'videos/test 13_cam2.mp4',
+    # ]
+    # for i, v in enumerate(vid):
+    #     # sp = f"videos/short"
+    #     DatasetProcessing.cut_video(
+    #         video_path=v,
+    #         save_path=f"videos/short",
+    #         from_time=32,
+    #         to_time=40
+    #     )
 
     CHECK_BOXES_IN_DATASET = True
     # data = [
@@ -751,7 +758,9 @@ if __name__ == '__main__':
     #     # 'videos/test 10_cam1.mp4', 'videos/test 10_cam2.mp4',
     #     # 'videos/test 11_cam1.mp4', 'videos/test 11_cam2.mp4',
     #     # 'videos/test 12_cam1.mp4', 'videos/test 12_cam2.mp4',
-    #     'videos/test 13_cam1.mp4', 'videos/test 13_cam2.mp4',
+    #     # 'videos/test 13_cam1.mp4', 'videos/test 13_cam2.mp4',
+    #     'videos/test 14_cam 1.mp4', 'videos/test 14_cam 2.mp4',
+    #     'videos/test 15_cam 1.mp4', 'videos/test 15_cam 2.mp4',
     # ]
     # for v in vid:
     #     shutil.move(v, 'test.mp4')
@@ -760,7 +769,8 @@ if __name__ == '__main__':
     #         save_path=v,
     #         set_fps=25
     #     )
-    #     os.remove('test.mp4')
+    #     if os.path.isfile('test.mp4'):
+    #         os.remove('test.mp4')
 
     CUT_VIDEOS_TO_FRAMES = True
     # vid = [
@@ -783,11 +793,14 @@ if __name__ == '__main__':
     #     # 'videos/test 8_cam1.mp4', 'videos/test 8_cam2.mp4',
     #     # 'videos/test 10_cam1.mp4', 'videos/test 10_cam2.mp4',
     #     # 'videos/test 11_cam1.mp4', 'videos/test 11_cam2.mp4',
-    #     'videos/test 12_cam1.mp4', 'videos/test 12_cam2.mp4',
+    #     # 'videos/test 12_cam1.mp4', 'videos/test 12_cam2.mp4',
     #     # 'videos/test 13_cam1.mp4', 'videos/test 13_cam2.mp4',
+    #     'videos/test 14_cam 1.mp4', 'videos/test 14_cam 2.mp4',
+    #     'videos/test 15_cam 1.mp4', 'videos/test 15_cam 2.mp4',
     # ]
     # fin_time = [
     #     # 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 300
+    #     60, 60, 60, 60
     # ]
     # # fin_time = [0 for i in range(len(vid))]
     # for i, v in enumerate(vid):
@@ -830,8 +843,12 @@ if __name__ == '__main__':
     #     # 'videos/test 11_cam2.mp4': [1345, '15:49:21'],
     #     # 'videos/test 12_cam1.mp4': [182, '16:16:15'],
     #     # 'videos/test 12_cam2.mp4': [552, '16:16:17'],
-    #     'videos/test 13_cam1.mp4': [229, '17:00:00'],
-    #     'videos/test 13_cam2.mp4': [6106, '17:00:02'],
+    #     # 'videos/test 13_cam1.mp4': [229, '17:00:00'],
+    #     # 'videos/test 13_cam2.mp4': [6106, '17:00:02'],
+    #     'videos/test 14_cam 1.mp4': [26, '17:02:02'],
+    #     'videos/test 14_cam 2.mp4': [50, '17:00:01'],
+    #     'videos/test 15_cam 1.mp4': [92, '14:23:53'],
+    #     'videos/test 15_cam 2.mp4': [518, '14:23:53'],
     # }
     # sync_videos = [
     #     # {'camera 1': 'videos/test 1_cam 1.mp4', 'camera 2': 'videos/test 1_cam 2.mp4'},
@@ -849,7 +866,9 @@ if __name__ == '__main__':
     #     # {'camera 1': 'videos/test 10_cam1.mp4', 'camera 2': 'videos/test 10_cam2.mp4'},
     #     # {'camera 1': 'videos/test 11_cam1.mp4', 'camera 2': 'videos/test 11_cam2.mp4'},
     #     # {'camera 1': 'videos/test 12_cam1.mp4', 'camera 2': 'videos/test 12_cam2.mp4'},
-    #     {'camera 1': 'videos/test 13_cam1.mp4', 'camera 2': 'videos/test 13_cam2.mp4'},
+    #     # {'camera 1': 'videos/test 13_cam1.mp4', 'camera 2': 'videos/test 13_cam2.mp4'},
+    #     {'camera 1': 'videos/test 14_cam 1.mp4', 'camera 2': 'videos/test 14_cam 2.mp4'},
+    #     {'camera 1': 'videos/test 15_cam 1.mp4', 'camera 2': 'videos/test 15_cam 2.mp4'},
     # ]
     # for pair in sync_videos:
     #     save_name_1 = f"{pair.get('camera 1').split('/')[-1].split('.')[0]}_sync.mp4"

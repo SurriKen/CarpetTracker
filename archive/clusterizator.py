@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 
 from parameters import MIN_OBJ_SEQUENCE, CARPET_SIZE_LIST, NUM_CLUSTERS, KMEANS_MODEL_NAME
-from utils import save_txt, load_txt, get_distance, save_dict, load_dict
+from utils import save_txt, load_txt, get_distance, save_data, load_data
 
 
 class Clusterizator:
@@ -323,8 +323,8 @@ class Clusterizator:
             # print(l, ss, len(stat[ss[1]]))
             stat2[ss[1]] = CARPET_SIZE_LIST[l]
         if save_path:
-            save_dict(
-                dict_=stat2,
+            save_data(
+                data=stat2,
                 file_path=save_path,
                 filename=name
             )
@@ -341,7 +341,7 @@ class Clusterizator:
             model = pickle.load(f)
         lbl_dict = {}
         if dict_:
-            lbl_dict = load_dict(pickle_path=f"{path}/{name}.dict")
+            lbl_dict = load_data(pickle_path=f"{path}/{name}.dict")
         return model, lbl_dict
 
     @staticmethod

@@ -23,7 +23,10 @@ logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
 
-def time_converter(time_sec: int) -> str:
+def time_converter(time_sec: float) -> str:
+    if time_sec < 1:
+        return f"{round(time_sec * 1000, 1)} ms"
+    time_sec = int(time_sec)
     seconds = time_sec % 60
     minutes = time_sec // 60
     hours = minutes // 60
@@ -74,22 +77,22 @@ def get_confusion_matrix(y_true, y_pred, get_percent=True) -> tuple:
     return cm.astype('float').tolist(), cm_percent.astype('float').tolist()
 
 
-def save_dict(dict_: dict, file_path: str, filename: str) -> None:
+def save_data(data, file_path: str, filename: str) -> None:
     """Save a dictionary to a file"""
     with open(os.path.join(file_path, f"{filename}.dict"), 'wb') as handle:
-        pickle.dump(dict_, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def load_dict(pickle_path: str) -> dict:
+def load_data(pickle_path: str) -> dict:
     """Load a dictionary from saved file"""
     with open(pickle_path, 'rb') as handle:
         b = pickle.load(handle)
     return b
 
 
-def save_txt(txt: str, txt_path: str) -> None:
+def save_txt(txt: str, txt_path: str, mode: str = 'w') -> None:
     """Save a text to a file"""
-    with open(txt_path, 'w') as f:
+    with open(txt_path, mode) as f:
         f.write(txt)
 
 
