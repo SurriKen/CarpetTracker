@@ -6,7 +6,6 @@ from torchvision.utils import draw_bounding_boxes
 from parameters import IMAGE_IRRELEVANT_SPACE_PERCENT, MIN_OBJ_SEQUENCE, MIN_EMPTY_SEQUENCE, SPEED_LIMIT_PERCENT
 
 
-
 class Tracker:
     def __init__(self):
         self.tracker_dict = {}
@@ -68,7 +67,7 @@ class Tracker:
             return box
 
     @staticmethod
-    def get_distance(box1: list, box2: list) -> float:
+    def get_distance(box1: list, box2: list) -> tuple[float, float, float, float, float]:
         """
         :param box1: list of coordinates with first 4 index positions [x1, y1, x2, y2]
         :param box2: list of coordinates with first 4 index positions [x1, y1, x2, y2]
@@ -77,7 +76,12 @@ class Tracker:
         # print(box1, box2)
         c1 = ((box1[0] + box1[2]) / 2, (box1[1] + box1[3]) / 2)
         c2 = ((box2[0] + box2[2]) / 2, (box2[1] + box2[3]) / 2)
-        return ((c1[0] - c2[0]) ** 2 + (c1[1] - c2[1]) ** 2) ** 0.5
+        shift_center = ((c1[0] - c2[0]) ** 2 + (c1[1] - c2[1]) ** 2) ** 0.5
+        shift_top_left = ((box1[0] - box2[0]) ** 2 + (box1[1] - box2[1]) ** 2) ** 0.5
+        shift_top_right = ((box1[0] - box2[0]) ** 2 + (box1[3] - box2[3]) ** 2) ** 0.5
+        shift_bottom_left = ((box1[2] - box2[2]) ** 2 + (box1[1] - box2[1]) ** 2) ** 0.5
+        shift_bottom_right = ((box1[2] - box2[2]) ** 2 + (box1[3] - box2[3]) ** 2) ** 0.5
+        return shift_center, shift_top_left, shift_top_right, shift_bottom_left, shift_bottom_right
 
     @staticmethod
     def lists_difference(list1, list2):
@@ -105,7 +109,11 @@ class Tracker:
             # 'status': 'run',  # 'end'
             # 'images': [],  # arrays from 2 cameras
             # 'carpet_size': '',
-            'shift': [],
+            'shift_center': [],
+            'shift_top_left': [],
+            'shift_top_right': [],
+            'shift_bottom_left': [],
+            'shift_bottom_right': [],
             'countable': False,  # True
             'relevant': True,  # False
         }
@@ -166,8 +174,8 @@ class Tracker:
                             tracker_1_dict.get(k).get('frame_id')) in pat:
                         dist[i]['cam1'].append(k)
                         dist[i]['tr_num'] = len(dist[i]['cam1']) if dist[i]['tr_num'] < len(dist[i]['cam1']) else \
-                        dist[i][
-                            'tr_num']
+                            dist[i][
+                                'tr_num']
                         keys1.pop(keys1.index(k))
             if keys2:
                 for k in tracker_2_dict.keys():
@@ -175,8 +183,8 @@ class Tracker:
                             tracker_2_dict.get(k).get('frame_id')) in pat:
                         dist[i]['cam2'].append(k)
                         dist[i]['tr_num'] = len(dist[i]['cam2']) if dist[i]['tr_num'] < len(dist[i]['cam2']) else \
-                        dist[i][
-                            'tr_num']
+                            dist[i][
+                                'tr_num']
                         keys2.pop(keys2.index(k))
             # if dist[i]['tr_num'] > 1:
             #     pat_for_analysis.append(i)
@@ -427,8 +435,13 @@ class Tracker:
             self.tracker_dict[id]['relevant'] = relevant
             # id_dict[id]['images'] = []
         if len(self.tracker_dict[id]['coords']) > 1:
-            self.tracker_dict[id]['shift'].append(
-                self.get_distance(self.tracker_dict[id]['coords'][-2], self.tracker_dict[id]['coords'][-1]))
+            shift_center, shift_top_left, shift_top_right, shift_bottom_left, shift_bottom_right = \
+                self.get_distance(self.tracker_dict[id]['coords'][-2], self.tracker_dict[id]['coords'][-1])
+            self.tracker_dict[id]['shift_center'].append(shift_center)
+            self.tracker_dict[id]['shift_top_left'].append(shift_top_left)
+            self.tracker_dict[id]['shift_top_right'].append(shift_top_right)
+            self.tracker_dict[id]['shift_bottom_left'].append(shift_bottom_left)
+            self.tracker_dict[id]['shift_bottom_right'].append(shift_bottom_right)
         # if status == 'end':
         #     id_dict[id]['status'] = status
         #     id_dict[id]['images'] = []
@@ -474,8 +487,14 @@ class Tracker:
             # check dead tracks
             # elif len(self.tracker_dict[id]['shift']) >= MIN_OBJ_SEQUENCE and \
             #         max(self.tracker_dict[id]['shift'][-int(MIN_OBJ_SEQUENCE / 2):]) < distance_limit:
-            elif len(self.tracker_dict[id]['shift']) >= MIN_EMPTY_SEQUENCE and \
-                    max(self.tracker_dict[id]['shift'][-MIN_EMPTY_SEQUENCE:]) < distance_limit:
+            elif len(self.tracker_dict[id]['shift_center']) >= MIN_OBJ_SEQUENCE and \
+                    (
+                            max(self.tracker_dict[id]['shift_center'][-MIN_OBJ_SEQUENCE:]) < distance_limit or
+                            max(self.tracker_dict[id]['shift_top_left'][-MIN_OBJ_SEQUENCE:]) < distance_limit or
+                            max(self.tracker_dict[id]['shift_bottom_right'][-MIN_OBJ_SEQUENCE:]) < distance_limit or
+                            max(self.tracker_dict[id]['shift_top_right'][-MIN_OBJ_SEQUENCE:]) < distance_limit or
+                            max(self.tracker_dict[id]['shift_bottom_left'][-MIN_OBJ_SEQUENCE:]) < distance_limit
+                    ):
                 # self.move_boxes_from_track_to_dead(
                 #     frame_idxs=self.tracker_dict[id]['frame_id'][-int(MIN_OBJ_SEQUENCE / 2):],
                 #     boxes=self.tracker_dict[id]['coords'][-int(MIN_OBJ_SEQUENCE / 2):]
@@ -485,11 +504,11 @@ class Tracker:
                 # self.tracker_dict[id]['relevant'] = False
                 # remove_keys.append(id)
                 self.move_boxes_from_track_to_dead(
-                    frame_idxs=self.tracker_dict[id]['frame_id'][-MIN_EMPTY_SEQUENCE:],
-                    boxes=self.tracker_dict[id]['coords'][-MIN_EMPTY_SEQUENCE:]
+                    frame_idxs=self.tracker_dict[id]['frame_id'][-MIN_OBJ_SEQUENCE:],
+                    boxes=self.tracker_dict[id]['coords'][-MIN_OBJ_SEQUENCE:]
                 )
-                self.tracker_dict[id]['frame_id'] = self.tracker_dict[id]['frame_id'][:-MIN_EMPTY_SEQUENCE]
-                self.tracker_dict[id]['coords'] = self.tracker_dict[id]['coords'][:-MIN_EMPTY_SEQUENCE]
+                self.tracker_dict[id]['frame_id'] = self.tracker_dict[id]['frame_id'][:-MIN_OBJ_SEQUENCE]
+                self.tracker_dict[id]['coords'] = self.tracker_dict[id]['coords'][:-MIN_OBJ_SEQUENCE]
                 self.tracker_dict[id]['relevant'] = False
                 self.tracker_dict[id]['countable'] = False
                 remove_keys.append(id)
@@ -530,9 +549,13 @@ class Tracker:
         drop_keys = []
         find = False
         for k in self.dead_boxes.keys():
+            shift_center, shift_top_left, shift_top_right, shift_bottom_left, shift_bottom_right = \
+                self.get_distance(box1=self.dead_boxes.get(k).get('coords')[-1], box2=new_box)
             if frame_id - self.dead_boxes.get(k).get('frame_id')[-1] > MIN_OBJ_SEQUENCE:
                 drop_keys.append(k)
-            elif self.get_distance(box1=self.dead_boxes.get(k).get('coords')[-1], box2=new_box) < distance_limit:
+            elif shift_center < distance_limit or shift_top_left < distance_limit or \
+                    shift_top_right < distance_limit or shift_bottom_left < distance_limit or \
+                    shift_bottom_right < distance_limit:
                 self.fill_dead_box_form(key=k, frame_id=frame_id, box=new_box)
                 find = True
             else:
@@ -629,7 +652,7 @@ class Tracker:
         return empty, carpet
 
     def process(self, frame_id: int, predict: dict, remove_perimeter_boxes: bool = True,
-                         speed_limit_percent: float = SPEED_LIMIT_PERCENT):
+                speed_limit_percent: float = SPEED_LIMIT_PERCENT):
         bb1 = predict.get('boxes')
         origin_shape_1 = predict.get('orig_shape')
         speed_limit = speed_limit_percent * (origin_shape_1[0] ** 2 + origin_shape_1[1] ** 2) ** 0.5

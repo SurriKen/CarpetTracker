@@ -301,7 +301,7 @@ class DatasetProcessing:
             logger.info(f"Video fps is already {set_fps} and does not need to change")
 
     @staticmethod
-    def video2frames(video_path: str, save_path: str = 'datasets', from_time=0, to_time=1000):
+    def video2frames(video_path: str, save_path: str = 'datasets', from_time=0, to_time=100000):
         video_name = video_path.split('/')[-1].split('.')[0]
         video_capture = cv2.VideoCapture()
         video_capture.open(video_path)
@@ -657,16 +657,17 @@ if __name__ == '__main__':
     #     # 'videos/test 8_cam1.mp4', 'videos/test 8_cam2.mp4',
     #     # 'videos/test 10_cam1.mp4', 'videos/test 10_cam2.mp4',
     #     # 'videos/test 11_cam1.mp4', 'videos/test 11_cam2.mp4',
-    #     'videos/sync_test/test 12_cam1_sync.mp4', 'videos/sync_test/test 12_cam2_sync.mp4',
+    #     # 'videos/sync_test/test 12_cam1_sync.mp4', 'videos/sync_test/test 12_cam2_sync.mp4',
     #     # 'videos/test 13_cam1.mp4', 'videos/test 13_cam2.mp4',
+    #     'videos/sync_test/test 15_cam 1_sync.mp4', 'videos/sync_test/test 15_cam 2_sync.mp4',
     # ]
     # for i, v in enumerate(vid):
     #     # sp = f"videos/short"
     #     DatasetProcessing.cut_video(
     #         video_path=v,
     #         save_path=f"videos/short",
-    #         from_time=32,
-    #         to_time=40
+    #         from_time=16,
+    #         to_time=20
     #     )
 
     CHECK_BOXES_IN_DATASET = True
@@ -773,43 +774,43 @@ if __name__ == '__main__':
     #         os.remove('test.mp4')
 
     CUT_VIDEOS_TO_FRAMES = True
-    # vid = [
-    #     # 'videos/test 1_cam 1.mp4', 'videos/test 1_cam 2.mp4',
-    #     # 'videos/test 2_cam 1.mp4', 'videos/test 2_cam 2.mp4',
-    #     # 'videos/test 3_cam 1.mp4', 'videos/test 3_cam 2.mp4',
-    #     # 'videos/test 4_cam 1.mp4', 'videos/test 4_cam 2.mp4',
-    #     # 'videos/test 5_cam 1.mp4', 'videos/test 5_cam 2.mp4',
-    #     # 'videos/classification_videos/13-05 ВО_cam1.mp4', 'videos/classification_videos/13-05 ВО_cam2.mp4',
-    #     # 'videos/classification_videos/16-10 ЦП_cam1.mp4', 'videos/classification_videos/16-10 ЦП_cam2.mp4',
-    #     # 'videos/classification_videos/МОС 19-40_cam1.mp4', 'videos/classification_videos/МОС 19-40_cam2.mp4',
-    #     # 'videos/classification_videos/Ночь 20-11_cam1.mp4', 'videos/classification_videos/Ночь 20-11_cam2.mp4',
-    #     # 'videos/classification_videos/13-05 ВО_cam1_sync.mp4', 'videos/classification_videos/13-05 ВО_cam2_sync.mp4',
-    #     # 'videos/classification_videos/16-10 ЦП_cam1_sync.mp4', 'videos/classification_videos/16-10 ЦП_cam2_sync.mp4',
-    #     # 'videos/classification_videos/МОС 19-40_cam1_sync.mp4', 'videos/classification_videos/МОС 19-40_cam2_sync.mp4',
-    #     # 'videos/classification_videos/Ночь 20-11_cam1_sync.mp4', 'videos/classification_videos/Ночь 20-11_cam2_sync.mp4',
-    #     # 'videos/sync_test/test 5_cam 1_sync.mp4', 'videos/sync_test/test 5_cam 2_sync.mp4',
-    #     # 'videos/test 6_cam 1.mp4', 'videos/test 6_cam 2.mp4',
-    #     # 'videos/test 7_cam1.mp4', 'videos/test 7_cam2.mp4',
-    #     # 'videos/test 8_cam1.mp4', 'videos/test 8_cam2.mp4',
-    #     # 'videos/test 10_cam1.mp4', 'videos/test 10_cam2.mp4',
-    #     # 'videos/test 11_cam1.mp4', 'videos/test 11_cam2.mp4',
-    #     # 'videos/test 12_cam1.mp4', 'videos/test 12_cam2.mp4',
-    #     # 'videos/test 13_cam1.mp4', 'videos/test 13_cam2.mp4',
-    #     'videos/test 14_cam 1.mp4', 'videos/test 14_cam 2.mp4',
-    #     'videos/test 15_cam 1.mp4', 'videos/test 15_cam 2.mp4',
-    # ]
-    # fin_time = [
-    #     # 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 300
-    #     60, 60, 60, 60
-    # ]
-    # # fin_time = [0 for i in range(len(vid))]
-    # for i, v in enumerate(vid):
-    #     DatasetProcessing.video2frames(
-    #         video_path=v,
-    #         save_path=f"datasets",
-    #         from_time=0,
-    #         to_time=120 if fin_time[i] == 0 or not fin_time else fin_time[i]
-    #     )
+    vid = [
+        # 'videos/test 1_cam 1.mp4', 'videos/test 1_cam 2.mp4',
+        # 'videos/test 2_cam 1.mp4', 'videos/test 2_cam 2.mp4',
+        # 'videos/test 3_cam 1.mp4', 'videos/test 3_cam 2.mp4',
+        # 'videos/test 4_cam 1.mp4', 'videos/test 4_cam 2.mp4',
+        # 'videos/test 5_cam 1.mp4', 'videos/test 5_cam 2.mp4',
+        # 'videos/classification_videos/13-05 ВО_cam1.mp4', 'videos/classification_videos/13-05 ВО_cam2.mp4',
+        # 'videos/classification_videos/16-10 ЦП_cam1.mp4', 'videos/classification_videos/16-10 ЦП_cam2.mp4',
+        # 'videos/classification_videos/МОС 19-40_cam1.mp4', 'videos/classification_videos/МОС 19-40_cam2.mp4',
+        # 'videos/classification_videos/Ночь 20-11_cam1.mp4', 'videos/classification_videos/Ночь 20-11_cam2.mp4',
+        # 'videos/classification_videos/13-05 ВО_cam1_sync.mp4', 'videos/classification_videos/13-05 ВО_cam2_sync.mp4',
+        # 'videos/classification_videos/16-10 ЦП_cam1_sync.mp4', 'videos/classification_videos/16-10 ЦП_cam2_sync.mp4',
+        # 'videos/classification_videos/МОС 19-40_cam1_sync.mp4', 'videos/classification_videos/МОС 19-40_cam2_sync.mp4',
+        # 'videos/classification_videos/Ночь 20-11_cam1_sync.mp4', 'videos/classification_videos/Ночь 20-11_cam2_sync.mp4',
+        # 'videos/sync_test/test 5_cam 1_sync.mp4', 'videos/sync_test/test 5_cam 2_sync.mp4',
+        # 'videos/test 6_cam 1.mp4', 'videos/test 6_cam 2.mp4',
+        'videos/test 7_cam1.mp4', 'videos/test 7_cam2.mp4',
+        'videos/test 8_cam1.mp4', 'videos/test 8_cam2.mp4',
+        'videos/test 10_cam1.mp4', 'videos/test 10_cam2.mp4',
+        'videos/test 11_cam1.mp4', 'videos/test 11_cam2.mp4',
+        'videos/test 12_cam1.mp4', 'videos/test 12_cam2.mp4',
+        'videos/test 13_cam1.mp4', 'videos/test 13_cam2.mp4',
+        # 'videos/test 14_cam 1.mp4', 'videos/test 14_cam 2.mp4',
+        # 'videos/test 15_cam 1.mp4', 'videos/test 15_cam 2.mp4',
+    ]
+    fin_time = [
+        # 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 300
+        60, 60, 60, 60
+    ]
+    # fin_time = [0 for i in range(len(vid))]
+    for i, v in enumerate(vid):
+        DatasetProcessing.video2frames(
+            video_path=v,
+            save_path=f"datasets",
+            from_time=0,
+            # to_time=120 if fin_time[i] == 0 or not fin_time else fin_time[i]
+        )
 
     SYNCHRONIZE_VIDEOS = True
     # sync_data = {

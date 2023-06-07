@@ -9,7 +9,7 @@ from utils import time_converter, load_data
 
 # tracker_1_dict = load_dict(pickle_path='/media/deny/Новый том/AI/CarpetTracker/tests/tracker_1_dict.dict')
 # tracker_2_dict = load_dict(pickle_path='/media/deny/Новый том/AI/CarpetTracker/tests/tracker_2_dict.dict')
-# patterns = load_dict(pickle_path='/media/deny/Новый том/AI/CarpetTracker/tests/patterns.dict')
+patterns = load_data(pickle_path='/media/deny/Новый том/AI/CarpetTracker/tests/patterns.dict')
 true_bb_1 = load_data(pickle_path='/media/deny/Новый том/AI/CarpetTracker/tests/true_bb_1.dict')
 true_bb_2 = load_data(pickle_path='/media/deny/Новый том/AI/CarpetTracker/tests/true_bb_2.dict')
 
@@ -191,17 +191,17 @@ def pattern_analisys(pattern: dict, tracker_1_dict: dict, tracker_2_dict: dict):
 
 
 def update_pattern(pattern, tracker_1_dict, tracker_2_dict) -> list:
-    print("================================")
-    for k in tracker_1_dict.keys():
-        print("update_pattern begin", k, tracker_1_dict[k]['frame_id'])
+    # print("================================")
+    # for k in tracker_1_dict.keys():
+    #     print("update_pattern begin", k, tracker_1_dict[k]['frame_id'])
     # x = time.time()
     dist = get_distribution(
         pattern=pattern,
         tracker_1_dict=tracker_1_dict,
         tracker_2_dict=tracker_2_dict
     )
-    for k, v in dist.items():
-        print(f"pat {k}: {v}")
+    # for k, v in dist.items():
+    #     print(f"pat {k}: {v}")
     # for k in tracker_1_dict.keys():
     #     print("get_distribution end", k, tracker_1_dict[k]['frame_id'])
     # print('================================================================')
@@ -292,13 +292,13 @@ def clean_tracks(frame, pattern, tracker_1_dict, tracker_2_dict):
 #     tracker_2_dict=tracker_2_dict
 # )
 # print("time Tracker.update_pattern:", time_converter(time.time() - x))
-
+start, finish = 400, 490
 tracker_1 = Tracker()
 tracker_2 = Tracker()
 st = time.time()
 cur_count = 0
 old_patterns = []
-for i in range(800, len(true_bb_1)):
+for i in range(start, len(true_bb_1)):
     itt = time.time()
     # x = time.time()
     result = {'boxes': true_bb_1[i], 'orig_shape': (1080, 1920)}
@@ -338,17 +338,17 @@ for i in range(800, len(true_bb_1)):
     # print("time update_pattern:", time_converter(time.time() - x))
 
     # x = time.time()
-    if test_patterns:
-        # print("test_patterns:", test_patterns)
-        old_pattern_count, test_patterns, old_pat = clean_tracks(
-            frame=i,
-            pattern=test_patterns,
-            tracker_1_dict=tracker_1.tracker_dict,
-            tracker_2_dict=tracker_2.tracker_dict
-        )
-        cur_count += old_pattern_count
-        if old_pat:
-            old_patterns.extend(old_pat)
+    # if test_patterns:
+    #     # print("test_patterns:", test_patterns)
+    #     old_pattern_count, test_patterns, old_pat = clean_tracks(
+    #         frame=i,
+    #         pattern=test_patterns,
+    #         tracker_1_dict=tracker_1.tracker_dict,
+    #         tracker_2_dict=tracker_2.tracker_dict
+    #     )
+    #     cur_count += old_pattern_count
+    #     if old_pat:
+    #         old_patterns.extend(old_pat)
     # print("time clean_tracks:", time_converter(time.time() - x))
     tracker_1.current_id = []
     tracker_1.current_boxes = []
@@ -356,7 +356,7 @@ for i in range(800, len(true_bb_1)):
     tracker_2.current_boxes = []
     print("Iteration:", i, "Iteration time:", time_converter(time.time() - itt), "Find patterns:", cur_count + len(test_patterns))
     print()
-    if i > 1000:
+    if i > finish:
         print("Total time:", time_converter(time.time() - st))
         break
 
@@ -366,26 +366,51 @@ for i in range(len(old_patterns)):
 print("===================================================")
 for i in range(len(test_patterns)):
     print('test_patterns', i, test_patterns[i])
-# print("===================================================")
-# for k in tracker_1.tracker_dict.keys():
-#     print('tracker_1.tracker_dict', k, tracker_1.tracker_dict[k]['frame_id'])
-# #
+print("===================================================")
+for k in tracker_1.tracker_dict.keys():
+    print('tracker_1.tracker_dict', k, tracker_1.tracker_dict[k]['frame_id'])
+#
 # print("===================================================")
 # for k in tracker_1_dict.keys():
 #     print('tracker_1_dict.tracker_dict', k, tracker_1_dict[k]['frame_id'])
 
-# print("===================================================")
-# for k in tracker_2.tracker_dict.keys():
-#     print('tracker_2.tracker_dict', k, tracker_2.tracker_dict[k]['frame_id'])
-#
+print("===================================================")
+for k in tracker_2.tracker_dict.keys():
+    print('tracker_2.tracker_dict', k, tracker_2.tracker_dict[k]['frame_id'])
+
 # print("===================================================")
 # for k in tracker_2_dict.keys():
 #     print('tracker_2_dict', k, tracker_2_dict[k]['frame_id'])
 #
-# print("===================================================")
-# for i, p in enumerate(patterns):
-#     print('pattern', i, p)
-#
+print("===================================================")
+for i, p in enumerate(patterns):
+    if p[-1] > start and (p[-1] <= finish or finish in p):
+        print('pattern', i, p)
+
 # print("===================================================")
 # for i, p in enumerate(test_patterns):
 #     print('pattern', i, p)
+
+# DOUBLE - 4:07
+# pattern 60 [6214, 6215, 6216, 6217, 6218, 6219, 6220, 6221]
+# pattern 61 [6236, 6237, 6238, 6239, 6240, 6241, 6242, 6243, 6244, 6245, 6246, 6247, 6248, 6249, 6250, 6251, 6252]
+
+# EMPTY BETWEEN - 5:02
+# pattern 70 [7494, 7495, 7496, 7497, 7498, 7499, 7508, 7509, 7510, 7511, 7512, 7513, 7514, 7515]
+# pattern 71 [7712, 7713, 7714, 7715, 7716, 7717, 7718, 7719, 7720, 7725]
+
+# DOUBLE - 5:30
+# pattern 77 [8327, 8328, 8329, 8330, 8331, 8332, 8333, 8334, 8335, 8336, 8337, 8338, 8339, 8340, 8341, 8342, 8343]
+# pattern 78 [8411, 8412, 8413, 8414, 8415, 8416, 8417, 8418, 8419, 8420, 8421, 8422, 8423, 8424, 8425, 8426,
+# 8427, 8428, 8429, 8430, 8431, 8432]
+
+# EMPTY BETWEEN = 6:46
+# pattern 100 [10112, 10113, 10114, 10115, 10116, 10117, 10118, 10119, 10120, 10121, 10123, 10124,
+# 10125, 10126, 10127, 10128, 10129, 10130, 10131, 10132, 10133, 10134, 10135, 10136, 10138, 10139, 10144, 10145,
+# 10146, 10147, 10153, 10155, 10156, 10157, 10158, 10160, 10161, 10162, 10163, 10164, 10165, 10166, 10167, 10168,
+# 10169, 10170, 10171, 10172, 10173, 10174, 10175, 10176, 10177, 10178, 10179, 10180, 10181, 10182, 10183]
+# pattern 101 [10218, 10219, 10220, 10221, 10222, 10223, 10224, 10225, 10226, 10227, 10228, 10229, 10230, 10231, 10232,
+# 10233, 10234, 10235, 10236, 10237, 10239]
+
+# Test 15
+#  71 - 4:21, 43 - 3:00
