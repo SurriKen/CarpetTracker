@@ -516,17 +516,47 @@ if __name__ == '__main__':
         #     'model_1': 'videos/sync_test/test 13_cam1_sync.mp4',
         #     'model_2': 'videos/sync_test/test 13_cam2_sync.mp4',
         # },
+        # {
+        #     'model_1': 'videos/sync_test/test 14_cam 1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 14_cam 2_sync.mp4',
+        #     'save_path': 'temp/test 14.mp4',
+        #     'true_count': 157
+        # },
+        # {
+        #     'model_1': 'videos/sync_test/test 15_cam 1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 15_cam 2_sync.mp4',
+        #     'save_path': 'temp/test 15.mp4',
+        #     'true_count': 143
+        # },
         {
-            'model_1': 'videos/sync_test/test 14_cam 1_sync.mp4',
-            'model_2': 'videos/sync_test/test 14_cam 2_sync.mp4',
-            'save_path': 'temp/test 14.mp4',
-            'true_count': 157
+            'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4',
+            'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4',
+            'save_path': 'temp/test 16.mp4',
+            'true_count': 168
         },
         {
-            'model_1': 'videos/sync_test/test 15_cam 1_sync.mp4',
-            'model_2': 'videos/sync_test/test 15_cam 2_sync.mp4',
-            'save_path': 'temp/test 15.mp4',
-            'true_count': 143
+            'model_1': 'videos/sync_test/test 17_cam 1_sync.mp4',
+            'model_2': 'videos/sync_test/test 17_cam 2_sync.mp4',
+            'save_path': 'temp/test 17.mp4',
+            'true_count': 167
+        },
+        {
+            'model_1': 'videos/sync_test/test 18_cam 1_sync.mp4',
+            'model_2': 'videos/sync_test/test 18_cam 2_sync.mp4',
+            'save_path': 'temp/test 18.mp4',
+            'true_count': 129
+        },
+        {
+            'model_1': 'videos/sync_test/test 19_cam 1_sync.mp4',
+            'model_2': 'videos/sync_test/test 19_cam 2_sync.mp4',
+            'save_path': 'temp/test 19.mp4',
+            'true_count': 136
+        },
+        {
+            'model_1': 'videos/sync_test/test 20_cam 1_sync.mp4',
+            'model_2': 'videos/sync_test/test 20_cam 2_sync.mp4',
+            'save_path': 'temp/test 20.mp4',
+            'true_count': None
         },
         # {
         #     'model_1': 'videos/short/test 12_cam1_sync.mp4',
@@ -540,39 +570,39 @@ if __name__ == '__main__':
     # msg = ''
     for mod in models:
         for i in range(len(video_paths)):
-            for c in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
-                args = {
-                    'conf': c, 'iou': 0., 'speed_limit': SPEED_LIMIT_PERCENT,
-                    'start_frame': 0, 'end_frame': 0,
-                    'IMAGE_IRRELEVANT_SPACE_PERCENT': IMAGE_IRRELEVANT_SPACE_PERCENT,
-                    'MIN_OBJ_SEQUENCE': MIN_OBJ_SEQUENCE, 'MIN_EMPTY_SEQUENCE': MIN_EMPTY_SEQUENCE,
-                }
-                st = time.time()
-                sp = f"{video_paths[i].get('save_path').split('.')[0]} {mod[1]}.mp4" \
-                    if video_paths[i].get('save_path') else None
-                # sp = ''
-                pred_count = detect_synchro_video(
-                    models=mod[0],
-                    video_paths=video_paths[i],
-                    save_path=sp,
-                    start=args['start_frame'],
-                    finish=args['end_frame'],
-                    speed_limit=args['speed_limit'],
-                    iou=args['iou'],
-                    conf=args['conf']
-                )
-                dt = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-                txt = f"{dt} =========== Predict is finished ===========\n" \
-                      f"- Model {mod[1]}\n" \
-                      f"- Video '{video_paths[i]}'\n" \
-                      f"- True count: '{video_paths[i].get('true_count')}; Predict count: '{pred_count}'\n" \
-                      f"- Saves as '{sp}'\n" \
-                      f"- Predict args: {args}\n" \
-                      f"- Process time: {time_converter(time.time() - st)}\n"
-                logger.info(f"Predict is finished. Model {mod[1]}. Video {video_paths[i].get('save_path')}")
+            # for c in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
+            args = {
+                'conf': 0.3, 'iou': 0., 'speed_limit': SPEED_LIMIT_PERCENT,
+                'start_frame': 0, 'end_frame': 0,
+                'IMAGE_IRRELEVANT_SPACE_PERCENT': IMAGE_IRRELEVANT_SPACE_PERCENT,
+                'MIN_OBJ_SEQUENCE': MIN_OBJ_SEQUENCE, 'MIN_EMPTY_SEQUENCE': MIN_EMPTY_SEQUENCE,
+            }
+            st = time.time()
+            sp = f"{video_paths[i].get('save_path').split('.')[0]} {mod[1]}.mp4" \
+                if video_paths[i].get('save_path') else None
+            # sp = ''
+            pred_count = detect_synchro_video(
+                models=mod[0],
+                video_paths=video_paths[i],
+                save_path=sp,
+                start=args['start_frame'],
+                finish=args['end_frame'],
+                speed_limit=args['speed_limit'],
+                iou=args['iou'],
+                conf=args['conf']
+            )
+            dt = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            txt = f"{dt} =========== Predict is finished ===========\n" \
+                  f"- Model {mod[1]}\n" \
+                  f"- Video '{video_paths[i]}'\n" \
+                  f"- True count: '{video_paths[i].get('true_count')}; Predict count: '{pred_count}'\n" \
+                  f"- Saves as '{sp}'\n" \
+                  f"- Predict args: {args}\n" \
+                  f"- Process time: {time_converter(time.time() - st)}\n"
+            logger.info(f"Predict is finished. Model {mod[1]}. Video {video_paths[i].get('save_path')}")
 
-                msg = f"{dt}   {txt}\n\n"
-                save_txt(txt=msg, txt_path='logs/predict_synch_log.txt', mode='a')
+            msg = f"{dt}   {txt}\n\n"
+            save_txt(txt=msg, txt_path='logs/predict_synch_log.txt', mode='a')
 
     CREATE_CLASSIFICATION_VIDEO = True
     # models = {

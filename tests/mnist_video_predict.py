@@ -154,6 +154,7 @@ class Net(nn.Module):
         self.dense = nn.Linear(128 * 7 * 7, num_classes, device=device)
         # print('device', device)
         self.post = nn.Softmax(dim=1)
+        self.lstm = nn.LSTM(device=device)
 
     def forward(self, x):
         x = F.max_pool3d(F.relu(F.normalize(self.conv3d_1(x))), 2)
