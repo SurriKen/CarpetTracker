@@ -17,7 +17,7 @@ from sklearn.metrics import confusion_matrix
 from parameters import MIN_OBJ_SEQUENCE, ROOT_DIR
 
 logging.basicConfig(
-    level=logging.DEBUG, filename="py_log.log", filemode="w", format="%(asctime)s %(levelname)s %(message)s")
+    level=logging.DEBUG, filename="py_log.log", filemode="a", format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("carpet tracker")
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())

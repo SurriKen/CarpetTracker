@@ -1,28 +1,22 @@
-import copy
-import os
-import time
-from dataclasses import dataclass
 
+import os
 import cv2
 import numpy as np
 import torch
 import torchvision
 from PIL import Image
 import matplotlib.path as mpltPath
-from sympy.geometry import polygon
 from torchvision.utils import draw_bounding_boxes
 
-from parameters import ROOT_DIR, IMAGE_IRRELEVANT_SPACE_PERCENT, MIN_EMPTY_SEQUENCE, SPEED_LIMIT_PERCENT, \
-    MIN_OBJ_SEQUENCE
+from parameters import ROOT_DIR, MIN_EMPTY_SEQUENCE, MIN_OBJ_SEQUENCE
 from utils import load_data, time_converter, get_colors, add_headline_to_cv_image, logger
 
 imp1 = 'datasets/test 16_cam 1_0s-639s/frames/04424.png'
 imp2 = 'datasets/test 16_cam 2_0s-691s/frames/04424.png'
 
 img1 = Image.open(os.path.join(ROOT_DIR, imp1))
-# img1.show()
 img2 = Image.open(os.path.join(ROOT_DIR, imp2))
-# img2.show()
+
 POLY_CAM1_IN = [[185, 290], [360, 690], [590, 695], [820, 490], [665, 45]]
 POLY_CAM1_OUT = [[95, 330], [270, 750], [645, 760], [915, 480], [760, 0]]
 POLY_CAM2_IN = [[100, 0], [100, 215], [240, 285], [310, 200], [310, 0]]
@@ -30,34 +24,6 @@ POLY_CAM2_OUT = [[50, 0], [50, 225], [240, 340], [365, 240], [364, 0]]
 frame_path = 'datasets/test 16_cam 1_0s-639s/frames'
 # frames = sorted(os.listdir(os.path.join(ROOT_DIR, frame_path)))
 GLOBAL_STEP = 0.1
-
-
-# print("Frames", frames)
-
-def draw_polygons(polygons: list, image: np.ndarray, outline=(0, 200, 0), width: int = 5) -> np.ndarray:
-    if type(polygons[0]) == list:
-        xy = []
-        for i in polygons:
-            xy.append(i[0])
-            xy.append(i[1])
-    else:
-        xy = polygons
-
-    # image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    points = np.array(xy)
-    points = points.reshape((-1, 1, 2))
-    image = cv2.polylines(image, [points], True, outline, width)
-    return np.array(image)
-
-
-def point_in_polygon(point: list, polygon: list[list, ...]) -> bool:
-    path = mpltPath.Path(polygon)
-    return path.contains_points([point])[0]
-
-
-def get_center(coord: list[int, int, int, int]) -> tuple[int, int]:
-    return int((coord[0] + coord[2]) / 2), int((coord[1] + coord[3]) / 2)
-
 
 true_bb_1 = load_data(pickle_path='/media/deny/Новый том/AI/CarpetTracker/tests/true_bb_1.dict')
 true_bb_2 = load_data(pickle_path='/media/deny/Новый том/AI/CarpetTracker/tests/true_bb_2.dict')
