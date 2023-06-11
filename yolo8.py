@@ -1,3 +1,4 @@
+import copy
 import os
 import pickle
 import shutil
@@ -9,7 +10,7 @@ import numpy as np
 import wget
 from ultralytics import YOLO
 from dataset_processing import DatasetProcessing
-from tracker import Tracker
+from tracker import Tracker, PolyTracker
 from parameters import SPEED_LIMIT_PERCENT, IMAGE_IRRELEVANT_SPACE_PERCENT, MIN_OBJ_SEQUENCE, MIN_EMPTY_SEQUENCE, \
     POLY_CAM1_IN, POLY_CAM1_OUT, POLY_CAM2_OUT, POLY_CAM2_IN
 from utils import get_colors, load_data, add_headline_to_cv_image, logger, time_converter, save_txt, save_data
@@ -403,6 +404,155 @@ def detect_synchro_video(
     return len(patterns)
 
 
+def detect_synchro_video_polygon(
+        models: dict,
+        video_paths: dict,
+        save_path: str,
+        start: int = 0,
+        finish: int = 0,
+        iou: float = 0.3,
+        conf: float = 0.5,
+):
+    """
+    Detect two synchronized videos and save them as one video with boxes to save_path.
+
+    Args:
+        models: {'model_1': model_1, "model_2": model_2}
+        video_paths: {'model_1': path_1, "model_2": path_2}
+        save_path: save_path
+        remove_perimeter_boxes: {'model_1': True, "model_2": False}
+
+    Returns:
+
+    """
+    # Get names and colors
+    names = ['carpet']
+    colors = get_colors(names)
+
+    tracker_1 = PolyTracker(polygon_in=POLY_CAM1_IN, polygon_out=POLY_CAM1_OUT, name='camera 1')
+    tracker_2 = PolyTracker(polygon_in=POLY_CAM2_IN, polygon_out=POLY_CAM2_OUT, name='camera 2')
+
+    vc1 = cv2.VideoCapture()
+    vc1.open(video_paths.get("model_1"))
+    f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
+    fps1 = vc1.get(cv2.CAP_PROP_FPS)
+    w1 = int(vc1.get(cv2.CAP_PROP_FRAME_WIDTH))
+    h1 = int(vc1.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    vc2 = cv2.VideoCapture()
+    vc2.open(video_paths.get("model_2"))
+    f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
+    fps2 = vc2.get(cv2.CAP_PROP_FPS)
+    w2 = int(vc2.get(cv2.CAP_PROP_FRAME_WIDTH))
+    h2 = int(vc2.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    w = min([w1, w2])
+    h = min([h1, h2])
+
+    # Reformat video on 25 fps
+    if fps1 != 25:
+        shutil.move(video_paths.get("model_1"), 'test.mp4')
+        DatasetProcessing.change_fps(
+            video_path='test.mp4',
+            save_path=video_paths.get("model_1"),
+            set_fps=25
+        )
+        os.remove('test.mp4')
+        vc1 = cv2.VideoCapture()
+        vc1.open(video_paths.get("model_1"))
+        f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
+
+    if fps2 != 25:
+        shutil.move(video_paths.get("model_2"), 'test.mp4')
+        DatasetProcessing.change_fps(
+            video_path='test.mp4',
+            save_path=video_paths.get("model_2"),
+            set_fps=25
+        )
+        os.remove('test.mp4')
+        vc2 = cv2.VideoCapture()
+        vc2.open(video_paths.get("model_2"))
+        f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
+
+    # model = YOLO('runs/detect/train21/weights/best.pt')
+    if save_path:
+        # print(save_path, fps, (w, h))
+        out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), 25, (w, h * 2))
+
+    f = min([f1, f2])
+    finish = int(f) if finish == 0 or finish < start else finish
+    true_bb_1, true_bb_2 = [], []
+    count = 0
+    last_track_seq = {'tr1': [], 'tr2': []}
+    for i in range(0, finish):
+        fr_time = time.time()
+        logger.info(f'-- Process {i + 1} / {finish} frame')
+        _, frame1 = vc1.read()
+        _, frame2 = vc2.read()
+
+        if i >= start:
+            logger.info(f"Processed {i + 1} / {f} frames")
+            res1 = models.get('model_1').predict(frame1, iou=iou, conf=conf)
+            true_bb_1.append(res1[0].boxes.data.tolist())
+            tracker_1.process(frame_id=i, boxes=res1[0].boxes.data.tolist(), img_shape=res1[0].orig_shape[:2], debug=False)
+
+            res2 = models.get('model_2').predict(frame2, iou=iou, conf=conf)
+            true_bb_2.append(res2[0].boxes.data.tolist())
+            tracker_2.process(frame_id=i, boxes=res2[0].boxes.data.tolist(), img_shape=res2[0].orig_shape[:2], debug=False)
+
+            count, last_track_seq = PolyTracker.combine_count(
+                count=count,
+                last_track_seq=last_track_seq,
+                tracker_1_count_frames=copy.deepcopy(tracker_1.count_frames),
+                tracker_2_count_frames=copy.deepcopy(tracker_2.count_frames),
+                frame_id=i
+            )
+
+            if save_path:
+                frame1 = PolyTracker.prepare_image(
+                    image=cv2.cvtColor(frame1, cv2.COLOR_RGB2BGR),
+                    colors=colors,
+                    tracker_current_boxes=tracker_1.current_boxes,
+                    polygon_in=POLY_CAM1_IN,
+                    polygon_out=POLY_CAM1_OUT,
+                    poly_width=5,
+                    reshape=(w, h)
+                )
+                frame2 = PolyTracker.prepare_image(
+                    image=cv2.cvtColor(frame2, cv2.COLOR_RGB2BGR),
+                    colors=colors,
+                    tracker_current_boxes=tracker_2.current_boxes,
+                    polygon_in=POLY_CAM2_IN,
+                    polygon_out=POLY_CAM2_OUT,
+                    poly_width=2,
+                    reshape=(w, h)
+                )
+                img = np.concatenate((frame1, frame2), axis=0)
+                headline = f"Обнаружено ковров: {count}\nТрекер 1: {tracker_1.count}\nТрекер 2: {tracker_2.count}"
+                img = add_headline_to_cv_image(
+                    image=img,
+                    headline=headline
+                )
+
+                if (i + 1) % 100 == 0:
+                    logger.info(f"Frames {i + 1} / {finish} was processed")
+                out.write(img)
+
+            # print("time save_path:", time_converter(time.time() - x))
+            print("frame time:", time_converter(time.time() - fr_time), '\n')
+            logger.info(f"-- count: {count}")
+            if i >= finish - 1:
+            # if i >= 1500:
+                if save_path:
+                    out.release()
+                break
+
+    path = '/media/deny/Новый том/AI/CarpetTracker/tests'
+    save_data(data=true_bb_1, file_path=path, filename=f"true_bb_1_{video_paths.get('model_1').split('/')[-1].split('_')[0]}")
+    save_data(data=true_bb_2, file_path=path, filename=f"true_bb_2_{video_paths.get('model_2').split('/')[-1].split('_')[0]}")
+    return count
+
+
 def train(weights='yolo8/yolov8n.pt', config='data_custom.yaml', epochs=50, batch_size=4, name=None):
     model = YOLO(weights)
     model.train(data=config, epochs=epochs, batch=batch_size, name=name)
@@ -477,6 +627,158 @@ if __name__ == '__main__':
     #     )
 
     PREDICT_SYNCH_VIDEO = True
+    # model1 = {
+    #     'model_1': YOLO('runs/detect/camera_1_mix+_8n_100ep/weights/best.pt'),
+    #     'model_2': YOLO('runs/detect/camera_2_mix+_8n_100ep/weights/best.pt')
+    # }
+    # model2 = {
+    #     'model_1': YOLO('runs/detect/camera_1_mix++_8n_150ep/weights/best.pt'),
+    #     'model_2': YOLO('runs/detect/camera_2_mix++_8n_150ep/weights/best.pt')
+    # }
+    # models = [
+    #     (model1, "(mix+ 100ep, F% Acc% Sen%)"),
+    #     # (model2, "(mix++ 150ep, F% Acc% Sen%)"),
+    # ]
+    # video_paths = [
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 1_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 1_cam 2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 2_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 2_cam 2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 3_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 3_cam 2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 4_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 4_cam 2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 5_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 5_cam 2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 6_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 6_cam 2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 7_cam1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 7_cam2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 8_cam1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 8_cam2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 10_cam1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 10_cam2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 11_cam1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 11_cam2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 12_cam1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 12_cam2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 13_cam1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 13_cam2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 14_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 14_cam 2_sync.mp4',
+    #     #     'save_path': 'temp/test 14.mp4',
+    #     #     'true_count': 157
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 15_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 15_cam 2_sync.mp4',
+    #     #     'save_path': 'temp/test 15.mp4',
+    #     #     'true_count': 143
+    #     # },
+    #     {
+    #         'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4',
+    #         'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4',
+    #         'save_path': 'temp/test 16.mp4',
+    #         'true_count': 168
+    #     },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 17_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 17_cam 2_sync.mp4',
+    #     #     'save_path': 'temp/test 17.mp4',
+    #     #     'true_count': 167
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 18_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 18_cam 2_sync.mp4',
+    #     #     'save_path': 'temp/test 18.mp4',
+    #     #     'true_count': 129
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 19_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 19_cam 2_sync.mp4',
+    #     #     'save_path': 'temp/test 19.mp4',
+    #     #     'true_count': 136
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/sync_test/test 20_cam 1_sync.mp4',
+    #     #     'model_2': 'videos/sync_test/test 20_cam 2_sync.mp4',
+    #     #     'save_path': 'temp/test 20.mp4',
+    #     #     'true_count': 139
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/short/test 12_cam1_sync.mp4',
+    #     #     'model_2': 'videos/short/test 12_cam2_sync.mp4',
+    #     # },
+    #     # {
+    #     #     'model_1': 'videos/short/test 15_cam 1_sync_16s_20s.mp4',
+    #     #     'model_2': 'videos/short/test 15_cam 2_sync_16s_20s.mp4',
+    #     # },
+    # ]
+    # # msg = ''
+    # for mod in models:
+    #     for i in range(len(video_paths)):
+    #         # for c in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
+    #         args = {
+    #             'conf': 0.3, 'iou': 0., 'speed_limit': SPEED_LIMIT_PERCENT,
+    #             'start_frame': 0, 'end_frame': 0,
+    #             'IMAGE_IRRELEVANT_SPACE_PERCENT': IMAGE_IRRELEVANT_SPACE_PERCENT,
+    #             'MIN_OBJ_SEQUENCE': MIN_OBJ_SEQUENCE, 'MIN_EMPTY_SEQUENCE': MIN_EMPTY_SEQUENCE,
+    #             'draw_polygon': True
+    #         }
+    #         st = time.time()
+    #         sp = f"{video_paths[i].get('save_path').split('.')[0]} {mod[1]}.mp4" \
+    #             if video_paths[i].get('save_path') else None
+    #         # sp = ''
+    #         pred_count = detect_synchro_video(
+    #             models=mod[0],
+    #             video_paths=video_paths[i],
+    #             save_path=sp,
+    #             start=args['start_frame'],
+    #             finish=args['end_frame'],
+    #             speed_limit=args['speed_limit'],
+    #             iou=args['iou'],
+    #             conf=args['conf'],
+    #             draw_polygon=args['draw_polygon']
+    #         )
+    #         dt = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    #         txt = f"{dt} =========== Predict is finished ===========\n" \
+    #               f"- Model {mod[1]}\n" \
+    #               f"- Video '{video_paths[i]}'\n" \
+    #               f"- True count: '{video_paths[i].get('true_count')}; Predict count: '{pred_count}'\n" \
+    #               f"- Saves as '{sp}'\n" \
+    #               f"- Predict args: {args}\n" \
+    #               f"- Process time: {time_converter(time.time() - st)}\n"
+    #         logger.info(f"Predict is finished. Model {mod[1]}. Video {video_paths[i].get('save_path')}")
+    #
+    #         msg = f"{dt}   {txt}\n\n"
+    #         save_txt(txt=msg, txt_path='logs/predict_synch_log.txt', mode='a')
+
+    PREDICT_SYNCH_VIDEO_POLYGON = True
     model1 = {
         'model_1': YOLO('runs/detect/camera_1_mix+_8n_100ep/weights/best.pt'),
         'model_2': YOLO('runs/detect/camera_2_mix+_8n_100ep/weights/best.pt')
@@ -487,7 +789,7 @@ if __name__ == '__main__':
     }
     models = [
         (model1, "(mix+ 100ep, F% Acc% Sen%)"),
-        # (model2, "(mix++ 150ep, F% Acc% Sen%)"),
+        (model2, "(mix++ 150ep, F% Acc% Sen%)"),
     ]
     video_paths = [
         # {
@@ -556,64 +858,52 @@ if __name__ == '__main__':
             'save_path': 'temp/test 16.mp4',
             'true_count': 168
         },
-        # {
-        #     'model_1': 'videos/sync_test/test 17_cam 1_sync.mp4',
-        #     'model_2': 'videos/sync_test/test 17_cam 2_sync.mp4',
-        #     'save_path': 'temp/test 17.mp4',
-        #     'true_count': 167
-        # },
-        # {
-        #     'model_1': 'videos/sync_test/test 18_cam 1_sync.mp4',
-        #     'model_2': 'videos/sync_test/test 18_cam 2_sync.mp4',
-        #     'save_path': 'temp/test 18.mp4',
-        #     'true_count': 129
-        # },
-        # {
-        #     'model_1': 'videos/sync_test/test 19_cam 1_sync.mp4',
-        #     'model_2': 'videos/sync_test/test 19_cam 2_sync.mp4',
-        #     'save_path': 'temp/test 19.mp4',
-        #     'true_count': 136
-        # },
-        # {
-        #     'model_1': 'videos/sync_test/test 20_cam 1_sync.mp4',
-        #     'model_2': 'videos/sync_test/test 20_cam 2_sync.mp4',
-        #     'save_path': 'temp/test 20.mp4',
-        #     'true_count': 139
-        # },
-        # {
-        #     'model_1': 'videos/short/test 12_cam1_sync.mp4',
-        #     'model_2': 'videos/short/test 12_cam2_sync.mp4',
-        # },
-        # {
-        #     'model_1': 'videos/short/test 15_cam 1_sync_16s_20s.mp4',
-        #     'model_2': 'videos/short/test 15_cam 2_sync_16s_20s.mp4',
-        # },
+        {
+            'model_1': 'videos/sync_test/test 17_cam 1_sync.mp4',
+            'model_2': 'videos/sync_test/test 17_cam 2_sync.mp4',
+            'save_path': 'temp/test 17.mp4',
+            'true_count': 167
+        },
+        {
+            'model_1': 'videos/sync_test/test 18_cam 1_sync.mp4',
+            'model_2': 'videos/sync_test/test 18_cam 2_sync.mp4',
+            'save_path': 'temp/test 18.mp4',
+            'true_count': 129
+        },
+        {
+            'model_1': 'videos/sync_test/test 19_cam 1_sync.mp4',
+            'model_2': 'videos/sync_test/test 19_cam 2_sync.mp4',
+            'save_path': 'temp/test 19.mp4',
+            'true_count': 136
+        },
+        {
+            'model_1': 'videos/sync_test/test 20_cam 1_sync.mp4',
+            'model_2': 'videos/sync_test/test 20_cam 2_sync.mp4',
+            'save_path': 'temp/test 20.mp4',
+            'true_count': 139
+        },
     ]
-    # msg = ''
+
     for mod in models:
         for i in range(len(video_paths)):
-            # for c in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
             args = {
-                'conf': 0.3, 'iou': 0., 'speed_limit': SPEED_LIMIT_PERCENT,
+                'conf': 0.3, 'iou': 0.,
+                'POLY_CAM1_IN': POLY_CAM1_IN, 'POLY_CAM1_OUT': POLY_CAM1_OUT,
+                'POLY_CAM2_IN': POLY_CAM2_IN, 'POLY_CAM2_OUT': POLY_CAM2_OUT,
                 'start_frame': 0, 'end_frame': 0,
-                'IMAGE_IRRELEVANT_SPACE_PERCENT': IMAGE_IRRELEVANT_SPACE_PERCENT,
                 'MIN_OBJ_SEQUENCE': MIN_OBJ_SEQUENCE, 'MIN_EMPTY_SEQUENCE': MIN_EMPTY_SEQUENCE,
-                'draw_polygon': True
             }
             st = time.time()
             sp = f"{video_paths[i].get('save_path').split('.')[0]} {mod[1]}.mp4" \
                 if video_paths[i].get('save_path') else None
-            # sp = ''
-            pred_count = detect_synchro_video(
+            pred_count = detect_synchro_video_polygon(
                 models=mod[0],
                 video_paths=video_paths[i],
                 save_path=sp,
                 start=args['start_frame'],
                 finish=args['end_frame'],
-                speed_limit=args['speed_limit'],
                 iou=args['iou'],
                 conf=args['conf'],
-                draw_polygon=args['draw_polygon']
             )
             dt = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
             txt = f"{dt} =========== Predict is finished ===========\n" \
@@ -627,7 +917,6 @@ if __name__ == '__main__':
 
             msg = f"{dt}   {txt}\n\n"
             save_txt(txt=msg, txt_path='logs/predict_synch_log.txt', mode='a')
-
     CREATE_CLASSIFICATION_VIDEO = True
     # models = {
     #         'model_1': YOLO('runs/detect/camera_1_mix+_8n_100ep/weights/best.pt'),
