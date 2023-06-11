@@ -2,8 +2,12 @@ import copy
 import numpy as np
 import torch
 import torchvision
+from PIL import Image
 from torchvision.utils import draw_bounding_boxes
-from parameters import IMAGE_IRRELEVANT_SPACE_PERCENT, MIN_OBJ_SEQUENCE, MIN_EMPTY_SEQUENCE, SPEED_LIMIT_PERCENT
+
+from dataset_processing import DatasetProcessing
+from parameters import IMAGE_IRRELEVANT_SPACE_PERCENT, MIN_OBJ_SEQUENCE, MIN_EMPTY_SEQUENCE, SPEED_LIMIT_PERCENT, \
+    POLY_CAM1_IN, POLY_CAM1_OUT, POLY_CAM2_IN, POLY_CAM2_OUT
 
 
 class Tracker:
@@ -20,8 +24,17 @@ class Tracker:
         pass
 
     @staticmethod
-    def put_box_on_image(save_path, results, labels, color_list, coordinates):
-        image = results[0].orig_img[:, :, ::-1].copy()
+    def put_box_on_image(save_path, image, labels, color_list, coordinates):
+        # image = results[0].orig_img[:, :, ::-1].copy()
+        # print(image.shape)
+        # if draw_poly:
+        #     image = Image.fromarray(image)
+        #     poly = [POLY_CAM1_IN, POLY_CAM1_OUT] if camera == 1 else [POLY_CAM2_IN, POLY_CAM2_OUT]
+        #     image = DatasetProcessing.draw_polygons(polygons=poly[0], image=image, outline='green')
+        #     image = DatasetProcessing.draw_polygons(polygons=poly[1], image=image, outline='red')
+        #     # image.show()
+        #     image = np.array(image)
+        #     # image = np.expand_dims(image, axis=0)
         image = np.transpose(image, (2, 0, 1))
         w, h = image.shape[:2]
         image = torch.from_numpy(image)

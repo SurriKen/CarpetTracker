@@ -243,3 +243,129 @@
 - Process time: 15 min 31 sec
 
 
+10/06/2023 02:17:39   10/06/2023 02:17:39 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4', 'save_path': 'temp/test 16.mp4', 'true_count': 168}'
+- True count: '168; Predict count: '170'
+- Saves as 'temp/test 16 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'speed_limit': 0.01, 'start_frame': 0, 'end_frame': 0, 'IMAGE_IRRELEVANT_SPACE_PERCENT': 0.13, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12}
+- Process time: 28 min 36 sec
+
+
+10/06/2023 03:08:28   10/06/2023 03:08:28 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4', 'save_path': 'temp/test 16.mp4', 'true_count': 168}'
+- True count: '168; Predict count: '170'
+- Saves as 'temp/test 16 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'speed_limit': 0.01, 'start_frame': 0, 'end_frame': 0, 'IMAGE_IRRELEVANT_SPACE_PERCENT': 0.13, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12}
+- Process time: 33 min 15 sec
+
+
+10/06/2023 03:17:53   10/06/2023 03:17:53 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4', 'save_path': 'temp/test 16.mp4', 'true_count': 168}'
+- True count: '168; Predict count: '0'
+- Saves as 'temp/test 16 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'speed_limit': 0.01, 'start_frame': 0, 'end_frame': 0, 'IMAGE_IRRELEVANT_SPACE_PERCENT': 0.13, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12, 'draw_polygon': True}
+- Process time: 3 sec
+
+
+10/06/2023 03:17:54   10/06/2023 03:17:54 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 17_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 17_cam 2_sync.mp4', 'save_path': 'temp/test 17.mp4', 'true_count': 167}'
+- True count: '167; Predict count: '0'
+- Saves as 'temp/test 17 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'speed_limit': 0.01, 'start_frame': 0, 'end_frame': 0, 'IMAGE_IRRELEVANT_SPACE_PERCENT': 0.13, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12, 'draw_polygon': True}
+- Process time: 373.3 ms
+
+
+10/06/2023 03:17:54   10/06/2023 03:17:54 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 18_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 18_cam 2_sync.mp4', 'save_path': 'temp/test 18.mp4', 'true_count': 129}'
+- True count: '129; Predict count: '0'
+- Saves as 'temp/test 18 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'speed_limit': 0.01, 'start_frame': 0, 'end_frame': 0, 'IMAGE_IRRELEVANT_SPACE_PERCENT': 0.13, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12, 'draw_polygon': True}
+- Process time: 846.0 ms
+
+
+10/06/2023 03:17:55   10/06/2023 03:17:55 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 19_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 19_cam 2_sync.mp4', 'save_path': 'temp/test 19.mp4', 'true_count': 136}'
+- True count: '136; Predict count: '0'
+- Saves as 'temp/test 19 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'speed_limit': 0.01, 'start_frame': 0, 'end_frame': 0, 'IMAGE_IRRELEVANT_SPACE_PERCENT': 0.13, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12, 'draw_polygon': True}
+- Process time: 921.4 ms
+
+
+10/06/2023 03:17:56   10/06/2023 03:17:56 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 20_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 20_cam 2_sync.mp4', 'save_path': 'temp/test 20.mp4', 'true_count': 139}'
+- True count: '139; Predict count: '0'
+- Saves as 'temp/test 20 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'speed_limit': 0.01, 'start_frame': 0, 'end_frame': 0, 'IMAGE_IRRELEVANT_SPACE_PERCENT': 0.13, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12, 'draw_polygon': True}
+- Process time: 414.8 ms
+
+
+10/06/2023 03:34:55   10/06/2023 03:34:55 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4', 'save_path': 'temp/test 16.mp4', 'true_count': 168}'
+- True count: '168; Predict count: '0'
+- Saves as 'temp/test 16 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'speed_limit': 0.01, 'start_frame': 0, 'end_frame': 0, 'IMAGE_IRRELEVANT_SPACE_PERCENT': 0.13, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12, 'draw_polygon': True}
+- Process time: 21 sec
+
+
+10/06/2023 04:19:20   10/06/2023 04:19:20 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4', 'save_path': 'temp/test 16.mp4', 'true_count': 168}'
+- True count: '168; Predict count: '0'
+- Saves as 'temp/test 16 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'speed_limit': 0.01, 'start_frame': 0, 'end_frame': 0, 'IMAGE_IRRELEVANT_SPACE_PERCENT': 0.13, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12, 'draw_polygon': True}
+- Process time: 9 sec
+
+
+10/06/2023 04:20:17   10/06/2023 04:20:17 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4', 'save_path': 'temp/test 16.mp4', 'true_count': 168}'
+- True count: '168; Predict count: '0'
+- Saves as 'temp/test 16 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'speed_limit': 0.01, 'start_frame': 0, 'end_frame': 0, 'IMAGE_IRRELEVANT_SPACE_PERCENT': 0.13, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12, 'draw_polygon': True}
+- Process time: 9 sec
+
+
+10/06/2023 11:14:09   10/06/2023 11:14:09 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4', 'save_path': 'temp/test 16.mp4', 'true_count': 168}'
+- True count: '168; Predict count: '170'
+- Saves as 'temp/test 16 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'speed_limit': 0.01, 'start_frame': 0, 'end_frame': 0, 'IMAGE_IRRELEVANT_SPACE_PERCENT': 0.13, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12, 'draw_polygon': True}
+- Process time: 21 min 58 sec
+
+
+10/06/2023 11:33:01   10/06/2023 11:33:01 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4', 'save_path': 'temp/test 16.mp4', 'true_count': 168}'
+- True count: '168; Predict count: '5'
+- Saves as 'temp/test 16 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'speed_limit': 0.01, 'start_frame': 0, 'end_frame': 0, 'IMAGE_IRRELEVANT_SPACE_PERCENT': 0.13, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12, 'draw_polygon': True}
+- Process time: 1 min 57 sec
+
+
+10/06/2023 13:40:22   10/06/2023 13:40:22 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4', 'save_path': 'temp/test 16.mp4', 'true_count': 168}'
+- True count: '168; Predict count: '5'
+- Saves as 'temp/test 16 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'speed_limit': 0.01, 'start_frame': 0, 'end_frame': 0, 'IMAGE_IRRELEVANT_SPACE_PERCENT': 0.13, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12, 'draw_polygon': True}
+- Process time: 2 min 9 sec
+
+
+10/06/2023 18:13:47   10/06/2023 18:13:47 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4', 'save_path': 'temp/test 16.mp4', 'true_count': 168}'
+- True count: '168; Predict count: '170'
+- Saves as 'temp/test 16 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'speed_limit': 0.01, 'start_frame': 0, 'end_frame': 0, 'IMAGE_IRRELEVANT_SPACE_PERCENT': 0.13, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12, 'draw_polygon': True}
+- Process time: 21 min 6 sec
+
+

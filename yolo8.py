@@ -8,10 +8,10 @@ import cv2
 import numpy as np
 import wget
 from ultralytics import YOLO
-
 from dataset_processing import DatasetProcessing
 from tracker import Tracker
-from parameters import SPEED_LIMIT_PERCENT, IMAGE_IRRELEVANT_SPACE_PERCENT, MIN_OBJ_SEQUENCE, MIN_EMPTY_SEQUENCE
+from parameters import SPEED_LIMIT_PERCENT, IMAGE_IRRELEVANT_SPACE_PERCENT, MIN_OBJ_SEQUENCE, MIN_EMPTY_SEQUENCE, \
+    POLY_CAM1_IN, POLY_CAM1_OUT, POLY_CAM2_OUT, POLY_CAM2_IN
 from utils import get_colors, load_data, add_headline_to_cv_image, logger, time_converter, save_txt, save_data
 
 yolov8_types = {
@@ -146,7 +146,8 @@ def detect_synchro_video(
         finish: int = 0,
         speed_limit: float = SPEED_LIMIT_PERCENT,
         iou: float = 0.3,
-        conf: float = 0.5
+        conf: float = 0.5,
+        draw_polygon: bool = False,
 ):
     """
     Detect two synchronized videos and save them as one video with boxes to save_path.
@@ -274,6 +275,10 @@ def detect_synchro_video(
             #     old_patterns.extend(old_pat)
             # x = time.time()
             if save_path:
+                fr1 = res1[0].orig_img[:, :, ::-1].copy()
+                if draw_polygon:
+                    fr1 = DatasetProcessing.draw_polygons(image=fr1, polygons=POLY_CAM1_IN, outline=(0, 200, 0), width=5)
+                    fr1 = DatasetProcessing.draw_polygons(image=fr1, polygons=POLY_CAM1_OUT, outline=(200, 0, 0), width=5)
                 if tracker_1.current_id:
                     tracker_id = tracker_1.current_id
                     coords = tracker_1.current_boxes
@@ -289,18 +294,30 @@ def detect_synchro_video(
 
                     fr1 = tracker_1.put_box_on_image(
                         save_path=None,
-                        results=res1,
+                        image=fr1,
                         labels=labels,
                         color_list=cl,
-                        coordinates=coords
+                        coordinates=coords,
+                        # camera=1,
+                        # draw_poly=draw_polygon
                     )
                     fr1 = np.array(fr1)
-                else:
-                    fr1 = res1[0].orig_img[:, :, ::-1].copy()
+                # else:
+                #     # fr1 = Image.fromarray(image)
+                #     # poly = [POLY_CAM1_IN, POLY_CAM1_OUT] if camera == 1 else [POLY_CAM2_IN, POLY_CAM2_OUT]
+                #     # image = DatasetProcessing.draw_polygons(polygons=poly[0], image=image, outline='green')
+                #     # image = DatasetProcessing.draw_polygons(polygons=poly[1], image=image, outline='red')
+                #     # # image.show()
+                #     # image = np.array(image)
+                #     fr1 = res1[0].orig_img[:, :, ::-1].copy()
 
                 if fr1.shape[:2] != (h, w):
                     fr1 = cv2.resize(fr1, (w, h))
 
+                fr2 = res2[0].orig_img[:, :, ::-1].copy()
+                if draw_polygon:
+                    fr2 = DatasetProcessing.draw_polygons(image=fr2, polygons=POLY_CAM2_IN, outline=(0, 200, 0), width=2)
+                    fr2 = DatasetProcessing.draw_polygons(image=fr2, polygons=POLY_CAM2_OUT, outline=(200, 0, 0), width=2)
                 if tracker_2.current_id:
                     tracker_id = tracker_2.current_id
                     coords = tracker_2.current_boxes
@@ -316,14 +333,16 @@ def detect_synchro_video(
 
                     fr2 = tracker_2.put_box_on_image(
                         save_path=None,
-                        results=res2,
+                        image=fr2,
                         labels=labels,
                         color_list=cl,
-                        coordinates=coords
+                        coordinates=coords,
+                        # camera=2,
+                        # draw_poly=draw_polygon
                     )
                     fr2 = np.array(fr2)
-                else:
-                    fr2 = res2[0].orig_img[:, :, ::-1].copy()
+                # else:
+                #     fr2 = res2[0].orig_img[:, :, ::-1].copy()
                 if fr2.shape[:2] != (h, w):
                     fr2 = cv2.resize(fr2, (w, h))
 
@@ -333,6 +352,8 @@ def detect_synchro_video(
                     image=fr,
                     headline=headline
                 )
+                # fr = Image.fromarray(fr)
+                # fr.show()
 
                 cv_img = cv2.cvtColor(fr, cv2.COLOR_RGB2BGR)
                 out.write(cv_img)
@@ -345,6 +366,7 @@ def detect_synchro_video(
             print("frame time:", time_converter(time.time() - fr_time), '\n')
             logger.info(f"-- patterns: {cur_count + len(patterns)}")
             if i >= finish - 1:
+            # if i >= 1500:
                 if save_path:
                     out.release()
                 break
@@ -534,30 +556,30 @@ if __name__ == '__main__':
             'save_path': 'temp/test 16.mp4',
             'true_count': 168
         },
-        {
-            'model_1': 'videos/sync_test/test 17_cam 1_sync.mp4',
-            'model_2': 'videos/sync_test/test 17_cam 2_sync.mp4',
-            'save_path': 'temp/test 17.mp4',
-            'true_count': 167
-        },
-        {
-            'model_1': 'videos/sync_test/test 18_cam 1_sync.mp4',
-            'model_2': 'videos/sync_test/test 18_cam 2_sync.mp4',
-            'save_path': 'temp/test 18.mp4',
-            'true_count': 129
-        },
-        {
-            'model_1': 'videos/sync_test/test 19_cam 1_sync.mp4',
-            'model_2': 'videos/sync_test/test 19_cam 2_sync.mp4',
-            'save_path': 'temp/test 19.mp4',
-            'true_count': 136
-        },
-        {
-            'model_1': 'videos/sync_test/test 20_cam 1_sync.mp4',
-            'model_2': 'videos/sync_test/test 20_cam 2_sync.mp4',
-            'save_path': 'temp/test 20.mp4',
-            'true_count': None
-        },
+        # {
+        #     'model_1': 'videos/sync_test/test 17_cam 1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 17_cam 2_sync.mp4',
+        #     'save_path': 'temp/test 17.mp4',
+        #     'true_count': 167
+        # },
+        # {
+        #     'model_1': 'videos/sync_test/test 18_cam 1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 18_cam 2_sync.mp4',
+        #     'save_path': 'temp/test 18.mp4',
+        #     'true_count': 129
+        # },
+        # {
+        #     'model_1': 'videos/sync_test/test 19_cam 1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 19_cam 2_sync.mp4',
+        #     'save_path': 'temp/test 19.mp4',
+        #     'true_count': 136
+        # },
+        # {
+        #     'model_1': 'videos/sync_test/test 20_cam 1_sync.mp4',
+        #     'model_2': 'videos/sync_test/test 20_cam 2_sync.mp4',
+        #     'save_path': 'temp/test 20.mp4',
+        #     'true_count': 139
+        # },
         # {
         #     'model_1': 'videos/short/test 12_cam1_sync.mp4',
         #     'model_2': 'videos/short/test 12_cam2_sync.mp4',
@@ -576,6 +598,7 @@ if __name__ == '__main__':
                 'start_frame': 0, 'end_frame': 0,
                 'IMAGE_IRRELEVANT_SPACE_PERCENT': IMAGE_IRRELEVANT_SPACE_PERCENT,
                 'MIN_OBJ_SEQUENCE': MIN_OBJ_SEQUENCE, 'MIN_EMPTY_SEQUENCE': MIN_EMPTY_SEQUENCE,
+                'draw_polygon': True
             }
             st = time.time()
             sp = f"{video_paths[i].get('save_path').split('.')[0]} {mod[1]}.mp4" \
@@ -589,7 +612,8 @@ if __name__ == '__main__':
                 finish=args['end_frame'],
                 speed_limit=args['speed_limit'],
                 iou=args['iou'],
-                conf=args['conf']
+                conf=args['conf'],
+                draw_polygon=args['draw_polygon']
             )
             dt = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
             txt = f"{dt} =========== Predict is finished ===========\n" \

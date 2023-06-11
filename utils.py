@@ -14,7 +14,7 @@ from scipy import stats
 from sklearn.metrics import confusion_matrix
 
 
-from parameters import MIN_OBJ_SEQUENCE
+from parameters import MIN_OBJ_SEQUENCE, ROOT_DIR
 
 logging.basicConfig(
     level=logging.DEBUG, filename="py_log.log", filemode="w", format="%(asctime)s %(levelname)s %(message)s")
@@ -180,9 +180,9 @@ def add_headline_to_cv_image(image, headline: str):
     if headline:
         img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         im_pil = Image.fromarray(img)
-        font_size = int(im_pil.size[1] * 0.03)
+        font_size = int(im_pil.size[0] * 0.03)
         draw = ImageDraw.Draw(im_pil)
-        font = ImageFont.truetype("arial.ttf", font_size)
+        font = ImageFont.truetype(os.path.join(ROOT_DIR, "arial.ttf"), font_size)
         label_size = draw.textsize(headline, font)
         text_origin = np.array([int(im_pil.size[0] * 0.01), int(im_pil.size[1] * 0.01)])
         draw.rectangle(
