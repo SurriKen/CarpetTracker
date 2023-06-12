@@ -405,7 +405,7 @@ def detect_synchro_video(
 
 
 def detect_synchro_video_polygon(
-        models: dict,
+        models: tuple[dict, str],
         video_paths: dict,
         save_path: str,
         start: int = 0,
@@ -490,11 +490,11 @@ def detect_synchro_video_polygon(
 
         if i >= start:
             logger.info(f"Processed {i + 1} / {f} frames")
-            res1 = models.get('model_1').predict(frame1, iou=iou, conf=conf)
+            res1 = models[0].get('model_1').predict(frame1, iou=iou, conf=conf)
             true_bb_1.append(res1[0].boxes.data.tolist())
             tracker_1.process(frame_id=i, boxes=res1[0].boxes.data.tolist(), img_shape=res1[0].orig_shape[:2], debug=False)
 
-            res2 = models.get('model_2').predict(frame2, iou=iou, conf=conf)
+            res2 = models[0].get('model_2').predict(frame2, iou=iou, conf=conf)
             true_bb_2.append(res2[0].boxes.data.tolist())
             tracker_2.process(frame_id=i, boxes=res2[0].boxes.data.tolist(), img_shape=res2[0].orig_shape[:2], debug=False)
 
@@ -508,7 +508,7 @@ def detect_synchro_video_polygon(
 
             if save_path:
                 frame1 = PolyTracker.prepare_image(
-                    image=cv2.cvtColor(frame1, cv2.COLOR_RGB2BGR),
+                    image=frame1,
                     colors=colors,
                     tracker_current_boxes=tracker_1.current_boxes,
                     polygon_in=POLY_CAM1_IN,
@@ -516,8 +516,9 @@ def detect_synchro_video_polygon(
                     poly_width=5,
                     reshape=(w, h)
                 )
+                # frame2 = cv2.cvtColor(frame2, cv2.COLOR_RGB2BGR)
                 frame2 = PolyTracker.prepare_image(
-                    image=cv2.cvtColor(frame2, cv2.COLOR_RGB2BGR),
+                    image=frame2,
                     colors=colors,
                     tracker_current_boxes=tracker_2.current_boxes,
                     polygon_in=POLY_CAM2_IN,
@@ -546,8 +547,10 @@ def detect_synchro_video_polygon(
                 break
 
     path = '/media/deny/Новый том/AI/CarpetTracker/tests'
-    save_data(data=true_bb_1, file_path=path, filename=f"true_bb_1_{video_paths.get('model_1').split('/')[-1].split('_')[0]}")
-    save_data(data=true_bb_2, file_path=path, filename=f"true_bb_2_{video_paths.get('model_2').split('/')[-1].split('_')[0]}")
+    save_data(data=true_bb_1, file_path=path,
+              filename=f"true_bb_1_{video_paths.get('model_1').split('/')[-1].split('_')[0]} {models[1]}")
+    save_data(data=true_bb_2, file_path=path,
+              filename=f"true_bb_2_{video_paths.get('model_2').split('/')[-1].split('_')[0]} {models[1]}")
     return count
 
 
@@ -878,7 +881,7 @@ if __name__ == '__main__':
             'model_1': 'videos/sync_test/test 20_cam 1_sync.mp4',
             'model_2': 'videos/sync_test/test 20_cam 2_sync.mp4',
             'save_path': 'temp/test 20.mp4',
-            'true_count': 139
+            'true_count': 142
         },
     ]
 
@@ -895,7 +898,7 @@ if __name__ == '__main__':
             sp = f"{video_paths[i].get('save_path').split('.')[0]} {mod[1]}.mp4" \
                 if video_paths[i].get('save_path') else None
             pred_count = detect_synchro_video_polygon(
-                models=mod[0],
+                models=mod,
                 video_paths=video_paths[i],
                 save_path=sp,
                 start=args['start_frame'],
@@ -915,6 +918,7 @@ if __name__ == '__main__':
 
             msg = f"{dt}   {txt}\n\n"
             save_txt(txt=msg, txt_path='logs/predict_synch_log.txt', mode='a')
+
     CREATE_CLASSIFICATION_VIDEO = True
     # models = {
     #         'model_1': YOLO('runs/detect/camera_1_mix+_8n_100ep/weights/best.pt'),

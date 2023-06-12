@@ -369,3 +369,183 @@
 - Process time: 21 min 6 sec
 
 
+12/06/2023 01:50:51   12/06/2023 01:50:51 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4', 'save_path': 'temp/test 16.mp4', 'true_count': 168}'
+- True count: '168; Predict count: '167'
+- Saves as 'temp/test 16 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 635], [480, 685], [705, 505], [550, 110]], 'POLY_CAM1_OUT': [[85, 350], [285, 755], [550, 730], [830, 500], [690, 35]], 'POLY_CAM2_IN': [[140, 0], [140, 200], [230, 235], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 20}
+- Process time: 16 min 44 sec
+
+
+12/06/2023 02:15:38   12/06/2023 02:15:38 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 17_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 17_cam 2_sync.mp4', 'save_path': 'temp/test 17.mp4', 'true_count': 167}'
+- True count: '167; Predict count: '166'
+- Saves as 'temp/test 17 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 635], [480, 685], [705, 505], [550, 110]], 'POLY_CAM1_OUT': [[85, 350], [285, 755], [550, 730], [830, 500], [690, 35]], 'POLY_CAM2_IN': [[140, 0], [140, 200], [230, 235], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 20}
+- Process time: 24 min 47 sec
+
+
+12/06/2023 02:34:22   12/06/2023 02:34:22 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 18_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 18_cam 2_sync.mp4', 'save_path': 'temp/test 18.mp4', 'true_count': 129}'
+- True count: '129; Predict count: '124'
+- Saves as 'temp/test 18 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 635], [480, 685], [705, 505], [550, 110]], 'POLY_CAM1_OUT': [[85, 350], [285, 755], [550, 730], [830, 500], [690, 35]], 'POLY_CAM2_IN': [[140, 0], [140, 200], [230, 235], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 20}
+- Process time: 18 min 43 sec
+
+
+12/06/2023 02:51:36   12/06/2023 02:51:36 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 19_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 19_cam 2_sync.mp4', 'save_path': 'temp/test 19.mp4', 'true_count': 136}'
+- True count: '136; Predict count: '149'
+- Saves as 'temp/test 19 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 635], [480, 685], [705, 505], [550, 110]], 'POLY_CAM1_OUT': [[85, 350], [285, 755], [550, 730], [830, 500], [690, 35]], 'POLY_CAM2_IN': [[140, 0], [140, 200], [230, 235], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 20}
+- Process time: 17 min 14 sec
+
+
+12/06/2023 03:06:22   12/06/2023 03:06:22 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 20_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 20_cam 2_sync.mp4', 'save_path': 'temp/test 20.mp4', 'true_count': 139}'
+- True count: '139; Predict count: '141'
+- Saves as 'temp/test 20 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 635], [480, 685], [705, 505], [550, 110]], 'POLY_CAM1_OUT': [[85, 350], [285, 755], [550, 730], [830, 500], [690, 35]], 'POLY_CAM2_IN': [[140, 0], [140, 200], [230, 235], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 20}
+- Process time: 14 min 46 sec
+
+
+12/06/2023 03:23:27   12/06/2023 03:23:27 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4', 'save_path': 'temp/test 16.mp4', 'true_count': 168}'
+- True count: '168; Predict count: '167'
+- Saves as 'temp/test 16 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 635], [480, 685], [705, 505], [550, 110]], 'POLY_CAM1_OUT': [[85, 350], [285, 755], [550, 730], [830, 500], [690, 35]], 'POLY_CAM2_IN': [[140, 0], [140, 200], [230, 235], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 20}
+- Process time: 17 min 4 sec
+
+
+12/06/2023 03:48:19   12/06/2023 03:48:19 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 17_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 17_cam 2_sync.mp4', 'save_path': 'temp/test 17.mp4', 'true_count': 167}'
+- True count: '167; Predict count: '175'
+- Saves as 'temp/test 17 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 635], [480, 685], [705, 505], [550, 110]], 'POLY_CAM1_OUT': [[85, 350], [285, 755], [550, 730], [830, 500], [690, 35]], 'POLY_CAM2_IN': [[140, 0], [140, 200], [230, 235], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 20}
+- Process time: 24 min 52 sec
+
+
+12/06/2023 04:07:15   12/06/2023 04:07:15 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 18_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 18_cam 2_sync.mp4', 'save_path': 'temp/test 18.mp4', 'true_count': 129}'
+- True count: '129; Predict count: '128'
+- Saves as 'temp/test 18 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 635], [480, 685], [705, 505], [550, 110]], 'POLY_CAM1_OUT': [[85, 350], [285, 755], [550, 730], [830, 500], [690, 35]], 'POLY_CAM2_IN': [[140, 0], [140, 200], [230, 235], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 20}
+- Process time: 18 min 55 sec
+
+
+12/06/2023 04:24:35   12/06/2023 04:24:35 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 19_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 19_cam 2_sync.mp4', 'save_path': 'temp/test 19.mp4', 'true_count': 136}'
+- True count: '136; Predict count: '155'
+- Saves as 'temp/test 19 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 635], [480, 685], [705, 505], [550, 110]], 'POLY_CAM1_OUT': [[85, 350], [285, 755], [550, 730], [830, 500], [690, 35]], 'POLY_CAM2_IN': [[140, 0], [140, 200], [230, 235], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 20}
+- Process time: 17 min 20 sec
+
+
+12/06/2023 04:39:17   12/06/2023 04:39:17 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 20_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 20_cam 2_sync.mp4', 'save_path': 'temp/test 20.mp4', 'true_count': 139}'
+- True count: '139; Predict count: '140'
+- Saves as 'temp/test 20 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 635], [480, 685], [705, 505], [550, 110]], 'POLY_CAM1_OUT': [[85, 350], [285, 755], [550, 730], [830, 500], [690, 35]], 'POLY_CAM2_IN': [[140, 0], [140, 200], [230, 235], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 20}
+- Process time: 14 min 41 sec
+
+
+12/06/2023 19:06:10   12/06/2023 19:06:10 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4', 'save_path': 'temp/test 16.mp4', 'true_count': 168}'
+- True count: '168; Predict count: '168'
+- Saves as 'temp/test 16 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 650], [680, 450], [560, 100]], 'POLY_CAM1_OUT': [[95, 330], [270, 750], [535, 760], [915, 480], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12}
+- Process time: 17 min 19 sec
+
+
+12/06/2023 19:31:13   12/06/2023 19:31:13 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 17_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 17_cam 2_sync.mp4', 'save_path': 'temp/test 17.mp4', 'true_count': 167}'
+- True count: '167; Predict count: '164'
+- Saves as 'temp/test 17 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 650], [680, 450], [560, 100]], 'POLY_CAM1_OUT': [[95, 330], [270, 750], [535, 760], [915, 480], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12}
+- Process time: 25 min 3 sec
+
+
+12/06/2023 19:50:03   12/06/2023 19:50:03 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 18_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 18_cam 2_sync.mp4', 'save_path': 'temp/test 18.mp4', 'true_count': 129}'
+- True count: '129; Predict count: '105'
+- Saves as 'temp/test 18 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 650], [680, 450], [560, 100]], 'POLY_CAM1_OUT': [[95, 330], [270, 750], [535, 760], [915, 480], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12}
+- Process time: 18 min 49 sec
+
+
+12/06/2023 20:07:38   12/06/2023 20:07:38 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 19_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 19_cam 2_sync.mp4', 'save_path': 'temp/test 19.mp4', 'true_count': 136}'
+- True count: '136; Predict count: '137'
+- Saves as 'temp/test 19 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 650], [680, 450], [560, 100]], 'POLY_CAM1_OUT': [[95, 330], [270, 750], [535, 760], [915, 480], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12}
+- Process time: 17 min 35 sec
+
+
+12/06/2023 20:23:11   12/06/2023 20:23:11 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 20_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 20_cam 2_sync.mp4', 'save_path': 'temp/test 20.mp4', 'true_count': 139}'
+- True count: '139; Predict count: '140'
+- Saves as 'temp/test 20 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 650], [680, 450], [560, 100]], 'POLY_CAM1_OUT': [[95, 330], [270, 750], [535, 760], [915, 480], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12}
+- Process time: 15 min 32 sec
+
+
+12/06/2023 20:40:16   12/06/2023 20:40:16 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 16_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 16_cam 2_sync.mp4', 'save_path': 'temp/test 16.mp4', 'true_count': 168}'
+- True count: '168; Predict count: '171'
+- Saves as 'temp/test 16 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 650], [680, 450], [560, 100]], 'POLY_CAM1_OUT': [[95, 330], [270, 750], [535, 760], [915, 480], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12}
+- Process time: 17 min 5 sec
+
+
+12/06/2023 21:05:26   12/06/2023 21:05:26 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 17_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 17_cam 2_sync.mp4', 'save_path': 'temp/test 17.mp4', 'true_count': 167}'
+- True count: '167; Predict count: '170'
+- Saves as 'temp/test 17 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 650], [680, 450], [560, 100]], 'POLY_CAM1_OUT': [[95, 330], [270, 750], [535, 760], [915, 480], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12}
+- Process time: 25 min 9 sec
+
+
+12/06/2023 21:24:43   12/06/2023 21:24:43 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 18_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 18_cam 2_sync.mp4', 'save_path': 'temp/test 18.mp4', 'true_count': 129}'
+- True count: '129; Predict count: '112'
+- Saves as 'temp/test 18 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 650], [680, 450], [560, 100]], 'POLY_CAM1_OUT': [[95, 330], [270, 750], [535, 760], [915, 480], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12}
+- Process time: 19 min 16 sec
+
+
+12/06/2023 21:42:04   12/06/2023 21:42:04 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 19_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 19_cam 2_sync.mp4', 'save_path': 'temp/test 19.mp4', 'true_count': 136}'
+- True count: '136; Predict count: '136'
+- Saves as 'temp/test 19 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 650], [680, 450], [560, 100]], 'POLY_CAM1_OUT': [[95, 330], [270, 750], [535, 760], [915, 480], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12}
+- Process time: 17 min 21 sec
+
+
+12/06/2023 21:56:52   12/06/2023 21:56:52 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': 'videos/sync_test/test 20_cam 1_sync.mp4', 'model_2': 'videos/sync_test/test 20_cam 2_sync.mp4', 'save_path': 'temp/test 20.mp4', 'true_count': 139}'
+- True count: '139; Predict count: '140'
+- Saves as 'temp/test 20 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'POLY_CAM1_IN': [[240, 270], [410, 650], [680, 450], [560, 100]], 'POLY_CAM1_OUT': [[95, 330], [270, 750], [535, 760], [915, 480], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 12}
+- Process time: 14 min 47 sec
+
+

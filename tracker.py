@@ -1063,26 +1063,6 @@ class PolyTracker:
                               sum(trck['check_out'][:-(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1)]))
                 deleted.append(i)
                 self.count += 1
-
-            # elif 1 < len(trck['boxes']) and trck['check_out'][-2:] == [True, False]:
-            #     deleted.append(i)
-            #     self.count += 1
-            #     if debug:
-            #         print(f"Check 2 {self.name}", -(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1),
-            #                   sum(trck['check_out'][:-(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1)]))
-            # elif len(trck['boxes']) > MIN_OBJ_SEQUENCE and \
-            #         sum(trck['check_out'][:-(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1)]) == 0:
-            #     if debug:
-            #         print(f"Check2 {self.name}", -(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1),
-            #               sum(trck['check_out'][:-(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1)]))
-            #     deleted.append(i)
-            #     self.count += 1
-            # elif 1 < len(trck['boxes']) <= MIN_OBJ_SEQUENCE and not trck['check_out'][-1]:
-            #     if debug:
-            #         print(f"Check3 {self.name}", [i['check_out'][-1] for i in self.track_list],
-            #               sum(trck['check_out'][:-1]))
-            #     deleted.append(i)
-            #     self.count += 1
             else:
                 rel.append(i)
         for i in deleted:
