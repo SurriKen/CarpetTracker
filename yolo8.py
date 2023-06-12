@@ -474,9 +474,7 @@ def detect_synchro_video_polygon(
         vc2.open(video_paths.get("model_2"))
         f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
 
-    # model = YOLO('runs/detect/train21/weights/best.pt')
     if save_path:
-        # print(save_path, fps, (w, h))
         out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), 25, (w, h * 2))
 
     f = min([f1, f2])
