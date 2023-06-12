@@ -31,10 +31,6 @@ POLY_CAM2_OUT = [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]]
 # frames = sorted(os.listdir(os.path.join(ROOT_DIR, frame_path)))
 GLOBAL_STEP = 0.1
 
-true_bb_1 = load_data(pickle_path=os.path.join(ROOT_DIR, 'tests/true_bb_1.dict'))
-true_bb_2 = load_data(pickle_path=os.path.join(ROOT_DIR, 'tests/true_bb_2.dict'))
-
-
 
 class PolyTracker:
     def __init__(self, polygon_in: list, polygon_out: list, name: str = ''):
@@ -514,9 +510,59 @@ class PolyTracker:
 
 
 if __name__ == '__main__':
-    # start, finish = (8 * 60 + 5) * 25, (8 * 60 + 13) * 25
-    # start, finish = (7 * 60 + 50) * 25, (7 * 60 + 60) * 25
+    # Problem test 17
+    vid_1 = 'videos/sync_test/test 17_cam 1_sync.mp4'
+    vid_2 = 'videos/sync_test/test 17_cam 2_sync.mp4'
+    true_bb_1 = load_data(
+        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 17 (mix+ 100ep, F% Acc% Sen%).dict'))
+    true_bb_2 = load_data(
+        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 17 (mix+ 100ep, F% Acc% Sen%).dict'))
+    # start, finish = (5 * 60 + 15) * 25, (5 * 60 + 20) * 25
+    # start, finish = (7 * 60 + 10) * 25, (7 * 60 + 20) * 25
+    # start, finish = (9 * 60 + 0) * 25, (9 * 60 + 10) * 25
+    # start, finish = (15 * 60 + 10) * 25, (15 * 60 + 15) * 25
     start, finish = (0 * 60 + 0) * 25, (10 * 60 + 33) * 25
+
+    # Problem test 18
+    # vid_1 = 'videos/sync_test/test 18_cam 1_sync.mp4'
+    # vid_2 = 'videos/sync_test/test 18_cam 2_sync.mp4'
+    # true_bb_1 = load_data(
+    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 18 (mix+ 100ep, F% Acc% Sen%).dict'))
+    # true_bb_2 = load_data(
+    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 18 (mix+ 100ep, F% Acc% Sen%).dict'))
+    # start, finish = (9 * 60 + 35) * 25, (9 * 60 + 40) * 25
+    # start, finish = (1 * 60 + 0) * 25, (1 * 60 + 10) * 25
+    # start, finish = (3 * 60 + 10) * 25, (3 * 60 + 20) * 25
+    # start, finish = (4 * 60 + 0) * 25, (4 * 60 + 40) * 25
+    # start, finish = (8 * 60 + 0) * 25, (8 * 60 + 40) * 25
+    # start, finish = (0 * 60 + 0) * 25, (10 * 60 + 33) * 25
+
+    # Problem test 19
+    # vid_1 = 'videos/sync_test/test 19_cam 1_sync.mp4'
+    # vid_2 = 'videos/sync_test/test 19_cam 2_sync.mp4'
+    # true_bb_1 = load_data(
+    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 19 (mix+ 100ep, F% Acc% Sen%).dict'))
+    # true_bb_2 = load_data(
+    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 19 (mix+ 100ep, F% Acc% Sen%).dict'))
+    # start, finish = (0 * 60 + 5) * 25, (0 * 60 + 15) * 25
+    # start, finish = (7 * 60 + 0) * 25, (7 * 60 + 10) * 25
+    # start, finish = (10 * 60 + 30) * 25, (10 * 60 + 40) * 25
+    # start, finish = (4 * 60 + 25) * 25, (4 * 60 + 30) * 25
+    # start, finish = (4 * 60 + 45) * 25, (4 * 60 + 50) * 25
+    # start, finish = (5 * 60 + 40) * 25, (5 * 60 + 45) * 25
+    # start, finish = (0 * 60 + 0) * 25, (10 * 60 + 33) * 25
+
+    # Problem test 20
+    # vid_1 = 'videos/sync_test/test 20_cam 1_sync.mp4'
+    # vid_2 = 'videos/sync_test/test 20_cam 2_sync.mp4'
+    # true_bb_1 = load_data(
+    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 20 (mix+ 100ep, F% Acc% Sen%).dict'))
+    # true_bb_2 = load_data(
+    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 20 (mix+ 100ep, F% Acc% Sen%).dict'))
+    # start, finish = (5 * 60 + 13) * 25, (5 * 60 + 18) * 25
+    # start, finish = (6 * 60 + 44) * 25, (6 * 60 + 50) * 25
+    # start, finish = (6 * 60 + 44) * 25, (6 * 60 + 50) * 25
+
     tracker_1 = PolyTracker(polygon_in=POLY_CAM1_IN, polygon_out=POLY_CAM1_OUT, name='camera 1')
     tracker_2 = PolyTracker(polygon_in=POLY_CAM2_IN, polygon_out=POLY_CAM2_OUT, name='camera 2')
     names = ['carpet']
@@ -528,10 +574,8 @@ if __name__ == '__main__':
     vc1.open(os.path.join(ROOT_DIR, 'videos/sync_test/test 16_cam 1_sync.mp4'))
     vc2 = cv2.VideoCapture()
     vc2.open(os.path.join(ROOT_DIR, 'videos/sync_test/test 16_cam 2_sync.mp4'))
-    # print('fps =', vc1.get(cv2.CAP_PROP_FPS))
+    print('fps 1 =', vc1.get(cv2.CAP_PROP_FPS), '\nfps 2 =', vc2.get(cv2.CAP_PROP_FPS))
 
-    # trfr1, trfr2 = [], []
-    # trc = []
     count = 0
     last_track_seq = {'tr1': [], 'tr2': []}
     for i in range(0, finish):
@@ -596,4 +640,3 @@ if __name__ == '__main__':
             # break
     logger.info(f"\nFinal count={count}")
     out.release()
-    # print("Total time:", time_converter(time.time() - st))
