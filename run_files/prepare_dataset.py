@@ -31,12 +31,12 @@ DatasetProcessing.form_dataset_for_train(
     condition={'orig_shape': (1920, 1080)}
 )
 # put box on image to check quality of dataset
-for l in ['train', 'val']:
-    DatasetProcessing.put_box_on_image(
-        images=f'datasets/yolov8_camera_1/{l}/images',
-        labels=f'datasets/yolov8_camera_1/{l}/labels',
-        save_path=f'datasets/yolov8_camera_1/{l}/img+lbl'
-    )
+# for l in ['train', 'val']:
+#     DatasetProcessing.put_box_on_image(
+#         images=f'datasets/yolov8_camera_1/{l}/images',
+#         labels=f'datasets/yolov8_camera_1/{l}/labels',
+#         save_path=f'datasets/yolov8_camera_1/{l}/img+lbl'
+#     )
 
 # form dataset for camera 2 with frame shape 640, 360
 DatasetProcessing.form_dataset_for_train(
@@ -46,9 +46,9 @@ DatasetProcessing.form_dataset_for_train(
     condition={'orig_shape': (640, 360)}
 )
 # put box on image to check quality of dataset
-for l in ['train', 'val']:
-    DatasetProcessing.put_box_on_image(
-        images=f'datasets/yolov8_camera_2/{l}/images',
-        labels=f'datasets/yolov8_camera_2/{l}/labels',
-        save_path=f'datasets/yolov8_camera_2/{l}/img+lbl'
-    )
+# for l in ['train', 'val']:
+#     DatasetProcessing.put_box_on_image(
+#         images=f'datasets/yolov8_camera_2/{l}/images',
+#         labels=f'datasets/yolov8_camera_2/{l}/labels',
+#         save_path=f'datasets/yolov8_camera_2/{l}/img+lbl'
+#     )

@@ -212,7 +212,7 @@ def fill_history(history=None, epoch: int = 0, train_loss: float = 0, val_loss: 
     return history
 
 
-def get_confusion_matrix(y_true, y_pred, classes, save_path: str = ''):
+def get_confusion_matrix(y_true: list, y_pred: list, classes: list, save_path: str = '') -> np.ndarray:
     cm = confusion_matrix(y_true, y_pred, labels=classes)
     if save_path:
         disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)

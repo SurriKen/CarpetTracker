@@ -22,10 +22,10 @@ from utils import load_data, time_converter, get_colors, add_headline_to_cv_imag
 # POLY_CAM2_IN = [[140, 0], [140, 200], [230, 235], [260, 185], [260, 0]]
 # POLY_CAM2_OUT = [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]]
 
-POLY_CAM1_IN = [[240, 270], [410, 650], [680, 450], [560, 100]]
-POLY_CAM1_OUT = [[95, 330], [270, 750], [535, 760], [915, 480], [760, 0]]
+POLY_CAM1_IN = [[110, 0], [410, 650], [725, 415], [545, 0]]
+POLY_CAM1_OUT = [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]]
 POLY_CAM2_IN = [[140, 0], [140, 150], [260, 185], [260, 0]]
-POLY_CAM2_OUT = [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]]
+POLY_CAM2_OUT = [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]]
 
 # frame_path = 'datasets/test 16_cam 1_0s-639s/frames'
 # frames = sorted(os.listdir(os.path.join(ROOT_DIR, frame_path)))
@@ -518,10 +518,10 @@ if __name__ == '__main__':
     true_bb_2 = load_data(
         pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 17 (mix+ 100ep, F% Acc% Sen%).dict'))
     # start, finish = (5 * 60 + 15) * 25, (5 * 60 + 20) * 25
-    # start, finish = (7 * 60 + 10) * 25, (7 * 60 + 20) * 25
+    start, finish = (7 * 60 + 13) * 25, (7 * 60 + 18) * 25
     # start, finish = (9 * 60 + 0) * 25, (9 * 60 + 10) * 25
     # start, finish = (15 * 60 + 10) * 25, (15 * 60 + 15) * 25
-    start, finish = (0 * 60 + 0) * 25, (10 * 60 + 33) * 25
+    # start, finish = (0 * 60 + 0) * 25, (15 * 60 + 38) * 25
 
     # Problem test 18
     # vid_1 = 'videos/sync_test/test 18_cam 1_sync.mp4'
@@ -535,7 +535,7 @@ if __name__ == '__main__':
     # start, finish = (3 * 60 + 10) * 25, (3 * 60 + 20) * 25
     # start, finish = (4 * 60 + 0) * 25, (4 * 60 + 40) * 25
     # start, finish = (8 * 60 + 0) * 25, (8 * 60 + 40) * 25
-    # start, finish = (0 * 60 + 0) * 25, (10 * 60 + 33) * 25
+    # start, finish = (0 * 60 + 0) * 25, (11 * 60 + 55) * 25
 
     # Problem test 19
     # vid_1 = 'videos/sync_test/test 19_cam 1_sync.mp4'
@@ -550,7 +550,7 @@ if __name__ == '__main__':
     # start, finish = (4 * 60 + 25) * 25, (4 * 60 + 30) * 25
     # start, finish = (4 * 60 + 45) * 25, (4 * 60 + 50) * 25
     # start, finish = (5 * 60 + 40) * 25, (5 * 60 + 45) * 25
-    # start, finish = (0 * 60 + 0) * 25, (10 * 60 + 33) * 25
+    # start, finish = (0 * 60 + 0) * 25, (10 * 60 + 49) * 25
 
     # Problem test 20
     # vid_1 = 'videos/sync_test/test 20_cam 1_sync.mp4'
@@ -561,7 +561,7 @@ if __name__ == '__main__':
     #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 20 (mix+ 100ep, F% Acc% Sen%).dict'))
     # start, finish = (5 * 60 + 13) * 25, (5 * 60 + 18) * 25
     # start, finish = (6 * 60 + 44) * 25, (6 * 60 + 50) * 25
-    # start, finish = (6 * 60 + 44) * 25, (6 * 60 + 50) * 25
+    # start, finish = (0 * 60 + 0) * 25, (9 * 60 + 18) * 25
 
     tracker_1 = PolyTracker(polygon_in=POLY_CAM1_IN, polygon_out=POLY_CAM1_OUT, name='camera 1')
     tracker_2 = PolyTracker(polygon_in=POLY_CAM2_IN, polygon_out=POLY_CAM2_OUT, name='camera 2')
@@ -571,9 +571,9 @@ if __name__ == '__main__':
     out = cv2.VideoWriter(os.path.join(ROOT_DIR, 'temp/test.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), 25,
                           (out_size[0], out_size[1] * 2))
     vc1 = cv2.VideoCapture()
-    vc1.open(os.path.join(ROOT_DIR, 'videos/sync_test/test 16_cam 1_sync.mp4'))
+    vc1.open(os.path.join(ROOT_DIR, vid_1))
     vc2 = cv2.VideoCapture()
-    vc2.open(os.path.join(ROOT_DIR, 'videos/sync_test/test 16_cam 2_sync.mp4'))
+    vc2.open(os.path.join(ROOT_DIR, vid_2))
     print('fps 1 =', vc1.get(cv2.CAP_PROP_FPS), '\nfps 2 =', vc2.get(cv2.CAP_PROP_FPS))
 
     count = 0
@@ -587,7 +587,7 @@ if __name__ == '__main__':
             boxes_1 = true_bb_1[i]
             tracker_1.process(frame_id=i, boxes=boxes_1, img_shape=img1.shape[:2], debug=False)
             boxes_2 = true_bb_2[i]
-            tracker_2.process(frame_id=i, boxes=boxes_2, img_shape=img2.shape[:2], debug=False)
+            tracker_2.process(frame_id=i, boxes=boxes_2, img_shape=img2.shape[:2], debug=True)
             # print('================================================================')
             # print(f" - frame={i}, count={count}, boxes_1={[[int(c) for c in box[:4]] for box in boxes_1]},"
             #       f" boxes_2={[[int(c) for c in box[:4]] for box in boxes_2]}")
@@ -623,6 +623,8 @@ if __name__ == '__main__':
                 poly_width=2,
                 reshape=out_size
             )
+            # cv2.imshow('image', img2)
+            # cv2.waitKey(0)
 
             img = np.concatenate((img1, img2), axis=0)
             headline = f"Обнаружено ковров: {count}\nТрекер 1: {tracker_1.count}\nТрекер 2: {tracker_2.count}"
