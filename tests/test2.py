@@ -8,7 +8,7 @@ from PIL import Image
 import matplotlib.path as mpltPath
 from torchvision.utils import draw_bounding_boxes
 
-from parameters import ROOT_DIR, MIN_EMPTY_SEQUENCE, MIN_OBJ_SEQUENCE, SPEED_LIMIT_PERCENT
+from parameters import ROOT_DIR, MIN_EMPTY_SEQUENCE, MIN_OBJ_SEQUENCE, SPEED_LIMIT_PERCENT, DEAD_LIMIT_PERCENT
 from utils import load_data, time_converter, get_colors, add_headline_to_cv_image, logger
 
 # imp1 = 'datasets/test 16_cam 1_0s-639s/frames/04424.png'
@@ -338,7 +338,6 @@ class PolyTracker:
         rel, deleted = [], []
         self.count_frames = []
         for i, trck in enumerate(self.track_list):
-            # print(f" -- {i}, distance_limit={distance_limit}, trck={trck}")
             cut = MIN_OBJ_SEQUENCE - 1
             if len(trck['shift_center']) > MIN_OBJ_SEQUENCE and \
                     (
@@ -368,7 +367,7 @@ class PolyTracker:
                     (trck['check_in'][-1] or trck['check_out'][-1]):
                 continue
 
-            elif self.frame_id - trck['frame_id'][-1] > MIN_EMPTY_SEQUENCE and not trck['check_out'][-1]:
+            elif (self.frame_id - trck['frame_id'][-1]) > MIN_EMPTY_SEQUENCE and not trck['check_out'][-1]:
                 if debug:
                     print(f"Check {self.name}", -(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1),
                               sum(trck['check_out'][:-(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1)]))
@@ -408,6 +407,7 @@ class PolyTracker:
         self.frame_id = frame_id
         diagonal = ((img_shape[0]) ** 2 + (img_shape[1]) ** 2) ** 0.5
         speed_limit = speed_limit_percent * diagonal
+        dist_limit = DEAD_LIMIT_PERCENT * diagonal
         step = GLOBAL_STEP * diagonal
         limit_in = self.expand_poly(self.polygon_in, -1 * step * 0.5)
         limit_out = self.expand_poly(self.polygon_out, step)
@@ -422,7 +422,7 @@ class PolyTracker:
 
                 # Check in dead boxes list and update it
                 if self.dead_boxes:
-                    box = self.update_dead_boxes(frame_id=frame_id, new_box=box, distance_limit=speed_limit)
+                    box = self.update_dead_boxes(frame_id=frame_id, new_box=box, distance_limit=dist_limit)
 
                 if box:
                     self.current_boxes.append([box, check_in, check_out])
@@ -446,11 +446,11 @@ class PolyTracker:
 
                     self.max_id += 1
                     self.track_list.append(track)
-                elif not box[-2]:
+                elif not box[-1]:
                     # key = 0 if not self.dead_boxes else max(list(self.dead_boxes.keys()))
                     # self.dead_boxes[key] = dict(frame_id=[], coords=[])
                     self.move_boxes_from_track_to_dead(frame_idxs=[frame_id], boxes=[box[0]])
-            # print("track_list 1", [i for i in self.track_list])
+
         # if track exist - update track
         else:
             tr_idxs = list(range(len(self.track_list)))
@@ -462,20 +462,17 @@ class PolyTracker:
                     # distance = self.get_distance(self.track_list[i].boxes[-1], self.current_boxes[b])
                     c1 = self.track_list[i]['boxes'][-1]
                     c2 = self.current_boxes[b][0]
-                    # distance = PolyTracker.get_distance(c1, c2)
-                    speed = PolyTracker.get_distance(c1, c2) / (frame_id - self.track_list[i]['frame_id'][-1])
+                    distance = PolyTracker.get_distance(c1, c2)
+                    # speed = PolyTracker.get_distance(c1, c2) / (frame_id - self.track_list[i]['frame_id'][-1])
                     if (i, b) not in pair or (b, i) not in pair:
                         # if distance <= 0.05 * diagonal:
-                        dist.append((speed, i, b))
+                        dist.append((distance, i, b))
                         pair.append((i, b))
             dist = sorted(dist)
-            # dist_limit = 0.15 * diagonal
-            speed_limit = 0.1 * diagonal
             if debug:
-                print('dist =', dist, '\nspeed_limit =', speed_limit)
+                print('dist =', dist, '\nspeed_limit =', speed_limit, '\ndist_limit =', dist_limit)
             for d in dist:
-                if tr_idxs and d[1] in tr_idxs and d[2] in box_idxs:  # and d[0] < speed_limit:
-                    # print(f"-- d: {d}")
+                if tr_idxs and d[1] in tr_idxs and d[2] in box_idxs and d[0] < speed_limit:
                     self.track_list[d[1]] = self.fill_track(
                         track=self.track_list[d[1]],
                         id=self.track_list[d[1]]['id'],
@@ -484,12 +481,9 @@ class PolyTracker:
                         check_in=self.current_boxes[d[2]][1],
                         check_out=self.current_boxes[d[2]][2]
                     )
-                    # self.max_id += 1
                     tr_idxs.pop(tr_idxs.index(d[1]))
                     box_idxs.pop(box_idxs.index(d[2]))
-                    # print('-- tr_id', tr_idxs, 'box_id', box_idxs, self.track_list[d[1]])
             if box_idxs:
-                # print("track", frame_id, [b['boxes'] for b in self.track_list])
                 for b in box_idxs:
                     # add track if its first point is inside out-polygon
                     if self.current_boxes[b][2]:
@@ -507,7 +501,12 @@ class PolyTracker:
                         self.max_id += 1
                         self.track_list.append(track)
                     else:
-                        self.fill_dead_box_form(key=max(list(self.dead_boxes.keys())), frame_id=frame_id, box=box[0])
+                        key = 0 if not list(self.dead_boxes.keys()) else max(list(self.dead_boxes.keys())) + 1
+                        self.dead_boxes[key] = {
+                            'frame_id': [],
+                            'coords': []
+                        }
+                        self.fill_dead_box_form(key=key, frame_id=frame_id, box=self.current_boxes[b][0])
         #         print("track", frame_id, [b['boxes'] for b in self.track_list])
         if debug:
             print("track x", self.track_list)
@@ -520,38 +519,39 @@ class PolyTracker:
                 f"{[i['boxes'] for i in self.track_list]}\n"
                 f"{[i['check_out'] for i in self.track_list]}\n"
             )
-        self.update_track_list(distance_limit=speed_limit, debug=debug)
+        self.update_track_list(distance_limit=dist_limit, debug=debug)
         if debug:
-            print("track x2", self.count, [i['boxes'] for i in self.track_list], [i['check_out'] for i in self.track_list])
+            # print("track x2", self.count, [i['boxes'] for i in self.track_list], [i['check_out'] for i in self.track_list])
+            print('self.dead_boxes', self.dead_boxes)
 
 
 if __name__ == '__main__':
     # Problem test 17
-    vid_1 = 'videos/sync_test/test 17_cam 1_sync.mp4'
-    vid_2 = 'videos/sync_test/test 17_cam 2_sync.mp4'
-    true_bb_1 = load_data(
-        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 17 (mix+ 100ep, F% Acc% Sen%).dict'))
-    true_bb_2 = load_data(
-        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 17 (mix+ 100ep, F% Acc% Sen%).dict'))
+    # vid_1 = 'videos/sync_test/test 17_cam 1_sync.mp4'
+    # vid_2 = 'videos/sync_test/test 17_cam 2_sync.mp4'
+    # true_bb_1 = load_data(
+    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 17 (mix+ 100ep, F% Acc% Sen%).dict'))
+    # true_bb_2 = load_data(
+    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 17 (mix+ 100ep, F% Acc% Sen%).dict'))
     # start, finish = (5 * 60 + 15) * 25, (5 * 60 + 20) * 25
     # start, finish = (7 * 60 + 13) * 25, (7 * 60 + 17) * 25
     # start, finish = (9 * 60 + 0) * 25, (9 * 60 + 10) * 25
-    start, finish = (15 * 60 + 10) * 25, (15 * 60 + 15) * 25
+    # start, finish = (15 * 60 + 12) * 25, (15 * 60 + 17) * 25
     # start, finish = (0 * 60 + 0) * 25, (15 * 60 + 38) * 25
 
     # Problem test 18
-    # vid_1 = 'videos/sync_test/test 18_cam 1_sync.mp4'
-    # vid_2 = 'videos/sync_test/test 18_cam 2_sync.mp4'
-    # true_bb_1 = load_data(
-    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 18 (mix+ 100ep, F% Acc% Sen%).dict'))
-    # true_bb_2 = load_data(
-    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 18 (mix+ 100ep, F% Acc% Sen%).dict'))
+    vid_1 = 'videos/sync_test/test 18_cam 1_sync.mp4'
+    vid_2 = 'videos/sync_test/test 18_cam 2_sync.mp4'
+    true_bb_1 = load_data(
+        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 18 (mix+ 100ep, F% Acc% Sen%).dict'))
+    true_bb_2 = load_data(
+        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 18 (mix+ 100ep, F% Acc% Sen%).dict'))
     # start, finish = (9 * 60 + 35) * 25, (9 * 60 + 40) * 25
     # start, finish = (1 * 60 + 0) * 25, (1 * 60 + 10) * 25
     # start, finish = (3 * 60 + 10) * 25, (3 * 60 + 20) * 25
     # start, finish = (4 * 60 + 0) * 25, (4 * 60 + 40) * 25
-    # start, finish = (8 * 60 + 0) * 25, (8 * 60 + 40) * 25
-    # start, finish = (0 * 60 + 0) * 25, (11 * 60 + 55) * 25
+    # start, finish = (8 * 60 + 19) * 25, (8 * 60 + 30) * 25
+    start, finish = (0 * 60 + 0) * 25, (11 * 60 + 55) * 25
 
     # Problem test 19
     # vid_1 = 'videos/sync_test/test 19_cam 1_sync.mp4'

@@ -1,4 +1,7 @@
+import os.path
+
 from dataset_processing import DatasetProcessing
+from parameters import ROOT_DIR
 
 # dict with info about video, where key - link to video, value - list of info,
 # index 0 - frame to start synch, index 1 - timestamp in video for this frame
@@ -22,8 +25,10 @@ sync_data = {
     # 'videos/classification_videos/МОС 19-40_cam2.mp4': [16, '19:40:52'],
     # 'videos/classification_videos/Ночь 20-11_cam1.mp4': [193, '20:11:13'],
     # 'videos/classification_videos/Ночь 20-11_cam2.mp4': [8, '20:11:13'],
-    'videos/test 6_cam 1.mp4': [31, '13:30:01'],
-    'videos/test 6_cam 2.mp4': [2159, '13:30:02'],
+    # 'videos/test 6_cam 1.mp4': [31, '13:30:01'],
+    # 'videos/test 6_cam 2.mp4': [2159, '13:30:02'],
+    'videos/test 21_cam 1.mp4': [195, '18:59:35'],
+    'videos/test 21_cam 2.mp4': [931, '18:59:38'],
 }
 
 # List of dicts, each dict in formate {'camera 1': 'link to video from camera 1', 'camera 2': 'link to video from camera 2'}
@@ -38,19 +43,19 @@ sync_videos = [
     # {'camera 1': 'videos/classification_videos/16-10 ЦП_cam1.mp4', 'camera 2': 'videos/classification_videos/16-10 ЦП_cam2.mp4'},
     # {'camera 1': 'videos/classification_videos/МОС 19-40_cam1.mp4', 'camera 2': 'videos/classification_videos/МОС 19-40_cam2.mp4'},
     # {'camera 1': 'videos/classification_videos/Ночь 20-11_cam1.mp4', 'camera 2': 'videos/classification_videos/Ночь 20-11_cam2.mp4'},
-    {'camera 1': 'videos/test 6_cam 1.mp4', 'camera 2': 'videos/test 6_cam 2.mp4'},
+    {'camera 1': 'videos/test 21_cam 1.mp4', 'camera 2': 'videos/test 21_cam 2.mp4'},
 ]
 
 for pair in sync_videos:
     save_name_1 = f"{pair.get('camera 1').split('/')[-1].split('.')[0]}_sync.mp4"
     DatasetProcessing.synchronize_video(
-        video_path=pair.get('camera 1'),
-        save_path=f"videos/sync_test/{save_name_1}",
+        video_path=os.path.join(ROOT_DIR, pair.get('camera 1')),
+        save_path=os.path.join(ROOT_DIR, f"videos/sync_test/{save_name_1}"),
         from_frame=sync_data.get(pair.get('camera 1'))[0]
     )
     save_name_2 = f"{pair.get('camera 2').split('/')[-1].split('.')[0]}_sync.mp4"
     DatasetProcessing.synchronize_video(
-        video_path=pair.get('camera 2'),
-        save_path=f"videos/sync_test/{save_name_2}",
+        video_path=os.path.join(ROOT_DIR, pair.get('camera 2')),
+        save_path=os.path.join(ROOT_DIR, f"videos/sync_test/{save_name_2}"),
         from_frame=sync_data.get(pair.get('camera 2'))[0]
     )

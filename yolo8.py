@@ -12,7 +12,7 @@ from ultralytics import YOLO
 from dataset_processing import DatasetProcessing
 from tracker import Tracker, PolyTracker
 from parameters import SPEED_LIMIT_PERCENT, IMAGE_IRRELEVANT_SPACE_PERCENT, MIN_OBJ_SEQUENCE, MIN_EMPTY_SEQUENCE, \
-    POLY_CAM1_IN, POLY_CAM1_OUT, POLY_CAM2_OUT, POLY_CAM2_IN
+    POLY_CAM1_IN, POLY_CAM1_OUT, POLY_CAM2_OUT, POLY_CAM2_IN, ROOT_DIR
 from utils import get_colors, load_data, add_headline_to_cv_image, logger, time_converter, save_txt, save_data
 
 yolov8_types = {
@@ -546,7 +546,7 @@ def detect_synchro_video_polygon(
                     out.release()
                 break
 
-    path = '/media/deny/Новый том/AI/CarpetTracker/tests'
+    path = os.path.join(ROOT_DIR, 'tests/boxes')
     save_data(data=true_bb_1, file_path=path,
               filename=f"true_bb_1_{video_paths.get('model_1').split('/')[-1].split('_')[0]} {models[1]}")
     save_data(data=true_bb_2, file_path=path,

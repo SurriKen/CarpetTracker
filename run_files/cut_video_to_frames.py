@@ -1,4 +1,7 @@
+import os
+
 from dataset_processing import DatasetProcessing
+from parameters import ROOT_DIR
 
 # Link to video (from repository/content root)
 vid = [
@@ -16,7 +19,8 @@ vid = [
     # 'videos/classification_videos/МОС,19-40_sync.mp4', 'videos/classification_videos/МОС,19-40_2_sync.mp4',
     # 'videos/classification_videos/НОЧЬ,20-11_sync.mp4', 'videos/classification_videos/НОЧЬ,20-11_2_sync.mp4',
     # 'videos/sync_test/test 5_cam 1_sync.mp4', 'videos/sync_test/test 5_cam 2_sync.mp4',
-    'videos/test 6_cam 1.mp4', 'videos/test 6_cam 2.mp4',
+    # 'videos/test 6_cam 1.mp4', 'videos/test 6_cam 2.mp4',
+    'videos/test 21_cam 1.mp4', 'videos/test 21_cam 2.mp4',
 ]
 
 FOLDER_FOR_FRAMES = 'datasets'
@@ -24,9 +28,10 @@ FOLDER_FOR_FRAMES = 'datasets'
 # from_time - time in video to start cutting, sec (default - 0)
 # to_time - time in video to end cutting, sec (default - 10000), if to_time > frame count -> to_time = frame count
 for v in vid:
+    v = os.path.join(ROOT_DIR, v)
     DatasetProcessing.video2frames(
         video_path=v,
-        save_path=FOLDER_FOR_FRAMES,
+        save_path=os.path.join(ROOT_DIR, FOLDER_FOR_FRAMES),
         from_time=0,
         to_time=120
     )
