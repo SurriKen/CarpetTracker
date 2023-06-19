@@ -280,25 +280,25 @@ class PolyTracker:
         elif last_state == [True, False] and new_state == [False, True]:
             if min(new_track_seq['tr2']) - max(last_track_seq['tr1']) > MIN_EMPTY_SEQUENCE:
                 if debug:
-                    print(3)
+                    print(3, min(new_track_seq['tr2']), max(last_track_seq['tr1']), MIN_EMPTY_SEQUENCE)
                 last_track_seq['tr1'] = []
                 last_track_seq['tr2'] = new_track_seq['tr2']
                 count += 1
             else:
                 if debug:
-                    print(4)
+                    print(4, min(new_track_seq['tr2']), max(last_track_seq['tr1']), MIN_EMPTY_SEQUENCE)
                 last_track_seq['tr2'] = new_track_seq['tr2']
 
         elif last_state == [False, True] and new_state == [True, False]:
             if min(new_track_seq['tr1']) - max(last_track_seq['tr2']) > MIN_EMPTY_SEQUENCE:
                 if debug:
-                    print(5)
+                    print(5, min(new_track_seq['tr1']), max(last_track_seq['tr2']), MIN_EMPTY_SEQUENCE)
                 last_track_seq['tr2'] = []
                 last_track_seq['tr1'] = new_track_seq['tr1']
                 count += 1
             else:
                 if debug:
-                    print(6)
+                    print(6, min(new_track_seq['tr1']), max(last_track_seq['tr2']), MIN_EMPTY_SEQUENCE)
                 last_track_seq['tr1'] = new_track_seq['tr1']
 
         elif last_state == [True, True] and new_state == [True, False]:
@@ -334,6 +334,13 @@ class PolyTracker:
 
         return count, last_track_seq
 
+    @staticmethod
+    def isin(pattern, sequence):
+        for i in range(len(sequence) - len(pattern) + 1):
+            if sequence[i:i + len(pattern)] == pattern:
+                return True
+        return False
+
     def update_track_list(self, distance_limit: float, debug: bool = False):
         rel, deleted = [], []
         self.count_frames = []
@@ -364,7 +371,11 @@ class PolyTracker:
             if debug:
                 print('trck', trck)
             if self.frame_id - trck['frame_id'][-1] > MIN_EMPTY_SEQUENCE and \
-                    (trck['check_in'][-1] or trck['check_out'][-1]):
+                    trck['check_in'][-1]:  # or trck['check_out'][-1]):
+                continue
+
+            elif self.frame_id - trck['frame_id'][-1] > MIN_EMPTY_SEQUENCE and \
+                    trck['check_out'][-1] and not self.isin([False, False, False], trck['check_out']):  # or trck['check_out'][-1]):
                 continue
 
             elif (self.frame_id - trck['frame_id'][-1]) > MIN_EMPTY_SEQUENCE and not trck['check_out'][-1]:
@@ -374,25 +385,14 @@ class PolyTracker:
                 deleted.append(i)
                 self.count += 1
 
-            # elif 1 < len(trck['boxes']) and trck['check_out'][-2:] == [True, False]:
-            #     deleted.append(i)
-            #     self.count += 1
-            #     if debug:
-            #         print(f"Check 2 {self.name}", -(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1),
-            #                   sum(trck['check_out'][:-(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1)]))
-            # elif len(trck['boxes']) > MIN_OBJ_SEQUENCE and \
-            #         sum(trck['check_out'][:-(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1)]) == 0:
-            #     if debug:
-            #         print(f"Check2 {self.name}", -(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1),
-            #               sum(trck['check_out'][:-(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1)]))
-            #     deleted.append(i)
-            #     self.count += 1
-            # elif 1 < len(trck['boxes']) <= MIN_OBJ_SEQUENCE and not trck['check_out'][-1]:
-            #     if debug:
-            #         print(f"Check3 {self.name}", [i['check_out'][-1] for i in self.track_list],
-            #               sum(trck['check_out'][:-1]))
-            #     deleted.append(i)
-            #     self.count += 1
+            elif (self.frame_id - trck['frame_id'][-1]) > MIN_EMPTY_SEQUENCE and \
+                    self.isin([False, False, False], trck['check_out']):
+                if debug:
+                    print(f"Check {self.name}", -(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1),
+                              sum(trck['check_out'][:-(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1)]))
+                deleted.append(i)
+                self.count += 1
+
             else:
                 rel.append(i)
         for i in deleted:
@@ -406,7 +406,7 @@ class PolyTracker:
         self.current_boxes = []
         self.frame_id = frame_id
         diagonal = ((img_shape[0]) ** 2 + (img_shape[1]) ** 2) ** 0.5
-        speed_limit = speed_limit_percent * diagonal
+        # speed_limit = speed_limit_percent * diagonal
         dist_limit = DEAD_LIMIT_PERCENT * diagonal
         step = GLOBAL_STEP * diagonal
         limit_in = self.expand_poly(self.polygon_in, -1 * step * 0.5)
@@ -469,10 +469,14 @@ class PolyTracker:
                         dist.append((distance, i, b))
                         pair.append((i, b))
             dist = sorted(dist)
-            if debug:
-                print('dist =', dist, '\nspeed_limit =', speed_limit, '\ndist_limit =', dist_limit)
+            # if debug:
+            #     print('dist =', dist,
+            #           # '\nspeed_limit =', speed_limit,
+            #           '\ndist_limit =', dist_limit)
             for d in dist:
-                if tr_idxs and d[1] in tr_idxs and d[2] in box_idxs and d[0] < speed_limit:
+                if not self.track_list[d[1]]['check_out'][-1] and self.current_boxes[d[2]][1]:
+                    continue
+                elif tr_idxs and d[1] in tr_idxs and d[2] in box_idxs: # and d[0] < speed_limit:
                     self.track_list[d[1]] = self.fill_track(
                         track=self.track_list[d[1]],
                         id=self.track_list[d[1]]['id'],
@@ -508,8 +512,8 @@ class PolyTracker:
                         }
                         self.fill_dead_box_form(key=key, frame_id=frame_id, box=self.current_boxes[b][0])
         #         print("track", frame_id, [b['boxes'] for b in self.track_list])
-        if debug:
-            print("track x", self.track_list)
+        # if debug:
+        #     print("track x", self.track_list)
 
         # Review tracks
         if debug:
@@ -540,18 +544,24 @@ if __name__ == '__main__':
     # start, finish = (0 * 60 + 0) * 25, (15 * 60 + 38) * 25
 
     # Problem test 18
-    vid_1 = 'videos/sync_test/test 18_cam 1_sync.mp4'
-    vid_2 = 'videos/sync_test/test 18_cam 2_sync.mp4'
-    true_bb_1 = load_data(
-        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 18 (mix+ 100ep, F% Acc% Sen%).dict'))
-    true_bb_2 = load_data(
-        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 18 (mix+ 100ep, F% Acc% Sen%).dict'))
-    # start, finish = (9 * 60 + 35) * 25, (9 * 60 + 40) * 25
-    # start, finish = (1 * 60 + 0) * 25, (1 * 60 + 10) * 25
-    # start, finish = (3 * 60 + 10) * 25, (3 * 60 + 20) * 25
-    # start, finish = (4 * 60 + 0) * 25, (4 * 60 + 40) * 25
-    # start, finish = (8 * 60 + 19) * 25, (8 * 60 + 30) * 25
-    start, finish = (0 * 60 + 0) * 25, (11 * 60 + 55) * 25
+    # vid_1 = 'videos/sync_test/test 18_cam 1_sync.mp4'
+    # vid_2 = 'videos/sync_test/test 18_cam 2_sync.mp4'
+    # true_bb_1 = load_data(
+    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 18 (mix+ 100ep, F% Acc% Sen%).dict'))
+    # true_bb_2 = load_data(
+    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 18 (mix+ 100ep, F% Acc% Sen%).dict'))
+    # start, finish = (0 * 60 + 40) * 25, (0 * 60 + 45) * 25
+    # start, finish = (3 * 60 + 0) * 25, (3 * 60 + 8) * 25
+    # start, finish = (6 * 60 + 25) * 25, (6 * 60 + 32) * 25
+    # start, finish = (7 * 60 + 41) * 25, (7 * 60 + 45) * 25
+    # start, finish = (8 * 60 + 20) * 25, (8 * 60 + 40) * 25
+    # start, finish = (8 * 60 + 36) * 25, (8 * 60 + 38) * 25
+    # start, finish = (8 * 60 + 55) * 25, (8 * 60 + 58) * 25
+    # start, finish = (9 * 60 + 8) * 25, (9 * 60 + 12) * 25
+    # start, finish = (10 * 60 + 18) * 25, (10 * 60 + 22) * 25
+    # start, finish = (10 * 60 + 20) * 25, (10 * 60 + 40) * 25
+    # start, finish = (10 * 60 + 59) * 25, (11 * 60 + 4) * 25
+    # start, finish = (0 * 60 + 0) * 25, (11 * 60 + 55) * 25
 
     # Problem test 19
     # vid_1 = 'videos/sync_test/test 19_cam 1_sync.mp4'
@@ -565,7 +575,7 @@ if __name__ == '__main__':
     # start, finish = (10 * 60 + 30) * 25, (10 * 60 + 40) * 25
     # start, finish = (4 * 60 + 25) * 25, (4 * 60 + 30) * 25
     # start, finish = (4 * 60 + 45) * 25, (4 * 60 + 50) * 25
-    # start, finish = (5 * 60 + 40) * 25, (5 * 60 + 45) * 25
+    # start, finish = (10 * 60 + 17) * 25, (10 * 60 + 23) * 25
     # start, finish = (0 * 60 + 0) * 25, (10 * 60 + 49) * 25
 
     # Problem test 20
@@ -575,9 +585,23 @@ if __name__ == '__main__':
     #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 20 (mix+ 100ep, F% Acc% Sen%).dict'))
     # true_bb_2 = load_data(
     #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 20 (mix+ 100ep, F% Acc% Sen%).dict'))
-    # start, finish = (5 * 60 + 13) * 25, (5 * 60 + 18) * 25
-    # start, finish = (6 * 60 + 44) * 25, (6 * 60 + 50) * 25
+    # start, finish = (0 * 60 + 10) * 25, (0 * 60 + 15) * 25
+    # start, finish = (8 * 60 + 5) * 25, (8 * 60 + 10) * 25
     # start, finish = (0 * 60 + 0) * 25, (9 * 60 + 18) * 25
+
+    # Problem test 21
+    vid_1 = 'videos/sync_test/test 21_cam 1_sync.mp4'
+    vid_2 = 'videos/sync_test/test 21_cam 2_sync.mp4'
+    true_bb_1 = load_data(
+        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 21 (mix+ 100ep, F% Acc% Sen%).dict'))
+    true_bb_2 = load_data(
+        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 21 (mix+ 100ep, F% Acc% Sen%).dict'))
+    start, finish = (9 * 60 + 35) * 25, (9 * 60 + 40) * 25
+    # start, finish = (1 * 60 + 0) * 25, (1 * 60 + 10) * 25
+    # start, finish = (3 * 60 + 10) * 25, (3 * 60 + 20) * 25
+    # start, finish = (4 * 60 + 0) * 25, (4 * 60 + 40) * 25
+    # start, finish = (8 * 60 + 19) * 25, (8 * 60 + 30) * 25
+    # start, finish = (0 * 60 + 0) * 25, (11 * 60 + 55) * 25
 
     tracker_1 = PolyTracker(polygon_in=POLY_CAM1_IN, polygon_out=POLY_CAM1_OUT, name='camera 1')
     tracker_2 = PolyTracker(polygon_in=POLY_CAM2_IN, polygon_out=POLY_CAM2_OUT, name='camera 2')
@@ -601,7 +625,7 @@ if __name__ == '__main__':
 
         if i >= start:
             boxes_1 = true_bb_1[i]
-            tracker_1.process(frame_id=i, boxes=boxes_1, img_shape=img1.shape[:2], debug=True)
+            tracker_1.process(frame_id=i, boxes=boxes_1, img_shape=img1.shape[:2], debug=False)
             boxes_2 = true_bb_2[i]
             tracker_2.process(frame_id=i, boxes=boxes_2, img_shape=img2.shape[:2], debug=False)
             # print('================================================================')

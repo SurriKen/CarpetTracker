@@ -3163,3 +3163,1040 @@ Final count=0
 2023-06-19 07:19:53,835 INFO Frames 17800 / 17875 was processed. Current count: 113
 2023-06-19 07:19:56,916 INFO 
 Final count=113
+2023-06-19 14:18:24,872 INFO Frames 100 / 17875 was processed. Current count: 0
+2023-06-19 14:18:26,923 INFO Frames 200 / 17875 was processed. Current count: 0
+2023-06-19 14:18:28,940 INFO Frames 300 / 17875 was processed. Current count: 0
+2023-06-19 14:18:30,942 INFO Frames 400 / 17875 was processed. Current count: 0
+2023-06-19 14:18:33,327 INFO Frames 500 / 17875 was processed. Current count: 0
+2023-06-19 14:18:35,921 INFO Frames 600 / 17875 was processed. Current count: 1
+2023-06-19 14:18:38,030 INFO Frames 700 / 17875 was processed. Current count: 2
+2023-06-19 14:18:42,037 INFO Frames 100 / 17875 was processed. Current count: 0
+2023-06-19 14:18:43,977 INFO Frames 200 / 17875 was processed. Current count: 0
+2023-06-19 14:18:45,961 INFO Frames 300 / 17875 was processed. Current count: 0
+2023-06-19 14:18:47,929 INFO Frames 400 / 17875 was processed. Current count: 0
+2023-06-19 14:18:49,972 INFO Frames 500 / 17875 was processed. Current count: 0
+2023-06-19 14:18:52,318 INFO Frames 600 / 17875 was processed. Current count: 1
+2023-06-19 14:18:54,427 INFO Frames 700 / 17875 was processed. Current count: 2
+2023-06-19 14:18:56,452 INFO Frames 800 / 17875 was processed. Current count: 2
+2023-06-19 14:18:58,403 INFO Frames 900 / 17875 was processed. Current count: 3
+2023-06-19 14:19:00,296 INFO Frames 1000 / 17875 was processed. Current count: 3
+2023-06-19 14:19:02,377 INFO Frames 1100 / 17875 was processed. Current count: 3
+2023-06-19 14:19:04,312 INFO Frames 1200 / 17875 was processed. Current count: 3
+2023-06-19 14:19:06,284 INFO Frames 1300 / 17875 was processed. Current count: 3
+2023-06-19 14:19:08,390 INFO Frames 1400 / 17875 was processed. Current count: 5
+2023-06-19 14:19:10,463 INFO Frames 1500 / 17875 was processed. Current count: 5
+2023-06-19 14:19:12,425 INFO Frames 1600 / 17875 was processed. Current count: 5
+2023-06-19 14:19:14,364 INFO Frames 1700 / 17875 was processed. Current count: 5
+2023-06-19 14:19:16,446 INFO Frames 1800 / 17875 was processed. Current count: 5
+2023-06-19 14:19:18,583 INFO Frames 1900 / 17875 was processed. Current count: 6
+2023-06-19 14:19:20,489 INFO Frames 2000 / 17875 was processed. Current count: 6
+2023-06-19 14:19:22,366 INFO Frames 2100 / 17875 was processed. Current count: 6
+2023-06-19 14:19:24,357 INFO Frames 2200 / 17875 was processed. Current count: 7
+2023-06-19 14:19:26,294 INFO Frames 2300 / 17875 was processed. Current count: 7
+2023-06-19 14:19:28,213 INFO Frames 2400 / 17875 was processed. Current count: 7
+2023-06-19 14:19:30,174 INFO Frames 2500 / 17875 was processed. Current count: 7
+2023-06-19 14:19:32,172 INFO Frames 2600 / 17875 was processed. Current count: 9
+2023-06-19 14:19:34,205 INFO Frames 2700 / 17875 was processed. Current count: 9
+2023-06-19 14:19:36,127 INFO Frames 2800 / 17875 was processed. Current count: 10
+2023-06-19 14:19:38,262 INFO Frames 2900 / 17875 was processed. Current count: 11
+2023-06-19 14:19:40,234 INFO Frames 3000 / 17875 was processed. Current count: 12
+2023-06-19 14:19:42,417 INFO Frames 3100 / 17875 was processed. Current count: 14
+2023-06-19 14:19:44,470 INFO Frames 3200 / 17875 was processed. Current count: 16
+2023-06-19 14:19:46,521 INFO Frames 3300 / 17875 was processed. Current count: 17
+2023-06-19 14:19:48,667 INFO Frames 3400 / 17875 was processed. Current count: 19
+2023-06-19 14:19:50,928 INFO Frames 3500 / 17875 was processed. Current count: 20
+2023-06-19 14:19:53,022 INFO Frames 3600 / 17875 was processed. Current count: 21
+2023-06-19 14:19:55,103 INFO Frames 3700 / 17875 was processed. Current count: 23
+2023-06-19 14:19:57,122 INFO Frames 3800 / 17875 was processed. Current count: 23
+2023-06-19 14:19:59,138 INFO Frames 3900 / 17875 was processed. Current count: 24
+2023-06-19 14:20:01,244 INFO Frames 4000 / 17875 was processed. Current count: 25
+2023-06-19 14:20:03,398 INFO Frames 4100 / 17875 was processed. Current count: 25
+2023-06-19 14:20:05,505 INFO Frames 4200 / 17875 was processed. Current count: 27
+2023-06-19 14:20:07,435 INFO Frames 4300 / 17875 was processed. Current count: 27
+2023-06-19 14:20:09,464 INFO Frames 4400 / 17875 was processed. Current count: 28
+2023-06-19 14:20:11,451 INFO Frames 4500 / 17875 was processed. Current count: 28
+2023-06-19 14:20:13,580 INFO Frames 4600 / 17875 was processed. Current count: 29
+2023-06-19 14:20:15,765 INFO Frames 4700 / 17875 was processed. Current count: 29
+2023-06-19 14:20:17,946 INFO Frames 4800 / 17875 was processed. Current count: 30
+2023-06-19 14:20:20,008 INFO Frames 4900 / 17875 was processed. Current count: 31
+2023-06-19 14:20:22,138 INFO Frames 5000 / 17875 was processed. Current count: 32
+2023-06-19 14:20:24,151 INFO Frames 5100 / 17875 was processed. Current count: 33
+2023-06-19 14:20:26,123 INFO Frames 5200 / 17875 was processed. Current count: 33
+2023-06-19 14:20:28,087 INFO Frames 5300 / 17875 was processed. Current count: 33
+2023-06-19 14:20:30,064 INFO Frames 5400 / 17875 was processed. Current count: 33
+2023-06-19 14:20:32,019 INFO Frames 5500 / 17875 was processed. Current count: 33
+2023-06-19 14:20:33,982 INFO Frames 5600 / 17875 was processed. Current count: 33
+2023-06-19 14:20:36,126 INFO Frames 5700 / 17875 was processed. Current count: 33
+2023-06-19 14:20:38,073 INFO Frames 5800 / 17875 was processed. Current count: 33
+2023-06-19 14:20:39,991 INFO Frames 5900 / 17875 was processed. Current count: 33
+2023-06-19 14:20:41,963 INFO Frames 6000 / 17875 was processed. Current count: 33
+2023-06-19 14:20:43,928 INFO Frames 6100 / 17875 was processed. Current count: 33
+2023-06-19 14:20:45,905 INFO Frames 6200 / 17875 was processed. Current count: 33
+2023-06-19 14:20:48,768 INFO Frames 6300 / 17875 was processed. Current count: 33
+2023-06-19 14:20:50,749 INFO Frames 6400 / 17875 was processed. Current count: 33
+2023-06-19 14:20:52,761 INFO Frames 6500 / 17875 was processed. Current count: 33
+2023-06-19 14:20:54,909 INFO Frames 6600 / 17875 was processed. Current count: 34
+2023-06-19 14:20:56,920 INFO Frames 6700 / 17875 was processed. Current count: 34
+2023-06-19 14:20:59,051 INFO Frames 6800 / 17875 was processed. Current count: 35
+2023-06-19 14:21:01,062 INFO Frames 6900 / 17875 was processed. Current count: 35
+2023-06-19 14:21:03,266 INFO Frames 7000 / 17875 was processed. Current count: 36
+2023-06-19 14:21:05,417 INFO Frames 7100 / 17875 was processed. Current count: 37
+2023-06-19 14:21:07,427 INFO Frames 7200 / 17875 was processed. Current count: 37
+2023-06-19 14:21:09,425 INFO Frames 7300 / 17875 was processed. Current count: 37
+2023-06-19 14:21:11,374 INFO Frames 7400 / 17875 was processed. Current count: 37
+2023-06-19 14:21:13,338 INFO Frames 7500 / 17875 was processed. Current count: 37
+2023-06-19 14:21:15,384 INFO Frames 7600 / 17875 was processed. Current count: 37
+2023-06-19 14:21:17,504 INFO Frames 7700 / 17875 was processed. Current count: 37
+2023-06-19 14:21:19,766 INFO Frames 7800 / 17875 was processed. Current count: 37
+2023-06-19 14:21:21,703 INFO Frames 7900 / 17875 was processed. Current count: 37
+2023-06-19 14:21:23,648 INFO Frames 8000 / 17875 was processed. Current count: 37
+2023-06-19 14:21:25,583 INFO Frames 8100 / 17875 was processed. Current count: 37
+2023-06-19 14:21:27,528 INFO Frames 8200 / 17875 was processed. Current count: 37
+2023-06-19 14:21:29,475 INFO Frames 8300 / 17875 was processed. Current count: 37
+2023-06-19 14:21:31,427 INFO Frames 8400 / 17875 was processed. Current count: 37
+2023-06-19 14:21:33,379 INFO Frames 8500 / 17875 was processed. Current count: 37
+2023-06-19 14:21:35,550 INFO Frames 8600 / 17875 was processed. Current count: 38
+2023-06-19 14:21:37,557 INFO Frames 8700 / 17875 was processed. Current count: 38
+2023-06-19 14:21:39,581 INFO Frames 8800 / 17875 was processed. Current count: 40
+2023-06-19 14:21:41,625 INFO Frames 8900 / 17875 was processed. Current count: 41
+2023-06-19 14:21:43,675 INFO Frames 9000 / 17875 was processed. Current count: 42
+2023-06-19 14:21:45,765 INFO Frames 9100 / 17875 was processed. Current count: 43
+2023-06-19 14:21:48,068 INFO Frames 9200 / 17875 was processed. Current count: 45
+2023-06-19 14:21:50,027 INFO Frames 9300 / 17875 was processed. Current count: 45
+2023-06-19 14:21:52,114 INFO Frames 9400 / 17875 was processed. Current count: 46
+2023-06-19 14:21:54,124 INFO Frames 9500 / 17875 was processed. Current count: 46
+2023-06-19 14:21:56,323 INFO Frames 9600 / 17875 was processed. Current count: 46
+2023-06-19 14:21:58,431 INFO Frames 9700 / 17875 was processed. Current count: 46
+2023-06-19 14:22:00,400 INFO Frames 9800 / 17875 was processed. Current count: 47
+2023-06-19 14:22:02,397 INFO Frames 9900 / 17875 was processed. Current count: 47
+2023-06-19 14:22:04,397 INFO Frames 10000 / 17875 was processed. Current count: 49
+2023-06-19 14:22:06,450 INFO Frames 10100 / 17875 was processed. Current count: 50
+2023-06-19 14:22:08,399 INFO Frames 10200 / 17875 was processed. Current count: 51
+2023-06-19 14:22:10,366 INFO Frames 10300 / 17875 was processed. Current count: 53
+2023-06-19 14:22:12,310 INFO Frames 10400 / 17875 was processed. Current count: 53
+2023-06-19 14:22:14,335 INFO Frames 10500 / 17875 was processed. Current count: 54
+2023-06-19 14:22:16,364 INFO Frames 10600 / 17875 was processed. Current count: 54
+2023-06-19 14:22:18,337 INFO Frames 10700 / 17875 was processed. Current count: 55
+2023-06-19 14:22:20,408 INFO Frames 10800 / 17875 was processed. Current count: 56
+2023-06-19 14:22:22,481 INFO Frames 10900 / 17875 was processed. Current count: 58
+2023-06-19 14:22:24,632 INFO Frames 11000 / 17875 was processed. Current count: 60
+2023-06-19 14:22:26,744 INFO Frames 11100 / 17875 was processed. Current count: 62
+2023-06-19 14:22:28,883 INFO Frames 11200 / 17875 was processed. Current count: 64
+2023-06-19 14:22:30,966 INFO Frames 11300 / 17875 was processed. Current count: 66
+2023-06-19 14:22:33,020 INFO Frames 11400 / 17875 was processed. Current count: 67
+2023-06-19 14:22:35,116 INFO Frames 11500 / 17875 was processed. Current count: 68
+2023-06-19 14:22:37,151 INFO Frames 11600 / 17875 was processed. Current count: 69
+2023-06-19 14:22:39,197 INFO Frames 11700 / 17875 was processed. Current count: 70
+2023-06-19 14:22:41,229 INFO Frames 11800 / 17875 was processed. Current count: 71
+2023-06-19 14:22:43,372 INFO Frames 11900 / 17875 was processed. Current count: 73
+2023-06-19 14:22:45,391 INFO Frames 12000 / 17875 was processed. Current count: 74
+2023-06-19 14:22:47,394 INFO Frames 12100 / 17875 was processed. Current count: 74
+2023-06-19 14:22:49,394 INFO Frames 12200 / 17875 was processed. Current count: 75
+2023-06-19 14:22:51,516 INFO Frames 12300 / 17875 was processed. Current count: 76
+2023-06-19 14:22:53,572 INFO Frames 12400 / 17875 was processed. Current count: 76
+2023-06-19 14:22:55,670 INFO Frames 12500 / 17875 was processed. Current count: 77
+2023-06-19 14:22:57,749 INFO Frames 12600 / 17875 was processed. Current count: 77
+2023-06-19 14:22:59,688 INFO Frames 12700 / 17875 was processed. Current count: 77
+2023-06-19 14:23:01,797 INFO Frames 12800 / 17875 was processed. Current count: 77
+2023-06-19 14:23:03,868 INFO Frames 12900 / 17875 was processed. Current count: 78
+2023-06-19 14:23:05,976 INFO Frames 13000 / 17875 was processed. Current count: 78
+2023-06-19 14:23:08,066 INFO Frames 13100 / 17875 was processed. Current count: 80
+2023-06-19 14:23:10,215 INFO Frames 13200 / 17875 was processed. Current count: 81
+2023-06-19 14:23:12,277 INFO Frames 13300 / 17875 was processed. Current count: 83
+2023-06-19 14:23:14,338 INFO Frames 13400 / 17875 was processed. Current count: 84
+2023-06-19 14:23:16,409 INFO Frames 13500 / 17875 was processed. Current count: 85
+2023-06-19 14:23:18,424 INFO Frames 13600 / 17875 was processed. Current count: 85
+2023-06-19 14:23:20,491 INFO Frames 13700 / 17875 was processed. Current count: 86
+2023-06-19 14:23:22,627 INFO Frames 13800 / 17875 was processed. Current count: 86
+2023-06-19 14:23:24,913 INFO Frames 13900 / 17875 was processed. Current count: 86
+2023-06-19 14:23:27,569 INFO Frames 14000 / 17875 was processed. Current count: 87
+2023-06-19 14:23:29,658 INFO Frames 14100 / 17875 was processed. Current count: 88
+2023-06-19 14:23:31,746 INFO Frames 14200 / 17875 was processed. Current count: 89
+2023-06-19 14:23:33,749 INFO Frames 14300 / 17875 was processed. Current count: 89
+2023-06-19 14:23:35,832 INFO Frames 14400 / 17875 was processed. Current count: 89
+2023-06-19 14:23:37,833 INFO Frames 14500 / 17875 was processed. Current count: 89
+2023-06-19 14:23:39,859 INFO Frames 14600 / 17875 was processed. Current count: 90
+2023-06-19 14:23:41,880 INFO Frames 14700 / 17875 was processed. Current count: 91
+2023-06-19 14:23:43,886 INFO Frames 14800 / 17875 was processed. Current count: 92
+2023-06-19 14:23:45,884 INFO Frames 14900 / 17875 was processed. Current count: 93
+2023-06-19 14:23:47,902 INFO Frames 15000 / 17875 was processed. Current count: 94
+2023-06-19 14:23:49,933 INFO Frames 15100 / 17875 was processed. Current count: 95
+2023-06-19 14:23:51,986 INFO Frames 15200 / 17875 was processed. Current count: 96
+2023-06-19 14:23:54,087 INFO Frames 15300 / 17875 was processed. Current count: 97
+2023-06-19 14:23:56,091 INFO Frames 15400 / 17875 was processed. Current count: 99
+2023-06-19 14:23:58,213 INFO Frames 15500 / 17875 was processed. Current count: 100
+2023-06-19 14:24:00,268 INFO Frames 15600 / 17875 was processed. Current count: 100
+2023-06-19 14:24:02,405 INFO Frames 15700 / 17875 was processed. Current count: 102
+2023-06-19 14:24:04,474 INFO Frames 15800 / 17875 was processed. Current count: 103
+2023-06-19 14:24:06,494 INFO Frames 15900 / 17875 was processed. Current count: 103
+2023-06-19 14:24:08,517 INFO Frames 16000 / 17875 was processed. Current count: 105
+2023-06-19 14:24:10,540 INFO Frames 16100 / 17875 was processed. Current count: 106
+2023-06-19 14:24:12,581 INFO Frames 16200 / 17875 was processed. Current count: 107
+2023-06-19 14:24:14,591 INFO Frames 16300 / 17875 was processed. Current count: 108
+2023-06-19 14:24:16,640 INFO Frames 16400 / 17875 was processed. Current count: 109
+2023-06-19 14:24:18,675 INFO Frames 16500 / 17875 was processed. Current count: 109
+2023-06-19 14:24:20,690 INFO Frames 16600 / 17875 was processed. Current count: 110
+2023-06-19 14:24:22,708 INFO Frames 16700 / 17875 was processed. Current count: 111
+2023-06-19 14:24:24,858 INFO Frames 16800 / 17875 was processed. Current count: 112
+2023-06-19 14:24:26,881 INFO Frames 16900 / 17875 was processed. Current count: 113
+2023-06-19 14:24:28,844 INFO Frames 17000 / 17875 was processed. Current count: 113
+2023-06-19 14:24:30,855 INFO Frames 17100 / 17875 was processed. Current count: 113
+2023-06-19 14:24:32,784 INFO Frames 17200 / 17875 was processed. Current count: 113
+2023-06-19 14:24:34,763 INFO Frames 17300 / 17875 was processed. Current count: 113
+2023-06-19 14:24:36,671 INFO Frames 17400 / 17875 was processed. Current count: 113
+2023-06-19 14:24:38,595 INFO Frames 17500 / 17875 was processed. Current count: 113
+2023-06-19 14:24:40,514 INFO Frames 17600 / 17875 was processed. Current count: 113
+2023-06-19 14:24:42,432 INFO Frames 17700 / 17875 was processed. Current count: 113
+2023-06-19 14:24:44,344 INFO Frames 17800 / 17875 was processed. Current count: 113
+2023-06-19 14:24:45,803 INFO 
+Final count=113
+2023-06-19 14:44:55,988 INFO Frames 1100 / 1125 was processed. Current count: 0
+2023-06-19 14:44:56,497 INFO 
+Final count=0
+2023-06-19 14:47:17,027 INFO Frames 1100 / 1125 was processed. Current count: 0
+2023-06-19 14:47:17,516 INFO 
+Final count=0
+2023-06-19 14:51:23,982 INFO Frames 1600 / 1625 was processed. Current count: 0
+2023-06-19 14:51:24,515 INFO 
+Final count=0
+2023-06-19 14:52:29,675 INFO Frames 4600 / 4625 was processed. Current count: 0
+2023-06-19 14:52:30,260 INFO 
+Final count=0
+2023-06-19 14:53:21,713 INFO Frames 4600 / 4700 was processed. Current count: 0
+2023-06-19 14:53:23,871 INFO Frames 4700 / 4700 was processed. Current count: 1
+2023-06-19 14:53:23,874 INFO 
+Final count=1
+2023-06-19 14:54:23,551 INFO Frames 9700 / 9750 was processed. Current count: 1
+2023-06-19 14:54:24,594 INFO 
+Final count=1
+2023-06-19 14:55:40,213 INFO Frames 9700 / 9800 was processed. Current count: 0
+2023-06-19 14:55:42,183 INFO Frames 9800 / 9800 was processed. Current count: 1
+2023-06-19 14:55:42,185 INFO 
+Final count=1
+2023-06-19 14:57:14,655 INFO Frames 11600 / 11625 was processed. Current count: 1
+2023-06-19 14:57:15,157 INFO 
+Final count=1
+2023-06-19 14:58:22,449 INFO Frames 12600 / 12750 was processed. Current count: 0
+2023-06-19 14:58:24,462 INFO Frames 12700 / 12750 was processed. Current count: 0
+2023-06-19 14:58:25,552 INFO 
+Final count=0
+2023-06-19 15:00:17,078 INFO 
+Final count=0
+2023-06-19 15:02:34,752 INFO Frames 13400 / 13450 was processed. Current count: 0
+2023-06-19 15:02:35,734 INFO 
+Final count=1
+2023-06-19 15:25:25,971 INFO Frames 13800 / 13800 was processed. Current count: 0
+2023-06-19 15:25:25,974 INFO 
+Final count=0
+2023-06-19 15:31:43,930 INFO Frames 13800 / 13800 was processed. Current count: 0
+2023-06-19 15:31:43,933 INFO 
+Final count=0
+2023-06-19 15:36:46,569 INFO Frames 13800 / 13800 was processed. Current count: 0
+2023-06-19 15:36:46,573 INFO 
+Final count=0
+2023-06-19 15:42:16,922 INFO Frames 13800 / 13800 was processed. Current count: 1
+2023-06-19 15:42:16,925 INFO 
+Final count=1
+2023-06-19 15:44:18,372 INFO Frames 15500 / 15500 was processed. Current count: 0
+2023-06-19 15:44:18,375 INFO 
+Final count=0
+2023-06-19 15:45:26,093 INFO Frames 15500 / 15550 was processed. Current count: 0
+2023-06-19 15:45:27,092 INFO 
+Final count=1
+2023-06-19 15:46:41,823 INFO Frames 15900 / 15925 was processed. Current count: 0
+2023-06-19 15:46:42,351 INFO 
+Final count=1
+2023-06-19 15:48:01,995 INFO Frames 16500 / 16550 was processed. Current count: 0
+2023-06-19 15:48:03,081 INFO 
+Final count=0
+2023-06-19 15:50:01,672 INFO Frames 16500 / 16550 was processed. Current count: 1
+2023-06-19 15:50:02,809 INFO 
+Final count=1
+2023-06-19 15:51:31,315 INFO Frames 16500 / 16600 was processed. Current count: 1
+2023-06-19 15:51:33,389 INFO Frames 16600 / 16600 was processed. Current count: 2
+2023-06-19 15:51:33,392 INFO 
+Final count=2
+2023-06-19 15:52:00,888 INFO Frames 1100 / 1125 was processed. Current count: 1
+2023-06-19 15:52:01,387 INFO 
+Final count=1
+2023-06-19 15:52:49,528 INFO Frames 4600 / 4700 was processed. Current count: 0
+2023-06-19 15:52:51,706 INFO Frames 4700 / 4700 was processed. Current count: 1
+2023-06-19 15:52:51,708 INFO 
+Final count=1
+2023-06-19 15:53:54,259 INFO Frames 9700 / 9800 was processed. Current count: 1
+2023-06-19 15:53:56,280 INFO Frames 9800 / 9800 was processed. Current count: 2
+2023-06-19 15:53:56,282 INFO 
+Final count=2
+2023-06-19 15:55:03,783 INFO Frames 11600 / 11625 was processed. Current count: 1
+2023-06-19 15:55:04,290 INFO 
+Final count=1
+2023-06-19 15:56:38,350 INFO Frames 12600 / 12950 was processed. Current count: 1
+2023-06-19 15:56:40,333 INFO Frames 12700 / 12950 was processed. Current count: 1
+2023-06-19 15:56:42,457 INFO Frames 12800 / 12950 was processed. Current count: 1
+2023-06-19 15:56:44,520 INFO Frames 12900 / 12950 was processed. Current count: 2
+2023-06-19 15:56:45,602 INFO 
+Final count=2
+2023-06-19 15:58:36,003 INFO Frames 13400 / 13450 was processed. Current count: 0
+2023-06-19 15:58:37,029 INFO 
+Final count=1
+2023-06-19 15:59:15,507 INFO Frames 100 / 17875 was processed. Current count: 0
+2023-06-19 15:59:17,486 INFO Frames 200 / 17875 was processed. Current count: 0
+2023-06-19 15:59:19,429 INFO Frames 300 / 17875 was processed. Current count: 0
+2023-06-19 15:59:21,381 INFO Frames 400 / 17875 was processed. Current count: 0
+2023-06-19 15:59:23,353 INFO Frames 500 / 17875 was processed. Current count: 0
+2023-06-19 15:59:25,441 INFO Frames 600 / 17875 was processed. Current count: 1
+2023-06-19 15:59:27,670 INFO Frames 700 / 17875 was processed. Current count: 2
+2023-06-19 15:59:29,684 INFO Frames 800 / 17875 was processed. Current count: 2
+2023-06-19 15:59:31,614 INFO Frames 900 / 17875 was processed. Current count: 3
+2023-06-19 15:59:33,585 INFO Frames 1000 / 17875 was processed. Current count: 3
+2023-06-19 15:59:35,840 INFO Frames 1100 / 17875 was processed. Current count: 4
+2023-06-19 15:59:37,828 INFO Frames 1200 / 17875 was processed. Current count: 4
+2023-06-19 15:59:39,868 INFO Frames 1300 / 17875 was processed. Current count: 4
+2023-06-19 15:59:42,003 INFO Frames 1400 / 17875 was processed. Current count: 6
+2023-06-19 15:59:43,972 INFO Frames 1500 / 17875 was processed. Current count: 6
+2023-06-19 15:59:45,991 INFO Frames 1600 / 17875 was processed. Current count: 6
+2023-06-19 15:59:47,953 INFO Frames 1700 / 17875 was processed. Current count: 6
+2023-06-19 15:59:49,920 INFO Frames 1800 / 17875 was processed. Current count: 6
+2023-06-19 15:59:52,064 INFO Frames 1900 / 17875 was processed. Current count: 7
+2023-06-19 15:59:54,126 INFO Frames 2000 / 17875 was processed. Current count: 7
+2023-06-19 15:59:56,193 INFO Frames 2100 / 17875 was processed. Current count: 7
+2023-06-19 15:59:58,496 INFO Frames 2200 / 17875 was processed. Current count: 8
+2023-06-19 16:00:04,107 INFO Frames 100 / 17875 was processed. Current count: 0
+2023-06-19 16:00:06,031 INFO Frames 200 / 17875 was processed. Current count: 0
+2023-06-19 16:00:07,915 INFO Frames 300 / 17875 was processed. Current count: 0
+2023-06-19 16:00:09,800 INFO Frames 400 / 17875 was processed. Current count: 0
+2023-06-19 16:00:11,697 INFO Frames 500 / 17875 was processed. Current count: 0
+2023-06-19 16:00:13,699 INFO Frames 600 / 17875 was processed. Current count: 1
+2023-06-19 16:00:15,667 INFO Frames 700 / 17875 was processed. Current count: 2
+2023-06-19 16:00:17,635 INFO Frames 800 / 17875 was processed. Current count: 2
+2023-06-19 16:00:19,526 INFO Frames 900 / 17875 was processed. Current count: 3
+2023-06-19 16:00:21,420 INFO Frames 1000 / 17875 was processed. Current count: 3
+2023-06-19 16:00:23,497 INFO Frames 1100 / 17875 was processed. Current count: 4
+2023-06-19 16:00:25,403 INFO Frames 1200 / 17875 was processed. Current count: 4
+2023-06-19 16:00:27,391 INFO Frames 1300 / 17875 was processed. Current count: 4
+2023-06-19 16:00:29,420 INFO Frames 1400 / 17875 was processed. Current count: 6
+2023-06-19 16:00:31,304 INFO Frames 1500 / 17875 was processed. Current count: 6
+2023-06-19 16:00:33,208 INFO Frames 1600 / 17875 was processed. Current count: 6
+2023-06-19 16:00:35,132 INFO Frames 1700 / 17875 was processed. Current count: 6
+2023-06-19 16:00:37,012 INFO Frames 1800 / 17875 was processed. Current count: 6
+2023-06-19 16:00:38,989 INFO Frames 1900 / 17875 was processed. Current count: 7
+2023-06-19 16:00:40,851 INFO Frames 2000 / 17875 was processed. Current count: 7
+2023-06-19 16:00:42,725 INFO Frames 2100 / 17875 was processed. Current count: 7
+2023-06-19 16:00:44,693 INFO Frames 2200 / 17875 was processed. Current count: 8
+2023-06-19 16:00:46,562 INFO Frames 2300 / 17875 was processed. Current count: 8
+2023-06-19 16:00:48,437 INFO Frames 2400 / 17875 was processed. Current count: 8
+2023-06-19 16:00:50,354 INFO Frames 2500 / 17875 was processed. Current count: 8
+2023-06-19 16:00:52,358 INFO Frames 2600 / 17875 was processed. Current count: 10
+2023-06-19 16:00:54,332 INFO Frames 2700 / 17875 was processed. Current count: 10
+2023-06-19 16:00:56,244 INFO Frames 2800 / 17875 was processed. Current count: 11
+2023-06-19 16:00:58,222 INFO Frames 2900 / 17875 was processed. Current count: 12
+2023-06-19 16:01:00,190 INFO Frames 3000 / 17875 was processed. Current count: 13
+2023-06-19 16:01:02,188 INFO Frames 3100 / 17875 was processed. Current count: 15
+2023-06-19 16:01:04,216 INFO Frames 3200 / 17875 was processed. Current count: 17
+2023-06-19 16:01:06,248 INFO Frames 3300 / 17875 was processed. Current count: 18
+2023-06-19 16:01:08,302 INFO Frames 3400 / 17875 was processed. Current count: 20
+2023-06-19 16:01:10,335 INFO Frames 3500 / 17875 was processed. Current count: 21
+2023-06-19 16:01:12,362 INFO Frames 3600 / 17875 was processed. Current count: 22
+2023-06-19 16:01:14,378 INFO Frames 3700 / 17875 was processed. Current count: 24
+2023-06-19 16:01:16,317 INFO Frames 3800 / 17875 was processed. Current count: 24
+2023-06-19 16:01:18,276 INFO Frames 3900 / 17875 was processed. Current count: 25
+2023-06-19 16:01:20,283 INFO Frames 4000 / 17875 was processed. Current count: 26
+2023-06-19 16:01:22,306 INFO Frames 4100 / 17875 was processed. Current count: 26
+2023-06-19 16:01:24,359 INFO Frames 4200 / 17875 was processed. Current count: 28
+2023-06-19 16:01:26,289 INFO Frames 4300 / 17875 was processed. Current count: 28
+2023-06-19 16:01:28,317 INFO Frames 4400 / 17875 was processed. Current count: 29
+2023-06-19 16:01:30,288 INFO Frames 4500 / 17875 was processed. Current count: 29
+2023-06-19 16:01:32,392 INFO Frames 4600 / 17875 was processed. Current count: 30
+2023-06-19 16:01:34,488 INFO Frames 4700 / 17875 was processed. Current count: 31
+2023-06-19 16:01:36,586 INFO Frames 4800 / 17875 was processed. Current count: 32
+2023-06-19 16:01:38,610 INFO Frames 4900 / 17875 was processed. Current count: 33
+2023-06-19 16:01:40,704 INFO Frames 5000 / 17875 was processed. Current count: 34
+2023-06-19 16:01:42,679 INFO Frames 5100 / 17875 was processed. Current count: 35
+2023-06-19 16:01:44,620 INFO Frames 5200 / 17875 was processed. Current count: 35
+2023-06-19 16:01:46,536 INFO Frames 5300 / 17875 was processed. Current count: 35
+2023-06-19 16:01:48,505 INFO Frames 5400 / 17875 was processed. Current count: 35
+2023-06-19 16:01:50,402 INFO Frames 5500 / 17875 was processed. Current count: 35
+2023-06-19 16:01:52,302 INFO Frames 5600 / 17875 was processed. Current count: 35
+2023-06-19 16:01:54,217 INFO Frames 5700 / 17875 was processed. Current count: 35
+2023-06-19 16:01:56,119 INFO Frames 5800 / 17875 was processed. Current count: 35
+2023-06-19 16:01:58,017 INFO Frames 5900 / 17875 was processed. Current count: 35
+2023-06-19 16:01:59,909 INFO Frames 6000 / 17875 was processed. Current count: 35
+2023-06-19 16:02:01,814 INFO Frames 6100 / 17875 was processed. Current count: 35
+2023-06-19 16:02:03,736 INFO Frames 6200 / 17875 was processed. Current count: 35
+2023-06-19 16:02:05,714 INFO Frames 6300 / 17875 was processed. Current count: 35
+2023-06-19 16:02:07,642 INFO Frames 6400 / 17875 was processed. Current count: 35
+2023-06-19 16:02:09,548 INFO Frames 6500 / 17875 was processed. Current count: 35
+2023-06-19 16:02:11,588 INFO Frames 6600 / 17875 was processed. Current count: 36
+2023-06-19 16:02:13,510 INFO Frames 6700 / 17875 was processed. Current count: 36
+2023-06-19 16:02:15,541 INFO Frames 6800 / 17875 was processed. Current count: 37
+2023-06-19 16:02:17,464 INFO Frames 6900 / 17875 was processed. Current count: 37
+2023-06-19 16:02:19,458 INFO Frames 7000 / 17875 was processed. Current count: 38
+2023-06-19 16:02:21,502 INFO Frames 7100 / 17875 was processed. Current count: 39
+2023-06-19 16:02:23,437 INFO Frames 7200 / 17875 was processed. Current count: 39
+2023-06-19 16:02:25,353 INFO Frames 7300 / 17875 was processed. Current count: 39
+2023-06-19 16:02:27,273 INFO Frames 7400 / 17875 was processed. Current count: 39
+2023-06-19 16:02:29,195 INFO Frames 7500 / 17875 was processed. Current count: 39
+2023-06-19 16:02:31,130 INFO Frames 7600 / 17875 was processed. Current count: 39
+2023-06-19 16:02:33,158 INFO Frames 7700 / 17875 was processed. Current count: 39
+2023-06-19 16:02:35,275 INFO Frames 7800 / 17875 was processed. Current count: 39
+2023-06-19 16:02:37,193 INFO Frames 7900 / 17875 was processed. Current count: 39
+2023-06-19 16:02:39,109 INFO Frames 8000 / 17875 was processed. Current count: 39
+2023-06-19 16:02:41,018 INFO Frames 8100 / 17875 was processed. Current count: 39
+2023-06-19 16:02:42,948 INFO Frames 8200 / 17875 was processed. Current count: 39
+2023-06-19 16:02:44,872 INFO Frames 8300 / 17875 was processed. Current count: 39
+2023-06-19 16:02:46,778 INFO Frames 8400 / 17875 was processed. Current count: 39
+2023-06-19 16:02:48,697 INFO Frames 8500 / 17875 was processed. Current count: 39
+2023-06-19 16:02:50,773 INFO Frames 8600 / 17875 was processed. Current count: 40
+2023-06-19 16:02:52,765 INFO Frames 8700 / 17875 was processed. Current count: 40
+2023-06-19 16:02:54,759 INFO Frames 8800 / 17875 was processed. Current count: 41
+2023-06-19 16:02:56,796 INFO Frames 8900 / 17875 was processed. Current count: 43
+2023-06-19 16:02:58,814 INFO Frames 9000 / 17875 was processed. Current count: 44
+2023-06-19 16:03:00,860 INFO Frames 9100 / 17875 was processed. Current count: 45
+2023-06-19 16:03:02,996 INFO Frames 9200 / 17875 was processed. Current count: 47
+2023-06-19 16:03:04,910 INFO Frames 9300 / 17875 was processed. Current count: 47
+2023-06-19 16:03:06,978 INFO Frames 9400 / 17875 was processed. Current count: 48
+2023-06-19 16:03:08,962 INFO Frames 9500 / 17875 was processed. Current count: 48
+2023-06-19 16:03:11,108 INFO Frames 9600 / 17875 was processed. Current count: 48
+2023-06-19 16:03:13,161 INFO Frames 9700 / 17875 was processed. Current count: 49
+2023-06-19 16:03:15,126 INFO Frames 9800 / 17875 was processed. Current count: 50
+2023-06-19 16:03:17,095 INFO Frames 9900 / 17875 was processed. Current count: 50
+2023-06-19 16:03:19,081 INFO Frames 10000 / 17875 was processed. Current count: 52
+2023-06-19 16:03:21,115 INFO Frames 10100 / 17875 was processed. Current count: 53
+2023-06-19 16:03:23,052 INFO Frames 10200 / 17875 was processed. Current count: 54
+2023-06-19 16:03:24,995 INFO Frames 10300 / 17875 was processed. Current count: 56
+2023-06-19 16:03:26,934 INFO Frames 10400 / 17875 was processed. Current count: 56
+2023-06-19 16:03:28,942 INFO Frames 10500 / 17875 was processed. Current count: 57
+2023-06-19 16:03:30,945 INFO Frames 10600 / 17875 was processed. Current count: 57
+2023-06-19 16:03:32,877 INFO Frames 10700 / 17875 was processed. Current count: 58
+2023-06-19 16:03:34,965 INFO Frames 10800 / 17875 was processed. Current count: 59
+2023-06-19 16:03:37,030 INFO Frames 10900 / 17875 was processed. Current count: 61
+2023-06-19 16:03:39,163 INFO Frames 11000 / 17875 was processed. Current count: 63
+2023-06-19 16:03:41,240 INFO Frames 11100 / 17875 was processed. Current count: 65
+2023-06-19 16:03:43,357 INFO Frames 11200 / 17875 was processed. Current count: 67
+2023-06-19 16:03:45,422 INFO Frames 11300 / 17875 was processed. Current count: 69
+2023-06-19 16:03:47,443 INFO Frames 11400 / 17875 was processed. Current count: 70
+2023-06-19 16:03:49,490 INFO Frames 11500 / 17875 was processed. Current count: 71
+2023-06-19 16:03:51,525 INFO Frames 11600 / 17875 was processed. Current count: 73
+2023-06-19 16:03:53,531 INFO Frames 11700 / 17875 was processed. Current count: 74
+2023-06-19 16:03:55,539 INFO Frames 11800 / 17875 was processed. Current count: 75
+2023-06-19 16:03:57,644 INFO Frames 11900 / 17875 was processed. Current count: 77
+2023-06-19 16:03:59,638 INFO Frames 12000 / 17875 was processed. Current count: 78
+2023-06-19 16:04:01,604 INFO Frames 12100 / 17875 was processed. Current count: 78
+2023-06-19 16:04:03,581 INFO Frames 12200 / 17875 was processed. Current count: 79
+2023-06-19 16:04:05,587 INFO Frames 12300 / 17875 was processed. Current count: 80
+2023-06-19 16:04:07,540 INFO Frames 12400 / 17875 was processed. Current count: 80
+2023-06-19 16:04:09,534 INFO Frames 12500 / 17875 was processed. Current count: 81
+2023-06-19 16:04:11,566 INFO Frames 12600 / 17875 was processed. Current count: 82
+2023-06-19 16:04:13,480 INFO Frames 12700 / 17875 was processed. Current count: 82
+2023-06-19 16:04:15,529 INFO Frames 12800 / 17875 was processed. Current count: 82
+2023-06-19 16:04:17,501 INFO Frames 12900 / 17875 was processed. Current count: 83
+2023-06-19 16:04:19,526 INFO Frames 13000 / 17875 was processed. Current count: 83
+2023-06-19 16:04:21,551 INFO Frames 13100 / 17875 was processed. Current count: 85
+2023-06-19 16:04:23,600 INFO Frames 13200 / 17875 was processed. Current count: 86
+2023-06-19 16:04:25,614 INFO Frames 13300 / 17875 was processed. Current count: 88
+2023-06-19 16:04:27,597 INFO Frames 13400 / 17875 was processed. Current count: 89
+2023-06-19 16:04:29,606 INFO Frames 13500 / 17875 was processed. Current count: 91
+2023-06-19 16:04:31,542 INFO Frames 13600 / 17875 was processed. Current count: 91
+2023-06-19 16:04:33,558 INFO Frames 13700 / 17875 was processed. Current count: 92
+2023-06-19 16:04:35,638 INFO Frames 13800 / 17875 was processed. Current count: 93
+2023-06-19 16:04:37,662 INFO Frames 13900 / 17875 was processed. Current count: 93
+2023-06-19 16:04:39,613 INFO Frames 14000 / 17875 was processed. Current count: 94
+2023-06-19 16:04:41,599 INFO Frames 14100 / 17875 was processed. Current count: 95
+2023-06-19 16:04:43,666 INFO Frames 14200 / 17875 was processed. Current count: 96
+2023-06-19 16:04:45,630 INFO Frames 14300 / 17875 was processed. Current count: 96
+2023-06-19 16:04:47,605 INFO Frames 14400 / 17875 was processed. Current count: 96
+2023-06-19 16:04:49,571 INFO Frames 14500 / 17875 was processed. Current count: 97
+2023-06-19 16:04:51,577 INFO Frames 14600 / 17875 was processed. Current count: 98
+2023-06-19 16:04:53,573 INFO Frames 14700 / 17875 was processed. Current count: 99
+2023-06-19 16:04:55,561 INFO Frames 14800 / 17875 was processed. Current count: 100
+2023-06-19 16:04:57,582 INFO Frames 14900 / 17875 was processed. Current count: 101
+2023-06-19 16:04:59,584 INFO Frames 15000 / 17875 was processed. Current count: 102
+2023-06-19 16:05:01,627 INFO Frames 15100 / 17875 was processed. Current count: 103
+2023-06-19 16:05:04,023 INFO Frames 15200 / 17875 was processed. Current count: 104
+2023-06-19 16:05:06,192 INFO Frames 15300 / 17875 was processed. Current count: 105
+2023-06-19 16:05:08,165 INFO Frames 15400 / 17875 was processed. Current count: 107
+2023-06-19 16:05:10,274 INFO Frames 15500 / 17875 was processed. Current count: 108
+2023-06-19 16:05:12,321 INFO Frames 15600 / 17875 was processed. Current count: 109
+2023-06-19 16:05:14,366 INFO Frames 15700 / 17875 was processed. Current count: 111
+2023-06-19 16:05:16,391 INFO Frames 15800 / 17875 was processed. Current count: 112
+2023-06-19 16:05:18,417 INFO Frames 15900 / 17875 was processed. Current count: 112
+2023-06-19 16:05:20,438 INFO Frames 16000 / 17875 was processed. Current count: 114
+2023-06-19 16:05:22,467 INFO Frames 16100 / 17875 was processed. Current count: 115
+2023-06-19 16:05:24,486 INFO Frames 16200 / 17875 was processed. Current count: 116
+2023-06-19 16:05:26,502 INFO Frames 16300 / 17875 was processed. Current count: 117
+2023-06-19 16:05:28,541 INFO Frames 16400 / 17875 was processed. Current count: 118
+2023-06-19 16:05:30,576 INFO Frames 16500 / 17875 was processed. Current count: 119
+2023-06-19 16:05:32,592 INFO Frames 16600 / 17875 was processed. Current count: 120
+2023-06-19 16:05:34,650 INFO Frames 16700 / 17875 was processed. Current count: 121
+2023-06-19 16:05:36,784 INFO Frames 16800 / 17875 was processed. Current count: 122
+2023-06-19 16:05:38,789 INFO Frames 16900 / 17875 was processed. Current count: 123
+2023-06-19 16:05:40,775 INFO Frames 17000 / 17875 was processed. Current count: 124
+2023-06-19 16:05:42,790 INFO Frames 17100 / 17875 was processed. Current count: 124
+2023-06-19 16:05:44,732 INFO Frames 17200 / 17875 was processed. Current count: 124
+2023-06-19 16:05:46,675 INFO Frames 17300 / 17875 was processed. Current count: 124
+2023-06-19 16:05:48,606 INFO Frames 17400 / 17875 was processed. Current count: 124
+2023-06-19 16:05:50,545 INFO Frames 17500 / 17875 was processed. Current count: 124
+2023-06-19 16:05:52,481 INFO Frames 17600 / 17875 was processed. Current count: 124
+2023-06-19 16:05:54,415 INFO Frames 17700 / 17875 was processed. Current count: 124
+2023-06-19 16:05:56,339 INFO Frames 17800 / 17875 was processed. Current count: 124
+2023-06-19 16:05:57,775 INFO 
+Final count=124
+2023-06-19 16:47:48,892 INFO Frames 15900 / 15925 was processed. Current count: 0
+2023-06-19 16:47:49,441 INFO 
+Final count=1
+2023-06-19 16:49:14,610 INFO Frames 15800 / 16000 was processed. Current count: 1
+2023-06-19 16:49:16,677 INFO Frames 15900 / 16000 was processed. Current count: 1
+2023-06-19 16:49:18,759 INFO Frames 16000 / 16000 was processed. Current count: 3
+2023-06-19 16:49:18,762 INFO 
+Final count=3
+2023-06-19 16:52:35,994 INFO Frames 15800 / 16000 was processed. Current count: 1
+2023-06-19 16:52:37,984 INFO Frames 15900 / 16000 was processed. Current count: 1
+2023-06-19 16:52:39,982 INFO Frames 16000 / 16000 was processed. Current count: 3
+2023-06-19 16:52:39,985 INFO 
+Final count=3
+2023-06-19 16:57:30,698 INFO Frames 15800 / 16000 was processed. Current count: 1
+2023-06-19 16:57:32,668 INFO Frames 15900 / 16000 was processed. Current count: 1
+2023-06-19 16:57:34,701 INFO Frames 16000 / 16000 was processed. Current count: 3
+2023-06-19 16:57:34,704 INFO 
+Final count=3
+2023-06-19 16:59:42,760 INFO Frames 15800 / 16000 was processed. Current count: 1
+2023-06-19 16:59:44,772 INFO Frames 15900 / 16000 was processed. Current count: 1
+2023-06-19 16:59:46,802 INFO Frames 16000 / 16000 was processed. Current count: 3
+2023-06-19 16:59:46,805 INFO 
+Final count=3
+2023-06-19 17:19:03,012 INFO Frames 15800 / 16000 was processed. Current count: 1
+2023-06-19 17:19:05,029 INFO Frames 15900 / 16000 was processed. Current count: 2
+2023-06-19 17:19:07,036 INFO Frames 16000 / 16000 was processed. Current count: 4
+2023-06-19 17:19:07,038 INFO 
+Final count=4
+2023-06-19 17:23:14,974 INFO Frames 12600 / 13000 was processed. Current count: 0
+2023-06-19 17:23:16,940 INFO Frames 12700 / 13000 was processed. Current count: 0
+2023-06-19 17:23:18,998 INFO Frames 12800 / 13000 was processed. Current count: 0
+2023-06-19 17:23:20,997 INFO Frames 12900 / 13000 was processed. Current count: 1
+2023-06-19 17:23:23,048 INFO Frames 13000 / 13000 was processed. Current count: 1
+2023-06-19 17:23:23,051 INFO 
+Final count=1
+2023-06-19 17:48:25,264 INFO Frames 12600 / 13000 was processed. Current count: 0
+2023-06-19 17:48:27,133 INFO Frames 12700 / 13000 was processed. Current count: 0
+2023-06-19 17:48:29,145 INFO Frames 12800 / 13000 was processed. Current count: 0
+2023-06-19 17:49:54,771 INFO Frames 12600 / 13000 was processed. Current count: 0
+2023-06-19 17:49:56,722 INFO Frames 12700 / 13000 was processed. Current count: 0
+2023-06-19 17:49:58,812 INFO Frames 12800 / 13000 was processed. Current count: 0
+2023-06-19 17:50:00,948 INFO Frames 12900 / 13000 was processed. Current count: 1
+2023-06-19 17:50:03,124 INFO Frames 13000 / 13000 was processed. Current count: 1
+2023-06-19 17:50:03,126 INFO 
+Final count=1
+2023-06-19 18:02:57,462 INFO Frames 200 / 375 was processed. Current count: 0
+2023-06-19 18:02:59,455 INFO Frames 300 / 375 was processed. Current count: 0
+2023-06-19 18:03:00,863 INFO 
+Final count=0
+2023-06-19 18:04:04,762 INFO Frames 10600 / 10750 was processed. Current count: 0
+2023-06-19 18:04:06,722 INFO Frames 10700 / 10750 was processed. Current count: 2
+2023-06-19 18:04:07,718 INFO 
+Final count=3
+2023-06-19 18:05:35,209 INFO Frames 15800 / 16000 was processed. Current count: 0
+2023-06-19 18:05:37,107 INFO Frames 15900 / 16000 was processed. Current count: 0
+2023-06-19 18:05:38,992 INFO Frames 16000 / 16000 was processed. Current count: 0
+2023-06-19 18:05:38,994 INFO 
+Final count=0
+2023-06-19 18:08:38,162 INFO Frames 6700 / 6750 was processed. Current count: 1
+2023-06-19 18:08:39,102 INFO 
+Final count=1
+2023-06-19 18:10:09,413 INFO Frames 7200 / 7250 was processed. Current count: 0
+2023-06-19 18:10:10,441 INFO 
+Final count=1
+2023-06-19 18:27:47,130 INFO Frames 8600 / 8625 was processed. Current count: 2
+2023-06-19 18:27:47,602 INFO 
+Final count=2
+2023-06-19 18:28:43,337 INFO Frames 100 / 16225 was processed. Current count: 0
+2023-06-19 18:28:45,269 INFO Frames 200 / 16225 was processed. Current count: 0
+2023-06-19 18:28:47,203 INFO Frames 300 / 16225 was processed. Current count: 0
+2023-06-19 18:28:49,080 INFO Frames 400 / 16225 was processed. Current count: 0
+2023-06-19 18:28:50,958 INFO Frames 500 / 16225 was processed. Current count: 0
+2023-06-19 18:28:52,864 INFO Frames 600 / 16225 was processed. Current count: 0
+2023-06-19 18:28:54,759 INFO Frames 700 / 16225 was processed. Current count: 0
+2023-06-19 18:28:56,631 INFO Frames 800 / 16225 was processed. Current count: 0
+2023-06-19 18:28:58,490 INFO Frames 900 / 16225 was processed. Current count: 0
+2023-06-19 18:29:00,367 INFO Frames 1000 / 16225 was processed. Current count: 0
+2023-06-19 18:29:02,243 INFO Frames 1100 / 16225 was processed. Current count: 0
+2023-06-19 18:29:04,254 INFO Frames 1200 / 16225 was processed. Current count: 0
+2023-06-19 18:29:06,251 INFO Frames 1300 / 16225 was processed. Current count: 0
+2023-06-19 18:29:08,130 INFO Frames 1400 / 16225 was processed. Current count: 0
+2023-06-19 18:29:10,008 INFO Frames 1500 / 16225 was processed. Current count: 0
+2023-06-19 18:29:11,875 INFO Frames 1600 / 16225 was processed. Current count: 0
+2023-06-19 18:29:13,752 INFO Frames 1700 / 16225 was processed. Current count: 0
+2023-06-19 18:29:15,641 INFO Frames 1800 / 16225 was processed. Current count: 0
+2023-06-19 18:29:17,632 INFO Frames 1900 / 16225 was processed. Current count: 1
+2023-06-19 18:29:19,612 INFO Frames 2000 / 16225 was processed. Current count: 2
+2023-06-19 18:29:21,583 INFO Frames 2100 / 16225 was processed. Current count: 3
+2023-06-19 18:29:23,589 INFO Frames 2200 / 16225 was processed. Current count: 3
+2023-06-19 18:29:25,501 INFO Frames 2300 / 16225 was processed. Current count: 4
+2023-06-19 18:29:27,468 INFO Frames 2400 / 16225 was processed. Current count: 5
+2023-06-19 18:29:29,524 INFO Frames 2500 / 16225 was processed. Current count: 6
+2023-06-19 18:29:31,547 INFO Frames 2600 / 16225 was processed. Current count: 8
+2023-06-19 18:29:33,454 INFO Frames 2700 / 16225 was processed. Current count: 8
+2023-06-19 18:29:35,457 INFO Frames 2800 / 16225 was processed. Current count: 8
+2023-06-19 18:29:37,453 INFO Frames 2900 / 16225 was processed. Current count: 10
+2023-06-19 18:29:39,449 INFO Frames 3000 / 16225 was processed. Current count: 11
+2023-06-19 18:29:41,493 INFO Frames 3100 / 16225 was processed. Current count: 11
+2023-06-19 18:29:43,437 INFO Frames 3200 / 16225 was processed. Current count: 12
+2023-06-19 18:29:45,350 INFO Frames 3300 / 16225 was processed. Current count: 12
+2023-06-19 18:29:47,366 INFO Frames 3400 / 16225 was processed. Current count: 13
+2023-06-19 18:29:49,375 INFO Frames 3500 / 16225 was processed. Current count: 14
+2023-06-19 18:29:51,472 INFO Frames 3600 / 16225 was processed. Current count: 15
+2023-06-19 18:29:53,524 INFO Frames 3700 / 16225 was processed. Current count: 16
+2023-06-19 18:29:55,523 INFO Frames 3800 / 16225 was processed. Current count: 18
+2023-06-19 18:29:57,504 INFO Frames 3900 / 16225 was processed. Current count: 19
+2023-06-19 18:29:59,479 INFO Frames 4000 / 16225 was processed. Current count: 20
+2023-06-19 18:30:01,569 INFO Frames 4100 / 16225 was processed. Current count: 21
+2023-06-19 18:30:03,591 INFO Frames 4200 / 16225 was processed. Current count: 22
+2023-06-19 18:30:05,616 INFO Frames 4300 / 16225 was processed. Current count: 23
+2023-06-19 18:30:07,646 INFO Frames 4400 / 16225 was processed. Current count: 24
+2023-06-19 18:30:09,725 INFO Frames 4500 / 16225 was processed. Current count: 25
+2023-06-19 18:30:11,652 INFO Frames 4600 / 16225 was processed. Current count: 25
+2023-06-19 18:30:13,574 INFO Frames 4700 / 16225 was processed. Current count: 25
+2023-06-19 18:30:15,721 INFO Frames 4800 / 16225 was processed. Current count: 26
+2023-06-19 18:30:17,653 INFO Frames 4900 / 16225 was processed. Current count: 26
+2023-06-19 18:30:19,677 INFO Frames 5000 / 16225 was processed. Current count: 27
+2023-06-19 18:30:21,704 INFO Frames 5100 / 16225 was processed. Current count: 28
+2023-06-19 18:30:23,763 INFO Frames 5200 / 16225 was processed. Current count: 29
+2023-06-19 18:30:25,744 INFO Frames 5300 / 16225 was processed. Current count: 30
+2023-06-19 18:30:27,793 INFO Frames 5400 / 16225 was processed. Current count: 31
+2023-06-19 18:30:29,895 INFO Frames 5500 / 16225 was processed. Current count: 32
+2023-06-19 18:30:31,947 INFO Frames 5600 / 16225 was processed. Current count: 34
+2023-06-19 18:30:34,086 INFO Frames 5700 / 16225 was processed. Current count: 35
+2023-06-19 18:30:36,121 INFO Frames 5800 / 16225 was processed. Current count: 35
+2023-06-19 18:30:38,144 INFO Frames 5900 / 16225 was processed. Current count: 36
+2023-06-19 18:30:40,158 INFO Frames 6000 / 16225 was processed. Current count: 37
+2023-06-19 18:30:42,199 INFO Frames 6100 / 16225 was processed. Current count: 39
+2023-06-19 18:30:44,181 INFO Frames 6200 / 16225 was processed. Current count: 39
+2023-06-19 18:30:46,270 INFO Frames 6300 / 16225 was processed. Current count: 40
+2023-06-19 18:30:48,254 INFO Frames 6400 / 16225 was processed. Current count: 42
+2023-06-19 18:30:50,265 INFO Frames 6500 / 16225 was processed. Current count: 43
+2023-06-19 18:30:52,285 INFO Frames 6600 / 16225 was processed. Current count: 44
+2023-06-19 18:30:54,413 INFO Frames 6700 / 16225 was processed. Current count: 45
+2023-06-19 18:30:56,461 INFO Frames 6800 / 16225 was processed. Current count: 46
+2023-06-19 18:30:58,423 INFO Frames 6900 / 16225 was processed. Current count: 48
+2023-06-19 18:31:00,491 INFO Frames 7000 / 16225 was processed. Current count: 49
+2023-06-19 18:31:02,652 INFO Frames 7100 / 16225 was processed. Current count: 50
+2023-06-19 18:31:04,600 INFO Frames 7200 / 16225 was processed. Current count: 50
+2023-06-19 18:31:06,646 INFO Frames 7300 / 16225 was processed. Current count: 51
+2023-06-19 18:31:08,731 INFO Frames 7400 / 16225 was processed. Current count: 52
+2023-06-19 18:31:10,799 INFO Frames 7500 / 16225 was processed. Current count: 54
+2023-06-19 18:31:12,887 INFO Frames 7600 / 16225 was processed. Current count: 55
+2023-06-19 18:31:14,929 INFO Frames 7700 / 16225 was processed. Current count: 55
+2023-06-19 18:31:16,946 INFO Frames 7800 / 16225 was processed. Current count: 57
+2023-06-19 18:31:19,024 INFO Frames 7900 / 16225 was processed. Current count: 58
+2023-06-19 18:31:21,104 INFO Frames 8000 / 16225 was processed. Current count: 58
+2023-06-19 18:31:23,170 INFO Frames 8100 / 16225 was processed. Current count: 60
+2023-06-19 18:31:25,245 INFO Frames 8200 / 16225 was processed. Current count: 61
+2023-06-19 18:31:27,208 INFO Frames 8300 / 16225 was processed. Current count: 62
+2023-06-19 18:31:29,214 INFO Frames 8400 / 16225 was processed. Current count: 63
+2023-06-19 18:31:31,235 INFO Frames 8500 / 16225 was processed. Current count: 64
+2023-06-19 18:31:33,335 INFO Frames 8600 / 16225 was processed. Current count: 66
+2023-06-19 18:31:35,487 INFO Frames 8700 / 16225 was processed. Current count: 66
+2023-06-19 18:31:37,483 INFO Frames 8800 / 16225 was processed. Current count: 67
+2023-06-19 18:31:39,572 INFO Frames 8900 / 16225 was processed. Current count: 69
+2023-06-19 18:31:41,639 INFO Frames 9000 / 16225 was processed. Current count: 70
+2023-06-19 18:31:43,615 INFO Frames 9100 / 16225 was processed. Current count: 71
+2023-06-19 18:31:45,657 INFO Frames 9200 / 16225 was processed. Current count: 73
+2023-06-19 18:31:47,588 INFO Frames 9300 / 16225 was processed. Current count: 73
+2023-06-19 18:31:49,615 INFO Frames 9400 / 16225 was processed. Current count: 74
+2023-06-19 18:31:51,654 INFO Frames 9500 / 16225 was processed. Current count: 75
+2023-06-19 18:31:53,672 INFO Frames 9600 / 16225 was processed. Current count: 76
+2023-06-19 18:31:55,667 INFO Frames 9700 / 16225 was processed. Current count: 77
+2023-06-19 18:31:57,694 INFO Frames 9800 / 16225 was processed. Current count: 78
+2023-06-19 18:31:59,717 INFO Frames 9900 / 16225 was processed. Current count: 79
+2023-06-19 18:32:01,782 INFO Frames 10000 / 16225 was processed. Current count: 80
+2023-06-19 18:32:03,762 INFO Frames 10100 / 16225 was processed. Current count: 81
+2023-06-19 18:32:05,844 INFO Frames 10200 / 16225 was processed. Current count: 82
+2023-06-19 18:32:07,977 INFO Frames 10300 / 16225 was processed. Current count: 83
+2023-06-19 18:32:09,967 INFO Frames 10400 / 16225 was processed. Current count: 84
+2023-06-19 18:32:11,904 INFO Frames 10500 / 16225 was processed. Current count: 84
+2023-06-19 18:32:14,058 INFO Frames 10600 / 16225 was processed. Current count: 84
+2023-06-19 18:32:16,089 INFO Frames 10700 / 16225 was processed. Current count: 86
+2023-06-19 18:32:18,082 INFO Frames 10800 / 16225 was processed. Current count: 87
+2023-06-19 18:32:20,103 INFO Frames 10900 / 16225 was processed. Current count: 88
+2023-06-19 18:32:22,231 INFO Frames 11000 / 16225 was processed. Current count: 89
+2023-06-19 18:32:24,299 INFO Frames 11100 / 16225 was processed. Current count: 91
+2023-06-19 18:32:26,350 INFO Frames 11200 / 16225 was processed. Current count: 92
+2023-06-19 18:32:28,402 INFO Frames 11300 / 16225 was processed. Current count: 93
+2023-06-19 18:32:30,467 INFO Frames 11400 / 16225 was processed. Current count: 94
+2023-06-19 18:32:32,579 INFO Frames 11500 / 16225 was processed. Current count: 96
+2023-06-19 18:32:34,647 INFO Frames 11600 / 16225 was processed. Current count: 98
+2023-06-19 18:32:36,790 INFO Frames 11700 / 16225 was processed. Current count: 100
+2023-06-19 18:32:38,886 INFO Frames 11800 / 16225 was processed. Current count: 103
+2023-06-19 18:32:41,070 INFO Frames 11900 / 16225 was processed. Current count: 104
+2023-06-19 18:32:43,146 INFO Frames 12000 / 16225 was processed. Current count: 105
+2023-06-19 18:32:45,264 INFO Frames 12100 / 16225 was processed. Current count: 107
+2023-06-19 18:32:47,286 INFO Frames 12200 / 16225 was processed. Current count: 109
+2023-06-19 18:32:49,382 INFO Frames 12300 / 16225 was processed. Current count: 111
+2023-06-19 18:32:51,432 INFO Frames 12400 / 16225 was processed. Current count: 111
+2023-06-19 18:32:53,449 INFO Frames 12500 / 16225 was processed. Current count: 112
+2023-06-19 18:32:55,574 INFO Frames 12600 / 16225 was processed. Current count: 113
+2023-06-19 18:32:57,637 INFO Frames 12700 / 16225 was processed. Current count: 114
+2023-06-19 18:32:59,730 INFO Frames 12800 / 16225 was processed. Current count: 116
+2023-06-19 18:33:01,676 INFO Frames 12900 / 16225 was processed. Current count: 116
+2023-06-19 18:33:03,738 INFO Frames 13000 / 16225 was processed. Current count: 117
+2023-06-19 18:33:05,868 INFO Frames 13100 / 16225 was processed. Current count: 118
+2023-06-19 18:33:07,926 INFO Frames 13200 / 16225 was processed. Current count: 119
+2023-06-19 18:33:10,145 INFO Frames 13300 / 16225 was processed. Current count: 120
+2023-06-19 18:33:12,086 INFO Frames 13400 / 16225 was processed. Current count: 120
+2023-06-19 18:33:14,263 INFO Frames 13500 / 16225 was processed. Current count: 121
+2023-06-19 18:33:16,266 INFO Frames 13600 / 16225 was processed. Current count: 121
+2023-06-19 18:33:18,399 INFO Frames 13700 / 16225 was processed. Current count: 122
+2023-06-19 18:33:20,544 INFO Frames 13800 / 16225 was processed. Current count: 123
+2023-06-19 18:33:22,638 INFO Frames 13900 / 16225 was processed. Current count: 124
+2023-06-19 18:33:24,593 INFO Frames 14000 / 16225 was processed. Current count: 124
+2023-06-19 18:33:26,545 INFO Frames 14100 / 16225 was processed. Current count: 124
+2023-06-19 18:33:28,669 INFO Frames 14200 / 16225 was processed. Current count: 125
+2023-06-19 18:33:30,684 INFO Frames 14300 / 16225 was processed. Current count: 126
+2023-06-19 18:33:32,698 INFO Frames 14400 / 16225 was processed. Current count: 126
+2023-06-19 18:33:34,848 INFO Frames 14500 / 16225 was processed. Current count: 127
+2023-06-19 18:33:36,804 INFO Frames 14600 / 16225 was processed. Current count: 127
+2023-06-19 18:33:38,824 INFO Frames 14700 / 16225 was processed. Current count: 127
+2023-06-19 18:33:40,882 INFO Frames 14800 / 16225 was processed. Current count: 129
+2023-06-19 18:33:43,057 INFO Frames 14900 / 16225 was processed. Current count: 129
+2023-06-19 18:33:45,151 INFO Frames 15000 / 16225 was processed. Current count: 130
+2023-06-19 18:33:47,280 INFO Frames 15100 / 16225 was processed. Current count: 132
+2023-06-19 18:33:49,248 INFO Frames 15200 / 16225 was processed. Current count: 132
+2023-06-19 18:33:51,202 INFO Frames 15300 / 16225 was processed. Current count: 132
+2023-06-19 18:33:53,268 INFO Frames 15400 / 16225 was processed. Current count: 133
+2023-06-19 18:33:55,386 INFO Frames 15500 / 16225 was processed. Current count: 135
+2023-06-19 18:33:57,461 INFO Frames 15600 / 16225 was processed. Current count: 135
+2023-06-19 18:33:59,539 INFO Frames 15700 / 16225 was processed. Current count: 136
+2023-06-19 18:34:01,516 INFO Frames 15800 / 16225 was processed. Current count: 136
+2023-06-19 18:34:03,490 INFO Frames 15900 / 16225 was processed. Current count: 136
+2023-06-19 18:34:05,452 INFO Frames 16000 / 16225 was processed. Current count: 136
+2023-06-19 18:34:07,381 INFO Frames 16100 / 16225 was processed. Current count: 136
+2023-06-19 18:34:09,306 INFO Frames 16200 / 16225 was processed. Current count: 136
+2023-06-19 18:34:09,790 INFO 
+Final count=136
+2023-06-19 18:43:56,036 INFO Frames 15500 / 15575 was processed. Current count: 2
+2023-06-19 18:43:57,493 INFO 
+Final count=2
+2023-06-19 18:55:13,245 INFO Frames 7900 / 7950 was processed. Current count: 1
+2023-06-19 18:55:14,246 INFO 
+Final count=2
+2023-06-19 19:02:40,774 INFO Frames 10200 / 10250 was processed. Current count: 1
+2023-06-19 19:02:41,708 INFO 
+Final count=2
+2023-06-19 19:21:36,016 INFO Frames 100 / 13950 was processed. Current count: 0
+2023-06-19 19:21:37,914 INFO Frames 200 / 13950 was processed. Current count: 0
+2023-06-19 19:21:39,819 INFO Frames 300 / 13950 was processed. Current count: 0
+2023-06-19 19:21:41,744 INFO Frames 400 / 13950 was processed. Current count: 0
+2023-06-19 19:21:43,613 INFO Frames 500 / 13950 was processed. Current count: 0
+2023-06-19 19:21:45,555 INFO Frames 600 / 13950 was processed. Current count: 1
+2023-06-19 19:21:47,548 INFO Frames 700 / 13950 was processed. Current count: 2
+2023-06-19 19:21:49,669 INFO Frames 800 / 13950 was processed. Current count: 3
+2023-06-19 19:21:51,722 INFO Frames 900 / 13950 was processed. Current count: 5
+2023-06-19 19:21:53,675 INFO Frames 1000 / 13950 was processed. Current count: 6
+2023-06-19 19:21:55,669 INFO Frames 1100 / 13950 was processed. Current count: 7
+2023-06-19 19:21:57,639 INFO Frames 1200 / 13950 was processed. Current count: 9
+2023-06-19 19:21:59,562 INFO Frames 1300 / 13950 was processed. Current count: 11
+2023-06-19 19:22:01,529 INFO Frames 1400 / 13950 was processed. Current count: 12
+2023-06-19 19:22:03,637 INFO Frames 1500 / 13950 was processed. Current count: 14
+2023-06-19 19:22:05,622 INFO Frames 1600 / 13950 was processed. Current count: 15
+2023-06-19 19:22:07,633 INFO Frames 1700 / 13950 was processed. Current count: 16
+2023-06-19 19:22:09,727 INFO Frames 1800 / 13950 was processed. Current count: 17
+2023-06-19 19:22:11,745 INFO Frames 1900 / 13950 was processed. Current count: 19
+2023-06-19 19:22:13,760 INFO Frames 2000 / 13950 was processed. Current count: 19
+2023-06-19 19:22:15,783 INFO Frames 2100 / 13950 was processed. Current count: 21
+2023-06-19 19:22:17,760 INFO Frames 2200 / 13950 was processed. Current count: 21
+2023-06-19 19:22:19,720 INFO Frames 2300 / 13950 was processed. Current count: 22
+2023-06-19 19:22:21,765 INFO Frames 2400 / 13950 was processed. Current count: 23
+2023-06-19 19:22:23,673 INFO Frames 2500 / 13950 was processed. Current count: 23
+2023-06-19 19:22:25,697 INFO Frames 2600 / 13950 was processed. Current count: 24
+2023-06-19 19:22:27,768 INFO Frames 2700 / 13950 was processed. Current count: 25
+2023-06-19 19:22:29,694 INFO Frames 2800 / 13950 was processed. Current count: 25
+2023-06-19 19:22:31,727 INFO Frames 2900 / 13950 was processed. Current count: 26
+2023-06-19 19:22:33,786 INFO Frames 3000 / 13950 was processed. Current count: 27
+2023-06-19 19:22:35,833 INFO Frames 3100 / 13950 was processed. Current count: 29
+2023-06-19 19:22:37,839 INFO Frames 3200 / 13950 was processed. Current count: 30
+2023-06-19 19:22:39,922 INFO Frames 3300 / 13950 was processed. Current count: 31
+2023-06-19 19:22:41,988 INFO Frames 3400 / 13950 was processed. Current count: 33
+2023-06-19 19:22:44,044 INFO Frames 3500 / 13950 was processed. Current count: 34
+2023-06-19 19:22:46,115 INFO Frames 3600 / 13950 was processed. Current count: 36
+2023-06-19 19:22:48,040 INFO Frames 3700 / 13950 was processed. Current count: 36
+2023-06-19 19:22:50,027 INFO Frames 3800 / 13950 was processed. Current count: 37
+2023-06-19 19:22:52,010 INFO Frames 3900 / 13950 was processed. Current count: 38
+2023-06-19 19:22:54,012 INFO Frames 4000 / 13950 was processed. Current count: 39
+2023-06-19 19:22:56,005 INFO Frames 4100 / 13950 was processed. Current count: 40
+2023-06-19 19:22:58,002 INFO Frames 4200 / 13950 was processed. Current count: 40
+2023-06-19 19:22:59,966 INFO Frames 4300 / 13950 was processed. Current count: 41
+2023-06-19 19:23:02,005 INFO Frames 4400 / 13950 was processed. Current count: 42
+2023-06-19 19:23:04,011 INFO Frames 4500 / 13950 was processed. Current count: 44
+2023-06-19 19:23:05,979 INFO Frames 4600 / 13950 was processed. Current count: 44
+2023-06-19 19:23:08,039 INFO Frames 4700 / 13950 was processed. Current count: 46
+2023-06-19 19:23:10,157 INFO Frames 4800 / 13950 was processed. Current count: 46
+2023-06-19 19:23:12,155 INFO Frames 4900 / 13950 was processed. Current count: 48
+2023-06-19 19:23:14,218 INFO Frames 5000 / 13950 was processed. Current count: 48
+2023-06-19 19:23:16,239 INFO Frames 5100 / 13950 was processed. Current count: 49
+2023-06-19 19:23:18,314 INFO Frames 5200 / 13950 was processed. Current count: 50
+2023-06-19 19:23:20,255 INFO Frames 5300 / 13950 was processed. Current count: 51
+2023-06-19 19:23:22,279 INFO Frames 5400 / 13950 was processed. Current count: 52
+2023-06-19 19:23:24,360 INFO Frames 5500 / 13950 was processed. Current count: 52
+2023-06-19 19:23:26,417 INFO Frames 5600 / 13950 was processed. Current count: 53
+2023-06-19 19:23:28,442 INFO Frames 5700 / 13950 was processed. Current count: 55
+2023-06-19 19:23:30,448 INFO Frames 5800 / 13950 was processed. Current count: 56
+2023-06-19 19:23:32,461 INFO Frames 5900 / 13950 was processed. Current count: 56
+2023-06-19 19:23:34,405 INFO Frames 6000 / 13950 was processed. Current count: 57
+2023-06-19 19:23:36,470 INFO Frames 6100 / 13950 was processed. Current count: 58
+2023-06-19 19:23:38,482 INFO Frames 6200 / 13950 was processed. Current count: 59
+2023-06-19 19:23:40,504 INFO Frames 6300 / 13950 was processed. Current count: 60
+2023-06-19 19:23:42,592 INFO Frames 6400 / 13950 was processed. Current count: 62
+2023-06-19 19:23:44,654 INFO Frames 6500 / 13950 was processed. Current count: 63
+2023-06-19 19:23:46,707 INFO Frames 6600 / 13950 was processed. Current count: 65
+2023-06-19 19:23:48,717 INFO Frames 6700 / 13950 was processed. Current count: 66
+2023-06-19 19:23:50,780 INFO Frames 6800 / 13950 was processed. Current count: 67
+2023-06-19 19:23:52,875 INFO Frames 6900 / 13950 was processed. Current count: 69
+2023-06-19 19:23:54,862 INFO Frames 7000 / 13950 was processed. Current count: 70
+2023-06-19 19:23:56,861 INFO Frames 7100 / 13950 was processed. Current count: 71
+2023-06-19 19:23:58,893 INFO Frames 7200 / 13950 was processed. Current count: 73
+2023-06-19 19:24:00,902 INFO Frames 7300 / 13950 was processed. Current count: 75
+2023-06-19 19:24:02,943 INFO Frames 7400 / 13950 was processed. Current count: 77
+2023-06-19 19:24:05,003 INFO Frames 7500 / 13950 was processed. Current count: 79
+2023-06-19 19:24:07,022 INFO Frames 7600 / 13950 was processed. Current count: 80
+2023-06-19 19:24:09,157 INFO Frames 7700 / 13950 was processed. Current count: 81
+2023-06-19 19:24:11,168 INFO Frames 7800 / 13950 was processed. Current count: 82
+2023-06-19 19:24:13,196 INFO Frames 7900 / 13950 was processed. Current count: 83
+2023-06-19 19:24:15,216 INFO Frames 8000 / 13950 was processed. Current count: 85
+2023-06-19 19:24:17,226 INFO Frames 8100 / 13950 was processed. Current count: 86
+2023-06-19 19:24:19,225 INFO Frames 8200 / 13950 was processed. Current count: 88
+2023-06-19 19:24:21,198 INFO Frames 8300 / 13950 was processed. Current count: 88
+2023-06-19 19:24:23,173 INFO Frames 8400 / 13950 was processed. Current count: 89
+2023-06-19 19:24:25,191 INFO Frames 8500 / 13950 was processed. Current count: 90
+2023-06-19 19:24:27,222 INFO Frames 8600 / 13950 was processed. Current count: 91
+2023-06-19 19:24:29,207 INFO Frames 8700 / 13950 was processed. Current count: 92
+2023-06-19 19:24:31,306 INFO Frames 8800 / 13950 was processed. Current count: 94
+2023-06-19 19:24:33,333 INFO Frames 8900 / 13950 was processed. Current count: 95
+2023-06-19 19:24:35,317 INFO Frames 9000 / 13950 was processed. Current count: 95
+2023-06-19 19:24:37,346 INFO Frames 9100 / 13950 was processed. Current count: 97
+2023-06-19 19:24:39,336 INFO Frames 9200 / 13950 was processed. Current count: 98
+2023-06-19 19:24:41,347 INFO Frames 9300 / 13950 was processed. Current count: 99
+2023-06-19 19:24:43,338 INFO Frames 9400 / 13950 was processed. Current count: 100
+2023-06-19 19:24:45,381 INFO Frames 9500 / 13950 was processed. Current count: 102
+2023-06-19 19:24:47,352 INFO Frames 9600 / 13950 was processed. Current count: 105
+2023-06-19 19:24:49,362 INFO Frames 9700 / 13950 was processed. Current count: 106
+2023-06-19 19:24:51,355 INFO Frames 9800 / 13950 was processed. Current count: 107
+2023-06-19 19:24:53,366 INFO Frames 9900 / 13950 was processed. Current count: 108
+2023-06-19 19:24:55,385 INFO Frames 10000 / 13950 was processed. Current count: 109
+2023-06-19 19:24:57,430 INFO Frames 10100 / 13950 was processed. Current count: 110
+2023-06-19 19:24:59,454 INFO Frames 10200 / 13950 was processed. Current count: 111
+2023-06-19 19:25:01,797 INFO Frames 10300 / 13950 was processed. Current count: 113
+2023-06-19 19:25:03,824 INFO Frames 10400 / 13950 was processed. Current count: 114
+2023-06-19 19:25:05,920 INFO Frames 10500 / 13950 was processed. Current count: 115
+2023-06-19 19:25:07,949 INFO Frames 10600 / 13950 was processed. Current count: 116
+2023-06-19 19:25:09,965 INFO Frames 10700 / 13950 was processed. Current count: 117
+2023-06-19 19:25:12,218 INFO Frames 10800 / 13950 was processed. Current count: 118
+2023-06-19 19:25:14,521 INFO Frames 10900 / 13950 was processed. Current count: 118
+2023-06-19 19:25:16,598 INFO Frames 11000 / 13950 was processed. Current count: 119
+2023-06-19 19:25:18,735 INFO Frames 11100 / 13950 was processed. Current count: 120
+2023-06-19 19:25:20,828 INFO Frames 11200 / 13950 was processed. Current count: 121
+2023-06-19 19:25:22,881 INFO Frames 11300 / 13950 was processed. Current count: 122
+2023-06-19 19:25:24,961 INFO Frames 11400 / 13950 was processed. Current count: 123
+2023-06-19 19:25:27,030 INFO Frames 11500 / 13950 was processed. Current count: 124
+2023-06-19 19:25:29,057 INFO Frames 11600 / 13950 was processed. Current count: 125
+2023-06-19 19:25:31,014 INFO Frames 11700 / 13950 was processed. Current count: 125
+2023-06-19 19:25:33,233 INFO Frames 11800 / 13950 was processed. Current count: 127
+2023-06-19 19:25:35,420 INFO Frames 11900 / 13950 was processed. Current count: 128
+2023-06-19 19:25:37,512 INFO Frames 12000 / 13950 was processed. Current count: 128
+2023-06-19 19:25:39,538 INFO Frames 12100 / 13950 was processed. Current count: 129
+2023-06-19 19:25:41,567 INFO Frames 12200 / 13950 was processed. Current count: 130
+2023-06-19 19:25:43,578 INFO Frames 12300 / 13950 was processed. Current count: 131
+2023-06-19 19:25:45,638 INFO Frames 12400 / 13950 was processed. Current count: 133
+2023-06-19 19:25:47,579 INFO Frames 12500 / 13950 was processed. Current count: 133
+2023-06-19 19:25:49,508 INFO Frames 12600 / 13950 was processed. Current count: 133
+2023-06-19 19:25:51,554 INFO Frames 12700 / 13950 was processed. Current count: 134
+2023-06-19 19:25:53,664 INFO Frames 12800 / 13950 was processed. Current count: 135
+2023-06-19 19:25:55,701 INFO Frames 12900 / 13950 was processed. Current count: 137
+2023-06-19 19:25:57,792 INFO Frames 13000 / 13950 was processed. Current count: 138
+2023-06-19 19:25:59,882 INFO Frames 13100 / 13950 was processed. Current count: 138
+2023-06-19 19:26:01,875 INFO Frames 13200 / 13950 was processed. Current count: 139
+2023-06-19 19:26:03,863 INFO Frames 13300 / 13950 was processed. Current count: 139
+2023-06-19 19:26:05,838 INFO Frames 13400 / 13950 was processed. Current count: 139
+2023-06-19 19:26:07,785 INFO Frames 13500 / 13950 was processed. Current count: 139
+2023-06-19 19:26:09,702 INFO Frames 13600 / 13950 was processed. Current count: 139
+2023-06-19 19:26:11,629 INFO Frames 13700 / 13950 was processed. Current count: 139
+2023-06-19 19:26:13,624 INFO Frames 13800 / 13950 was processed. Current count: 139
+2023-06-19 19:26:15,565 INFO Frames 13900 / 13950 was processed. Current count: 139
+2023-06-19 19:26:16,528 INFO 
+Final count=139
+2023-06-19 19:41:41,209 INFO Frames 300 / 375 was processed. Current count: 0
+2023-06-19 19:41:42,724 INFO 
+Final count=0
+2023-06-19 20:10:36,545 INFO Frames 300 / 375 was processed. Current count: 0
+2023-06-19 20:10:38,098 INFO 
+Final count=0
+2023-06-19 20:21:54,892 INFO Frames 12200 / 12250 was processed. Current count: 0
+2023-06-19 20:21:55,912 INFO 
+Final count=1
+2023-06-19 20:38:22,773 INFO Frames 12200 / 12250 was processed. Current count: 0
+2023-06-19 20:38:23,798 INFO 
+Final count=0
+2023-06-19 20:39:33,631 INFO Frames 12200 / 12250 was processed. Current count: 1
+2023-06-19 20:39:34,669 INFO 
+Final count=2
+2023-06-19 20:40:20,595 INFO Frames 300 / 375 was processed. Current count: 0
+2023-06-19 20:40:22,189 INFO 
+Final count=0
+2023-06-19 20:41:25,200 INFO Frames 300 / 375 was processed. Current count: 0
+2023-06-19 20:41:26,749 INFO 
+Final count=0
+2023-06-19 20:47:33,780 INFO Frames 100 / 13950 was processed. Current count: 0
+2023-06-19 20:47:35,773 INFO Frames 200 / 13950 was processed. Current count: 0
+2023-06-19 20:47:37,752 INFO Frames 300 / 13950 was processed. Current count: 0
+2023-06-19 20:47:39,761 INFO Frames 400 / 13950 was processed. Current count: 0
+2023-06-19 20:47:41,726 INFO Frames 500 / 13950 was processed. Current count: 0
+2023-06-19 20:47:43,748 INFO Frames 600 / 13950 was processed. Current count: 1
+2023-06-19 20:47:45,796 INFO Frames 700 / 13950 was processed. Current count: 2
+2023-06-19 20:47:47,985 INFO Frames 800 / 13950 was processed. Current count: 3
+2023-06-19 20:47:50,124 INFO Frames 900 / 13950 was processed. Current count: 5
+2023-06-19 20:47:52,134 INFO Frames 1000 / 13950 was processed. Current count: 6
+2023-06-19 20:47:54,488 INFO Frames 1100 / 13950 was processed. Current count: 7
+2023-06-19 20:47:56,547 INFO Frames 1200 / 13950 was processed. Current count: 9
+2023-06-19 20:47:58,553 INFO Frames 1300 / 13950 was processed. Current count: 11
+2023-06-19 20:48:00,607 INFO Frames 1400 / 13950 was processed. Current count: 12
+2023-06-19 20:48:02,786 INFO Frames 1500 / 13950 was processed. Current count: 14
+2023-06-19 20:48:04,868 INFO Frames 1600 / 13950 was processed. Current count: 15
+2023-06-19 20:48:29,386 INFO Frames 100 / 13950 was processed. Current count: 0
+2023-06-19 20:48:31,316 INFO Frames 200 / 13950 was processed. Current count: 0
+2023-06-19 20:48:33,310 INFO Frames 300 / 13950 was processed. Current count: 0
+2023-06-19 20:48:35,236 INFO Frames 400 / 13950 was processed. Current count: 0
+2023-06-19 20:48:37,098 INFO Frames 500 / 13950 was processed. Current count: 0
+2023-06-19 20:48:39,039 INFO Frames 600 / 13950 was processed. Current count: 1
+2023-06-19 20:48:41,007 INFO Frames 700 / 13950 was processed. Current count: 2
+2023-06-19 20:48:43,098 INFO Frames 800 / 13950 was processed. Current count: 3
+2023-06-19 20:48:45,140 INFO Frames 900 / 13950 was processed. Current count: 5
+2023-06-19 20:48:47,062 INFO Frames 1000 / 13950 was processed. Current count: 6
+2023-06-19 20:48:49,032 INFO Frames 1100 / 13950 was processed. Current count: 7
+2023-06-19 20:48:50,988 INFO Frames 1200 / 13950 was processed. Current count: 9
+2023-06-19 20:48:52,914 INFO Frames 1300 / 13950 was processed. Current count: 11
+2023-06-19 20:48:54,874 INFO Frames 1400 / 13950 was processed. Current count: 12
+2023-06-19 20:48:56,963 INFO Frames 1500 / 13950 was processed. Current count: 14
+2023-06-19 20:48:58,941 INFO Frames 1600 / 13950 was processed. Current count: 15
+2023-06-19 20:49:00,951 INFO Frames 1700 / 13950 was processed. Current count: 16
+2023-06-19 20:49:03,040 INFO Frames 1800 / 13950 was processed. Current count: 17
+2023-06-19 20:49:05,043 INFO Frames 1900 / 13950 was processed. Current count: 19
+2023-06-19 20:49:06,993 INFO Frames 2000 / 13950 was processed. Current count: 19
+2023-06-19 20:49:09,017 INFO Frames 2100 / 13950 was processed. Current count: 21
+2023-06-19 20:49:11,000 INFO Frames 2200 / 13950 was processed. Current count: 21
+2023-06-19 20:49:12,951 INFO Frames 2300 / 13950 was processed. Current count: 22
+2023-06-19 20:49:15,002 INFO Frames 2400 / 13950 was processed. Current count: 23
+2023-06-19 20:49:16,930 INFO Frames 2500 / 13950 was processed. Current count: 23
+2023-06-19 20:49:18,965 INFO Frames 2600 / 13950 was processed. Current count: 24
+2023-06-19 20:49:21,102 INFO Frames 2700 / 13950 was processed. Current count: 25
+2023-06-19 20:49:23,024 INFO Frames 2800 / 13950 was processed. Current count: 25
+2023-06-19 20:49:25,112 INFO Frames 2900 / 13950 was processed. Current count: 26
+2023-06-19 20:49:27,178 INFO Frames 3000 / 13950 was processed. Current count: 27
+2023-06-19 20:49:29,236 INFO Frames 3100 / 13950 was processed. Current count: 29
+2023-06-19 20:49:31,262 INFO Frames 3200 / 13950 was processed. Current count: 30
+2023-06-19 20:49:33,395 INFO Frames 3300 / 13950 was processed. Current count: 31
+2023-06-19 20:49:35,480 INFO Frames 3400 / 13950 was processed. Current count: 33
+2023-06-19 20:49:37,541 INFO Frames 3500 / 13950 was processed. Current count: 34
+2023-06-19 20:49:39,621 INFO Frames 3600 / 13950 was processed. Current count: 36
+2023-06-19 20:49:41,536 INFO Frames 3700 / 13950 was processed. Current count: 36
+2023-06-19 20:49:43,550 INFO Frames 3800 / 13950 was processed. Current count: 37
+2023-06-19 20:49:45,559 INFO Frames 3900 / 13950 was processed. Current count: 38
+2023-06-19 20:49:47,568 INFO Frames 4000 / 13950 was processed. Current count: 39
+2023-06-19 20:49:49,568 INFO Frames 4100 / 13950 was processed. Current count: 40
+2023-06-19 20:49:51,577 INFO Frames 4200 / 13950 was processed. Current count: 40
+2023-06-19 20:49:53,554 INFO Frames 4300 / 13950 was processed. Current count: 41
+2023-06-19 20:49:55,596 INFO Frames 4400 / 13950 was processed. Current count: 42
+2023-06-19 20:49:57,600 INFO Frames 4500 / 13950 was processed. Current count: 44
+2023-06-19 20:49:59,597 INFO Frames 4600 / 13950 was processed. Current count: 44
+2023-06-19 20:50:01,702 INFO Frames 4700 / 13950 was processed. Current count: 46
+2023-06-19 20:50:03,841 INFO Frames 4800 / 13950 was processed. Current count: 46
+2023-06-19 20:50:05,827 INFO Frames 4900 / 13950 was processed. Current count: 48
+2023-06-19 20:50:07,873 INFO Frames 5000 / 13950 was processed. Current count: 48
+2023-06-19 20:50:09,908 INFO Frames 5100 / 13950 was processed. Current count: 49
+2023-06-19 20:50:11,991 INFO Frames 5200 / 13950 was processed. Current count: 50
+2023-06-19 20:50:13,932 INFO Frames 5300 / 13950 was processed. Current count: 51
+2023-06-19 20:50:15,950 INFO Frames 5400 / 13950 was processed. Current count: 52
+2023-06-19 20:50:18,032 INFO Frames 5500 / 13950 was processed. Current count: 52
+2023-06-19 20:50:20,088 INFO Frames 5600 / 13950 was processed. Current count: 53
+2023-06-19 20:50:22,133 INFO Frames 5700 / 13950 was processed. Current count: 55
+2023-06-19 20:50:24,138 INFO Frames 5800 / 13950 was processed. Current count: 56
+2023-06-19 20:50:26,164 INFO Frames 5900 / 13950 was processed. Current count: 56
+2023-06-19 20:50:28,115 INFO Frames 6000 / 13950 was processed. Current count: 57
+2023-06-19 20:50:30,199 INFO Frames 6100 / 13950 was processed. Current count: 58
+2023-06-19 20:50:32,206 INFO Frames 6200 / 13950 was processed. Current count: 59
+2023-06-19 20:50:34,256 INFO Frames 6300 / 13950 was processed. Current count: 60
+2023-06-19 20:50:36,342 INFO Frames 6400 / 13950 was processed. Current count: 62
+2023-06-19 20:50:38,402 INFO Frames 6500 / 13950 was processed. Current count: 63
+2023-06-19 20:50:40,446 INFO Frames 6600 / 13950 was processed. Current count: 65
+2023-06-19 20:50:42,448 INFO Frames 6700 / 13950 was processed. Current count: 66
+2023-06-19 20:50:44,520 INFO Frames 6800 / 13950 was processed. Current count: 67
+2023-06-19 20:50:46,615 INFO Frames 6900 / 13950 was processed. Current count: 69
+2023-06-19 20:50:48,593 INFO Frames 7000 / 13950 was processed. Current count: 70
+2023-06-19 20:50:50,611 INFO Frames 7100 / 13950 was processed. Current count: 71
+2023-06-19 20:50:52,644 INFO Frames 7200 / 13950 was processed. Current count: 73
+2023-06-19 20:50:54,642 INFO Frames 7300 / 13950 was processed. Current count: 75
+2023-06-19 20:50:56,676 INFO Frames 7400 / 13950 was processed. Current count: 77
+2023-06-19 20:50:58,750 INFO Frames 7500 / 13950 was processed. Current count: 79
+2023-06-19 20:51:00,767 INFO Frames 7600 / 13950 was processed. Current count: 80
+2023-06-19 20:51:02,880 INFO Frames 7700 / 13950 was processed. Current count: 81
+2023-06-19 20:51:04,883 INFO Frames 7800 / 13950 was processed. Current count: 82
+2023-06-19 20:51:06,896 INFO Frames 7900 / 13950 was processed. Current count: 83
+2023-06-19 20:51:08,893 INFO Frames 8000 / 13950 was processed. Current count: 85
+2023-06-19 20:51:10,896 INFO Frames 8100 / 13950 was processed. Current count: 86
+2023-06-19 20:51:12,897 INFO Frames 8200 / 13950 was processed. Current count: 88
+2023-06-19 20:51:14,881 INFO Frames 8300 / 13950 was processed. Current count: 88
+2023-06-19 20:51:16,862 INFO Frames 8400 / 13950 was processed. Current count: 89
+2023-06-19 20:51:18,876 INFO Frames 8500 / 13950 was processed. Current count: 90
+2023-06-19 20:51:20,895 INFO Frames 8600 / 13950 was processed. Current count: 91
+2023-06-19 20:51:22,880 INFO Frames 8700 / 13950 was processed. Current count: 92
+2023-06-19 20:51:24,984 INFO Frames 8800 / 13950 was processed. Current count: 94
+2023-06-19 20:51:26,987 INFO Frames 8900 / 13950 was processed. Current count: 95
+2023-06-19 20:51:28,975 INFO Frames 9000 / 13950 was processed. Current count: 95
+2023-06-19 20:51:30,992 INFO Frames 9100 / 13950 was processed. Current count: 97
+2023-06-19 20:51:32,980 INFO Frames 9200 / 13950 was processed. Current count: 98
+2023-06-19 20:51:35,014 INFO Frames 9300 / 13950 was processed. Current count: 99
+2023-06-19 20:51:36,995 INFO Frames 9400 / 13950 was processed. Current count: 100
+2023-06-19 20:51:39,056 INFO Frames 9500 / 13950 was processed. Current count: 102
+2023-06-19 20:51:41,020 INFO Frames 9600 / 13950 was processed. Current count: 105
+2023-06-19 20:51:43,014 INFO Frames 9700 / 13950 was processed. Current count: 106
+2023-06-19 20:51:45,003 INFO Frames 9800 / 13950 was processed. Current count: 107
+2023-06-19 20:51:47,008 INFO Frames 9900 / 13950 was processed. Current count: 108
+2023-06-19 20:51:49,007 INFO Frames 10000 / 13950 was processed. Current count: 109
+2023-06-19 20:51:51,026 INFO Frames 10100 / 13950 was processed. Current count: 110
+2023-06-19 20:51:53,039 INFO Frames 10200 / 13950 was processed. Current count: 111
+2023-06-19 20:51:55,047 INFO Frames 10300 / 13950 was processed. Current count: 113
+2023-06-19 20:51:57,057 INFO Frames 10400 / 13950 was processed. Current count: 114
+2023-06-19 20:51:59,122 INFO Frames 10500 / 13950 was processed. Current count: 115
+2023-06-19 20:52:01,142 INFO Frames 10600 / 13950 was processed. Current count: 116
+2023-06-19 20:52:03,107 INFO Frames 10700 / 13950 was processed. Current count: 117
+2023-06-19 20:52:05,172 INFO Frames 10800 / 13950 was processed. Current count: 118
+2023-06-19 20:52:07,403 INFO Frames 10900 / 13950 was processed. Current count: 118
+2023-06-19 20:52:09,426 INFO Frames 11000 / 13950 was processed. Current count: 119
+2023-06-19 20:52:11,511 INFO Frames 11100 / 13950 was processed. Current count: 120
+2023-06-19 20:52:13,546 INFO Frames 11200 / 13950 was processed. Current count: 121
+2023-06-19 20:52:15,564 INFO Frames 11300 / 13950 was processed. Current count: 122
+2023-06-19 20:52:17,603 INFO Frames 11400 / 13950 was processed. Current count: 123
+2023-06-19 20:52:19,645 INFO Frames 11500 / 13950 was processed. Current count: 124
+2023-06-19 20:52:21,675 INFO Frames 11600 / 13950 was processed. Current count: 125
+2023-06-19 20:52:23,650 INFO Frames 11700 / 13950 was processed. Current count: 125
+2023-06-19 20:52:25,870 INFO Frames 11800 / 13950 was processed. Current count: 127
+2023-06-19 20:52:28,036 INFO Frames 11900 / 13950 was processed. Current count: 128
+2023-06-19 20:52:30,103 INFO Frames 12000 / 13950 was processed. Current count: 128
+2023-06-19 20:52:32,128 INFO Frames 12100 / 13950 was processed. Current count: 129
+2023-06-19 20:52:34,203 INFO Frames 12200 / 13950 was processed. Current count: 131
+2023-06-19 20:52:36,212 INFO Frames 12300 / 13950 was processed. Current count: 132
+2023-06-19 20:52:38,262 INFO Frames 12400 / 13950 was processed. Current count: 134
+2023-06-19 20:52:40,419 INFO Frames 12500 / 13950 was processed. Current count: 134
+2023-06-19 20:52:42,371 INFO Frames 12600 / 13950 was processed. Current count: 134
+2023-06-19 20:52:44,479 INFO Frames 12700 / 13950 was processed. Current count: 135
+2023-06-19 20:52:46,576 INFO Frames 12800 / 13950 was processed. Current count: 136
+2023-06-19 20:52:48,613 INFO Frames 12900 / 13950 was processed. Current count: 138
+2023-06-19 20:52:50,710 INFO Frames 13000 / 13950 was processed. Current count: 139
+2023-06-19 20:52:52,785 INFO Frames 13100 / 13950 was processed. Current count: 139
+2023-06-19 20:52:54,783 INFO Frames 13200 / 13950 was processed. Current count: 140
+2023-06-19 20:52:56,772 INFO Frames 13300 / 13950 was processed. Current count: 140
+2023-06-19 20:52:58,748 INFO Frames 13400 / 13950 was processed. Current count: 140
+2023-06-19 20:53:00,699 INFO Frames 13500 / 13950 was processed. Current count: 140
+2023-06-19 20:53:02,640 INFO Frames 13600 / 13950 was processed. Current count: 140
+2023-06-19 20:53:04,562 INFO Frames 13700 / 13950 was processed. Current count: 140
+2023-06-19 20:53:06,558 INFO Frames 13800 / 13950 was processed. Current count: 140
+2023-06-19 20:53:08,515 INFO Frames 13900 / 13950 was processed. Current count: 140
+2023-06-19 20:53:09,496 INFO 
+Final count=140

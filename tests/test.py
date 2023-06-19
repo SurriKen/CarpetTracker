@@ -1,2 +1,2 @@
 x = list(range(10))
-print(x[:-4])
+print(not False and True)
