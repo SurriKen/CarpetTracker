@@ -110,11 +110,65 @@ video_paths = [
 #         'save_path': 'temp/test 20.mp4',
 #         'true_count': 142
 #     },
+#     {
+#         'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 21_cam 1_sync.mp4'),
+#         'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 21_cam 2_sync.mp4'),
+#         'save_path': 'temp/test 21.mp4',
+#         'true_count': 137
+#     },
     {
-        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 21_cam 1_sync.mp4'),
-        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 21_cam 2_sync.mp4'),
-        'save_path': 'temp/test 21.mp4',
-        'true_count': 137
+        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 22_cam 1_sync.mp4'),
+        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 22_cam 2_sync.mp4'),
+        'save_path': 'temp/test 22.mp4',
+        'true_count': 0
+    },
+    {
+        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 23_cam 1_sync.mp4'),
+        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 23_cam 2_sync.mp4'),
+        'save_path': 'temp/test 23.mp4',
+        'true_count': 0
+    },
+    {
+        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 24_cam 1_sync.mp4'),
+        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 24_cam 2_sync.mp4'),
+        'save_path': 'temp/test 24.mp4',
+        'true_count': 0
+    },
+    {
+        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 25_cam 1_sync.mp4'),
+        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 25_cam 2_sync.mp4'),
+        'save_path': 'temp/test 25.mp4',
+        'true_count': 0
+    },
+    {
+        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 26_cam 1_sync.mp4'),
+        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 26_cam 2_sync.mp4'),
+        'save_path': 'temp/test 26.mp4',
+        'true_count': 0
+    },
+    {
+        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 27_cam 1_sync.mp4'),
+        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 27_cam 2_sync.mp4'),
+        'save_path': 'temp/test 27.mp4',
+        'true_count': 0
+    },
+    {
+        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 28_cam 1_sync.mp4'),
+        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 28_cam 2_sync.mp4'),
+        'save_path': 'temp/test 28.mp4',
+        'true_count': 0
+    },
+    {
+        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 29_cam 1_sync.mp4'),
+        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 29_cam 2_sync.mp4'),
+        'save_path': 'temp/test 29.mp4',
+        'true_count': 0
+    },
+    {
+        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 30_cam 1_sync.mp4'),
+        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 30_cam 2_sync.mp4'),
+        'save_path': 'temp/test 30.mp4',
+        'true_count': 0
     },
 ]
 
@@ -138,6 +192,7 @@ for mod in models:
             finish=args['end_frame'],
             iou=args['iou'],
             conf=args['conf'],
+            interactive_video=True
         )
         dt = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         txt = f"{dt} =========== Predict is finished ===========\n" \

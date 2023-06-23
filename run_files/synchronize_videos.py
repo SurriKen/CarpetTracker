@@ -27,8 +27,26 @@ sync_data = {
     # 'videos/classification_videos/Ночь 20-11_cam2.mp4': [8, '20:11:13'],
     # 'videos/test 6_cam 1.mp4': [31, '13:30:01'],
     # 'videos/test 6_cam 2.mp4': [2159, '13:30:02'],
-    'videos/test 21_cam 1.mp4': [195, '18:59:35'],
-    'videos/test 21_cam 2.mp4': [931, '18:59:38'],
+    # 'videos/test 21_cam 1.mp4': [195, '18:59:35'],
+    # 'videos/test 21_cam 2.mp4': [931, '18:59:38'],
+    'videos/init/test 22_cam 1.mp4': [715, '19:45:35'],
+    'videos/init/test 22_cam 2.mp4': [414, '19:45:35'],
+    'videos/init/test 23_cam 1.mp4': [934, ''],
+    'videos/init/test 23_cam 2.mp4': [179, ''],
+    'videos/init/test 24_cam 1.mp4': [772, ''],
+    'videos/init/test 24_cam 2.mp4': [13, ''],
+    'videos/init/test 25_cam 1.mp4': [27, ''],
+    'videos/init/test 25_cam 2.mp4': [482, ''],
+    'videos/init/test 26_cam 1.mp4': [27, ''],
+    'videos/init/test 26_cam 2.mp4': [69, ''],
+    'videos/init/test 27_cam 1.mp4': [192, ''],
+    'videos/init/test 27_cam 2.mp4': [189, ''],
+    'videos/init/test 28_cam 1.mp4': [72, ''],
+    'videos/init/test 28_cam 2.mp4': [368, ''],
+    'videos/init/test 29_cam 1.mp4': [244, ''],
+    'videos/init/test 29_cam 2.mp4': [122, ''],
+    'videos/init/test 30_cam 1.mp4': [48, ''],
+    'videos/init/test 30_cam 2.mp4': [351, ''],
 }
 
 # List of dicts, each dict in formate {'camera 1': 'link to video from camera 1', 'camera 2': 'link to video from camera 2'}
@@ -43,17 +61,28 @@ sync_videos = [
     # {'camera 1': 'videos/classification_videos/16-10 ЦП_cam1.mp4', 'camera 2': 'videos/classification_videos/16-10 ЦП_cam2.mp4'},
     # {'camera 1': 'videos/classification_videos/МОС 19-40_cam1.mp4', 'camera 2': 'videos/classification_videos/МОС 19-40_cam2.mp4'},
     # {'camera 1': 'videos/classification_videos/Ночь 20-11_cam1.mp4', 'camera 2': 'videos/classification_videos/Ночь 20-11_cam2.mp4'},
-    {'camera 1': 'videos/test 21_cam 1.mp4', 'camera 2': 'videos/test 21_cam 2.mp4'},
+    # {'camera 1': 'videos/test 21_cam 1.mp4', 'camera 2': 'videos/test 21_cam 2.mp4'},
+    # {'camera 1': 'videos/init/test 22_cam 1.mp4', 'camera 2': 'videos/init/test 22_cam 2.mp4'},
+    # {'camera 1': 'videos/init/test 23_cam 1.mp4', 'camera 2': 'videos/init/test 23_cam 2.mp4'},
+    # {'camera 1': 'videos/init/test 24_cam 1.mp4', 'camera 2': 'videos/init/test 24_cam 2.mp4'},
+    # {'camera 1': 'videos/init/test 25_cam 1.mp4', 'camera 2': 'videos/init/test 25_cam 2.mp4'},
+    # {'camera 1': 'videos/init/test 26_cam 1.mp4', 'camera 2': 'videos/init/test 26_cam 2.mp4'},
+    {'camera 1': 'videos/init/test 27_cam 1.mp4', 'camera 2': 'videos/init/test 27_cam 2.mp4'},
+    # {'camera 1': 'videos/init/test 28_cam 1.mp4', 'camera 2': 'videos/init/test 28_cam 2.mp4'},
+    # {'camera 1': 'videos/init/test 29_cam 1.mp4', 'camera 2': 'videos/init/test 29_cam 2.mp4'},
+    # {'camera 1': 'videos/init/test 30_cam 1.mp4', 'camera 2': 'videos/init/test 30_cam 2.mp4'},
 ]
 
 for pair in sync_videos:
     save_name_1 = f"{pair.get('camera 1').split('/')[-1].split('.')[0]}_sync.mp4"
+    print(save_name_1)
     DatasetProcessing.synchronize_video(
         video_path=os.path.join(ROOT_DIR, pair.get('camera 1')),
         save_path=os.path.join(ROOT_DIR, f"videos/sync_test/{save_name_1}"),
         from_frame=sync_data.get(pair.get('camera 1'))[0]
     )
     save_name_2 = f"{pair.get('camera 2').split('/')[-1].split('.')[0]}_sync.mp4"
+    print(save_name_2)
     DatasetProcessing.synchronize_video(
         video_path=os.path.join(ROOT_DIR, pair.get('camera 2')),
         save_path=os.path.join(ROOT_DIR, f"videos/sync_test/{save_name_2}"),

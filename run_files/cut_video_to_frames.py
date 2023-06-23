@@ -20,7 +20,16 @@ vid = [
     # 'videos/classification_videos/НОЧЬ,20-11_sync.mp4', 'videos/classification_videos/НОЧЬ,20-11_2_sync.mp4',
     # 'videos/sync_test/test 5_cam 1_sync.mp4', 'videos/sync_test/test 5_cam 2_sync.mp4',
     # 'videos/test 6_cam 1.mp4', 'videos/test 6_cam 2.mp4',
-    'videos/test 21_cam 1.mp4', 'videos/test 21_cam 2.mp4',
+    # 'videos/test 21_cam 1.mp4', 'videos/test 21_cam 2.mp4',
+    # 'videos/init/test 22_cam 1.mp4', 'videos/init/test 22_cam 2.mp4',
+    'videos/init/test 23_cam 1.mp4', 'videos/init/test 23_cam 2.mp4',
+    'videos/init/test 24_cam 1.mp4', 'videos/init/test 24_cam 2.mp4',
+    'videos/init/test 25_cam 1.mp4', 'videos/init/test 25_cam 2.mp4',
+    'videos/init/test 26_cam 1.mp4', 'videos/init/test 26_cam 2.mp4',
+    'videos/init/test 27_cam 1.mp4', 'videos/init/test 27_cam 2.mp4',
+    'videos/init/test 28_cam 1.mp4', 'videos/init/test 28_cam 2.mp4',
+    'videos/init/test 29_cam 1.mp4', 'videos/init/test 29_cam 2.mp4',
+    'videos/init/test 30_cam 1.mp4', 'videos/init/test 30_cam 2.mp4',
 ]
 
 FOLDER_FOR_FRAMES = 'datasets'
@@ -33,5 +42,6 @@ for v in vid:
         video_path=v,
         save_path=os.path.join(ROOT_DIR, FOLDER_FOR_FRAMES),
         from_time=0,
-        to_time=120
+        to_time=100,
+        size=(640, 360)
     )

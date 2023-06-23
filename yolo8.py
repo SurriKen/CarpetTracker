@@ -412,6 +412,7 @@ def detect_synchro_video_polygon(
         finish: int = 0,
         iou: float = 0.3,
         conf: float = 0.5,
+        interactive_video: bool = False
 ):
     """
     Detect two synchronized videos and save them as one video with boxes to save_path.
@@ -445,48 +446,70 @@ def detect_synchro_video_polygon(
     fps2 = vc2.get(cv2.CAP_PROP_FPS)
     w2 = int(vc2.get(cv2.CAP_PROP_FRAME_WIDTH))
     h2 = int(vc2.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    print(f"fps1={fps1}, fps2={fps2}\n")
 
     w = min([w1, w2])
     h = min([h1, h2])
 
-    # Reformat video on 25 fps
-    if fps1 != 25:
-        shutil.move(video_paths.get("model_1"), 'test.mp4')
-        DatasetProcessing.change_fps(
-            video_path='test.mp4',
-            save_path=video_paths.get("model_1"),
-            set_fps=25
-        )
-        os.remove('test.mp4')
-        vc1 = cv2.VideoCapture()
-        vc1.open(video_paths.get("model_1"))
-        f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
+    step = min([fps1, fps2])
+    range_1 = [(i, round(i * 1000 / fps1, 1)) for i in range(int(f1))]
+    range_2 = [(i, round(i * 1000 / fps2, 1)) for i in range(int(f2))]
+    (min_range, max_range) = (range_1, range_2) if step == fps1 else (range_2, range_1)
+    (min_vc, max_vc) = (vc1, vc2) if step == fps1 else (vc2, vc1)
 
-    if fps2 != 25:
-        shutil.move(video_paths.get("model_2"), 'test.mp4')
-        DatasetProcessing.change_fps(
-            video_path='test.mp4',
-            save_path=video_paths.get("model_2"),
-            set_fps=25
-        )
-        os.remove('test.mp4')
-        vc2 = cv2.VideoCapture()
-        vc2.open(video_paths.get("model_2"))
-        f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
+    def get_closest_id(x: float, data: list[tuple, ...]) -> int:
+        dist = [(abs(data[i][1] - x), i) for i in range(len(data))]
+        dist = sorted(dist)
+        print("Dist", dist)
+        return dist[0][1]
+
+    # Reformat video on 25 fps
+    # if fps1 != 25:
+    #     shutil.move(video_paths.get("model_1"), 'test.mp4')
+    #     DatasetProcessing.change_fps(
+    #         video_path='test.mp4',
+    #         save_path=video_paths.get("model_1"),
+    #         set_fps=25
+    #     )
+    #     os.remove('test.mp4')
+    #     vc1 = cv2.VideoCapture()
+    #     vc1.open(video_paths.get("model_1"))
+    #     f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
+    #
+    # if fps2 != 25:
+    #     shutil.move(video_paths.get("model_2"), 'test.mp4')
+    #     DatasetProcessing.change_fps(
+    #         video_path='test.mp4',
+    #         save_path=video_paths.get("model_2"),
+    #         set_fps=25
+    #     )
+    #     os.remove('test.mp4')
+    #     vc2 = cv2.VideoCapture()
+    #     vc2.open(video_paths.get("model_2"))
+    #     f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
 
     if save_path:
         out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), 25, (w, h * 2))
 
-    f = min([f1, f2])
+    # f = min([f1, f2])
+    f = f1 if step == fps1 else f2
     finish = int(f) if finish == 0 or finish < start else finish
     true_bb_1, true_bb_2 = [], []
     count = 0
     last_track_seq = {'tr1': [], 'tr2': []}
     for i in range(0, finish):
         fr_time = time.time()
-        logger.info(f'-- Process {i + 1} / {finish} frame')
-        _, frame1 = vc1.read()
-        _, frame2 = vc2.read()
+        _, frame1 = min_vc.read()
+        # _, frame2 = max_vc.read()
+
+        closest_id = get_closest_id(min_range[0][1], max_range[:10])
+        min_range.pop(0)
+        ids = list(range(closest_id)) if closest_id else [0]
+        ids = sorted(ids, reverse=True)
+        for id in ids:
+            max_range.pop(id)
+            _, frame2 = max_vc.read()
+        # logger.info(f'-- min_range {min_range[:5]}, \nmax_range {max_range[:5]}')
 
         if i >= start:
             logger.info(f"Processed {i + 1} / {f} frames")
@@ -532,6 +555,9 @@ def detect_synchro_video_polygon(
                     image=img,
                     headline=headline
                 )
+                if interactive_video:
+                    cv2.imshow('1', img)
+                    cv2.waitKey(1)
 
                 if (i + 1) % 100 == 0:
                     logger.info(f"Frames {i + 1} / {finish} was processed")
@@ -540,12 +566,10 @@ def detect_synchro_video_polygon(
             # print("time save_path:", time_converter(time.time() - x))
             print("frame time:", time_converter(time.time() - fr_time), '\n')
             logger.info(f"-- count: {count}")
-            if i >= finish - 1:
-            # if i >= 1500:
-                if save_path:
-                    out.release()
+            if i >= finish - 1 or not min_range or not max_range:
                 break
-
+    if save_path:
+        out.release()
     path = os.path.join(ROOT_DIR, 'tests/boxes')
     save_data(data=true_bb_1, file_path=path,
               filename=f"true_bb_1_{video_paths.get('model_1').split('/')[-1].split('_')[0]} {models[1]}")
