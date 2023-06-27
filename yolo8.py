@@ -578,7 +578,7 @@ def detect_synchro_video_polygon(
     return count
 
 
-def train(weights='yolo8/yolov8n.pt', config='data_custom.yaml', epochs=50, batch_size=4, name=None):
+def train(weights='yolo_weights/yolov8n.pt', config='data_custom.yaml', epochs=50, batch_size=4, name=None):
     model = YOLO(weights)
     model.train(data=config, epochs=epochs, batch=batch_size, name=name)
 

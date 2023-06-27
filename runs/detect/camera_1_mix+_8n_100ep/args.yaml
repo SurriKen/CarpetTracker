@@ -1,6 +1,6 @@
 task: detect
 mode: train
-model: yolo8/yolov8n.pt
+model: yolo_weights/yolov8n.pt
 data: data_custom_CAM1.yaml
 epochs: 100
 patience: 50
