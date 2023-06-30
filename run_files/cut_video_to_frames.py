@@ -22,14 +22,24 @@ vid = [
     # 'videos/test 6_cam 1.mp4', 'videos/test 6_cam 2.mp4',
     # 'videos/test 21_cam 1.mp4', 'videos/test 21_cam 2.mp4',
     # 'videos/init/test 22_cam 1.mp4', 'videos/init/test 22_cam 2.mp4',
-    'videos/init/test 23_cam 1.mp4', 'videos/init/test 23_cam 2.mp4',
-    'videos/init/test 24_cam 1.mp4', 'videos/init/test 24_cam 2.mp4',
-    'videos/init/test 25_cam 1.mp4', 'videos/init/test 25_cam 2.mp4',
-    'videos/init/test 26_cam 1.mp4', 'videos/init/test 26_cam 2.mp4',
-    'videos/init/test 27_cam 1.mp4', 'videos/init/test 27_cam 2.mp4',
-    'videos/init/test 28_cam 1.mp4', 'videos/init/test 28_cam 2.mp4',
-    'videos/init/test 29_cam 1.mp4', 'videos/init/test 29_cam 2.mp4',
-    'videos/init/test 30_cam 1.mp4', 'videos/init/test 30_cam 2.mp4',
+    # 'videos/init/test 23_cam 1.mp4', 'videos/init/test 23_cam 2.mp4',
+    # 'videos/init/test 24_cam 1.mp4', 'videos/init/test 24_cam 2.mp4',
+    # 'videos/init/test 25_cam 1.mp4', 'videos/init/test 25_cam 2.mp4',
+    # 'videos/init/test 26_cam 1.mp4', 'videos/init/test 26_cam 2.mp4',
+    # 'videos/init/test 27_cam 1.mp4', 'videos/init/test 27_cam 2.mp4',
+    # 'videos/init/test 28_cam 1.mp4', 'videos/init/test 28_cam 2.mp4',
+    # 'videos/init/test 29_cam 1.mp4', 'videos/init/test 29_cam 2.mp4',
+    # 'videos/init/test 30_cam 1.mp4', 'videos/init/test 30_cam 2.mp4',
+    # 'videos/classification_videos/05.06.23_cam 1.mp4', 'videos/classification_videos/05.06.23_cam 2.mp4',
+    # 'videos/classification_videos/05.06.23 вечер_cam 1.mp4', 'videos/classification_videos/05.06.23 вечер_cam 2.mp4',
+    # 'videos/classification_videos/19.06 в 13.40_cam 1.mp4', 'videos/classification_videos/19.06 в 13.40_cam 2.mp4',
+    # 'videos/classification_videos/20.06 в 14.02_cam 1.mp4', 'videos/classification_videos/20.06 в 14.02_cam 2.mp4',
+    # 'videos/classification_videos/21.06 в 14.40_cam 1.mp4', 'videos/classification_videos/21.06 в 14.40_cam 2.mp4',
+    # 'videos/classification_videos/21.06 в 16.44_cam 1.mp4', 'videos/classification_videos/21.06 в 16.44_cam 2.mp4',
+    # 'videos/sync_test/05.06.23_cam 1_sync.mp4', 'videos/sync_test/05.06.23 вечер_cam 1_sync.mp4',
+    # 'videos/sync_test/19.06 в 13.40_cam 1_sync.mp4',
+    'videos/sync_test/20.06 в 14.02_cam 1_sync.mp4',
+    'videos/sync_test/21.06 в 14.40_cam 1_sync.mp4', 'videos/sync_test/21.06 в 16.44_cam 1_sync.mp4'
 ]
 
 FOLDER_FOR_FRAMES = 'datasets'
@@ -42,6 +52,6 @@ for v in vid:
         video_path=v,
         save_path=os.path.join(ROOT_DIR, FOLDER_FOR_FRAMES),
         from_time=0,
-        to_time=100,
+        # to_time=120,
         size=(640, 360)
     )

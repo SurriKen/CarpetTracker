@@ -76,6 +76,7 @@ def clean_diff_image(image, low_color=0, high_color=255):
     cleaned_image = cleaned_image.astype(np.uint8)
     return cleaned_image, mask
 
+
 vid_links = [
     {
         'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 22_cam 1_sync.mp4'),

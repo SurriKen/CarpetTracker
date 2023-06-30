@@ -46830,3 +46830,746 @@ Final count=134
 2023-06-27 20:12:15,422 DEBUG STREAM b'IDAT' 41 1216
 2023-06-27 20:12:15,430 DEBUG STREAM b'IHDR' 16 13
 2023-06-27 20:12:15,430 DEBUG STREAM b'IDAT' 41 1216
+2023-06-30 00:57:42,090 INFO Frames 300 / 325 was processed. Current count: 1
+2023-06-30 00:57:42,910 INFO 
+Final count=1
+2023-06-30 01:02:34,792 INFO Frames 300 / 325 was processed. Current count: 1
+2023-06-30 01:02:35,677 INFO 
+Final count=1
+2023-06-30 20:31:18,721 INFO Frames 300 / 325 was processed. Current count: 1
+2023-06-30 20:31:19,968 INFO 
+Final count=1
+2023-07-01 00:17:20,028 INFO Processed 1 / 25.0 frames
+2023-07-01 00:17:22,768 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 00:17:22,790 INFO -- count: 0
+2023-07-01 00:17:22,792 INFO Processed 2 / 25.0 frames
+2023-07-01 00:17:22,810 INFO -- count: 0
+2023-07-01 00:17:22,812 INFO Processed 3 / 25.0 frames
+2023-07-01 00:17:22,829 INFO -- count: 0
+2023-07-01 00:17:22,831 INFO Processed 4 / 25.0 frames
+2023-07-01 00:17:22,846 INFO -- count: 0
+2023-07-01 00:17:22,849 INFO Processed 5 / 25.0 frames
+2023-07-01 00:17:22,866 INFO -- count: 0
+2023-07-01 00:17:22,869 INFO Processed 6 / 25.0 frames
+2023-07-01 00:17:22,876 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 00:17:22,886 INFO -- count: 0
+2023-07-01 00:17:22,889 INFO Processed 7 / 25.0 frames
+2023-07-01 00:17:22,905 INFO -- count: 0
+2023-07-01 00:17:22,908 INFO Processed 8 / 25.0 frames
+2023-07-01 00:17:22,926 INFO -- count: 0
+2023-07-01 00:17:22,929 INFO Processed 9 / 25.0 frames
+2023-07-01 00:17:22,947 INFO -- count: 0
+2023-07-01 00:17:22,949 INFO Processed 10 / 25.0 frames
+2023-07-01 00:17:22,968 INFO -- count: 0
+2023-07-01 00:17:22,971 INFO Processed 11 / 25.0 frames
+2023-07-01 00:17:22,988 INFO -- count: 0
+2023-07-01 00:17:22,990 INFO Processed 12 / 25.0 frames
+2023-07-01 00:17:23,006 INFO -- count: 0
+2023-07-01 00:17:23,008 INFO Processed 13 / 25.0 frames
+2023-07-01 00:17:23,026 INFO -- count: 0
+2023-07-01 00:17:23,028 INFO Processed 14 / 25.0 frames
+2023-07-01 00:17:23,044 INFO -- count: 0
+2023-07-01 00:17:23,046 INFO Processed 15 / 25.0 frames
+2023-07-01 00:17:23,062 INFO -- count: 0
+2023-07-01 00:17:23,064 INFO Processed 16 / 25.0 frames
+2023-07-01 00:17:23,080 INFO -- count: 0
+2023-07-01 00:17:23,082 INFO Processed 17 / 25.0 frames
+2023-07-01 00:17:23,097 INFO -- count: 0
+2023-07-01 00:17:23,100 INFO Processed 18 / 25.0 frames
+2023-07-01 00:17:23,130 INFO -- count: 0
+2023-07-01 00:17:23,132 INFO Processed 19 / 25.0 frames
+2023-07-01 00:17:23,151 INFO -- count: 0
+2023-07-01 00:17:23,154 INFO Processed 20 / 25.0 frames
+2023-07-01 00:17:23,174 INFO -- count: 0
+2023-07-01 00:17:23,176 INFO Processed 21 / 25.0 frames
+2023-07-01 00:17:23,195 INFO -- count: 0
+2023-07-01 00:17:23,197 INFO Processed 22 / 25.0 frames
+2023-07-01 00:17:23,214 INFO -- count: 0
+2023-07-01 00:17:23,217 INFO Processed 23 / 25.0 frames
+2023-07-01 00:17:23,235 INFO -- count: 0
+2023-07-01 00:17:23,238 INFO Processed 24 / 25.0 frames
+2023-07-01 00:17:23,254 INFO -- count: 0
+2023-07-01 00:17:23,257 INFO Processed 25 / 25.0 frames
+2023-07-01 00:17:23,274 INFO -- count: 0
+2023-07-01 00:17:58,791 INFO Processed 1 / 25.0 frames
+2023-07-01 00:18:01,119 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 00:18:01,137 INFO -- count: 0
+2023-07-01 00:18:01,140 INFO Processed 2 / 25.0 frames
+2023-07-01 00:18:01,155 INFO -- count: 0
+2023-07-01 00:18:01,158 INFO Processed 3 / 25.0 frames
+2023-07-01 00:18:01,173 INFO -- count: 0
+2023-07-01 00:18:01,175 INFO Processed 4 / 25.0 frames
+2023-07-01 00:18:01,190 INFO -- count: 0
+2023-07-01 00:18:01,192 INFO Processed 5 / 25.0 frames
+2023-07-01 00:18:01,208 INFO -- count: 0
+2023-07-01 00:18:01,210 INFO Processed 6 / 25.0 frames
+2023-07-01 00:18:01,223 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 00:18:01,228 INFO -- count: 0
+2023-07-01 00:18:01,230 INFO Processed 7 / 25.0 frames
+2023-07-01 00:18:01,246 INFO -- count: 0
+2023-07-01 00:18:01,249 INFO Processed 8 / 25.0 frames
+2023-07-01 00:18:01,264 INFO -- count: 0
+2023-07-01 00:18:01,268 INFO Processed 9 / 25.0 frames
+2023-07-01 00:18:01,286 INFO -- count: 0
+2023-07-01 00:18:01,289 INFO Processed 10 / 25.0 frames
+2023-07-01 00:18:01,307 INFO -- count: 0
+2023-07-01 00:18:01,310 INFO Processed 11 / 25.0 frames
+2023-07-01 00:18:01,327 INFO -- count: 0
+2023-07-01 00:18:01,330 INFO Processed 12 / 25.0 frames
+2023-07-01 00:18:01,346 INFO -- count: 0
+2023-07-01 00:18:01,349 INFO Processed 13 / 25.0 frames
+2023-07-01 00:18:01,368 INFO -- count: 0
+2023-07-01 00:18:01,370 INFO Processed 14 / 25.0 frames
+2023-07-01 00:18:01,387 INFO -- count: 0
+2023-07-01 00:18:01,389 INFO Processed 15 / 25.0 frames
+2023-07-01 00:18:01,405 INFO -- count: 0
+2023-07-01 00:18:01,407 INFO Processed 16 / 25.0 frames
+2023-07-01 00:18:01,422 INFO -- count: 0
+2023-07-01 00:18:01,424 INFO Processed 17 / 25.0 frames
+2023-07-01 00:18:01,439 INFO -- count: 0
+2023-07-01 00:18:01,441 INFO Processed 18 / 25.0 frames
+2023-07-01 00:18:01,457 INFO -- count: 0
+2023-07-01 00:18:01,459 INFO Processed 19 / 25.0 frames
+2023-07-01 00:18:01,474 INFO -- count: 0
+2023-07-01 00:18:01,476 INFO Processed 20 / 25.0 frames
+2023-07-01 00:18:01,491 INFO -- count: 0
+2023-07-01 00:18:01,493 INFO Processed 21 / 25.0 frames
+2023-07-01 00:18:01,509 INFO -- count: 0
+2023-07-01 00:18:01,511 INFO Processed 22 / 25.0 frames
+2023-07-01 00:18:01,527 INFO -- count: 0
+2023-07-01 00:18:01,529 INFO Processed 23 / 25.0 frames
+2023-07-01 00:18:01,544 INFO -- count: 0
+2023-07-01 00:18:01,546 INFO Processed 24 / 25.0 frames
+2023-07-01 00:18:01,562 INFO -- count: 0
+2023-07-01 00:18:01,564 INFO Processed 25 / 25.0 frames
+2023-07-01 00:18:01,579 INFO -- count: 0
+2023-07-01 00:23:55,752 INFO Processed 1 / 25.0 frames
+2023-07-01 00:23:58,429 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 00:23:58,452 INFO -- count: 0
+2023-07-01 00:23:58,455 INFO Processed 2 / 25.0 frames
+2023-07-01 00:23:58,475 INFO -- count: 0
+2023-07-01 00:23:58,477 INFO Processed 3 / 25.0 frames
+2023-07-01 00:23:58,494 INFO -- count: 0
+2023-07-01 00:23:58,497 INFO Processed 4 / 25.0 frames
+2023-07-01 00:23:58,513 INFO -- count: 0
+2023-07-01 00:23:58,516 INFO Processed 5 / 25.0 frames
+2023-07-01 00:23:58,533 INFO -- count: 0
+2023-07-01 00:23:58,536 INFO Processed 6 / 25.0 frames
+2023-07-01 00:23:58,548 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 00:23:58,555 INFO -- count: 0
+2023-07-01 00:23:58,558 INFO Processed 7 / 25.0 frames
+2023-07-01 00:23:58,577 INFO -- count: 0
+2023-07-01 00:23:58,580 INFO Processed 8 / 25.0 frames
+2023-07-01 00:23:58,598 INFO -- count: 0
+2023-07-01 00:23:58,601 INFO Processed 9 / 25.0 frames
+2023-07-01 00:23:58,619 INFO -- count: 0
+2023-07-01 00:23:58,622 INFO Processed 10 / 25.0 frames
+2023-07-01 00:23:58,643 INFO -- count: 0
+2023-07-01 00:23:58,646 INFO Processed 11 / 25.0 frames
+2023-07-01 00:23:58,664 INFO -- count: 0
+2023-07-01 00:23:58,667 INFO Processed 12 / 25.0 frames
+2023-07-01 00:23:58,684 INFO -- count: 0
+2023-07-01 00:23:58,687 INFO Processed 13 / 25.0 frames
+2023-07-01 00:23:58,704 INFO -- count: 0
+2023-07-01 00:23:58,707 INFO Processed 14 / 25.0 frames
+2023-07-01 00:23:58,724 INFO -- count: 0
+2023-07-01 00:23:58,727 INFO Processed 15 / 25.0 frames
+2023-07-01 00:23:58,744 INFO -- count: 0
+2023-07-01 00:23:58,747 INFO Processed 16 / 25.0 frames
+2023-07-01 00:23:58,764 INFO -- count: 0
+2023-07-01 00:23:58,767 INFO Processed 17 / 25.0 frames
+2023-07-01 00:23:58,786 INFO -- count: 0
+2023-07-01 00:23:58,790 INFO Processed 18 / 25.0 frames
+2023-07-01 00:23:58,806 INFO -- count: 0
+2023-07-01 00:23:58,808 INFO Processed 19 / 25.0 frames
+2023-07-01 00:23:58,826 INFO -- count: 0
+2023-07-01 00:23:58,829 INFO Processed 20 / 25.0 frames
+2023-07-01 00:23:58,849 INFO -- count: 0
+2023-07-01 00:23:58,852 INFO Processed 21 / 25.0 frames
+2023-07-01 00:23:58,872 INFO -- count: 0
+2023-07-01 00:23:58,874 INFO Processed 22 / 25.0 frames
+2023-07-01 00:23:58,894 INFO -- count: 0
+2023-07-01 00:23:58,896 INFO Processed 23 / 25.0 frames
+2023-07-01 00:23:58,920 INFO -- count: 0
+2023-07-01 00:23:58,923 INFO Processed 24 / 25.0 frames
+2023-07-01 00:23:58,941 INFO -- count: 0
+2023-07-01 00:23:58,944 INFO Processed 25 / 25.0 frames
+2023-07-01 00:23:58,963 INFO -- count: 0
+2023-07-01 00:27:18,571 INFO Processed 1 / 25.0 frames
+2023-07-01 00:27:21,061 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 00:27:21,082 INFO -- count: 0
+2023-07-01 00:27:21,084 INFO Processed 2 / 25.0 frames
+2023-07-01 00:27:21,100 INFO -- count: 0
+2023-07-01 00:27:21,102 INFO Processed 3 / 25.0 frames
+2023-07-01 00:27:21,118 INFO -- count: 0
+2023-07-01 00:27:21,121 INFO Processed 4 / 25.0 frames
+2023-07-01 00:27:21,136 INFO -- count: 0
+2023-07-01 00:27:21,139 INFO Processed 5 / 25.0 frames
+2023-07-01 00:27:21,156 INFO -- count: 0
+2023-07-01 00:27:21,158 INFO Processed 6 / 25.0 frames
+2023-07-01 00:27:21,172 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 00:27:21,176 INFO -- count: 0
+2023-07-01 00:27:21,179 INFO Processed 7 / 25.0 frames
+2023-07-01 00:27:21,196 INFO -- count: 0
+2023-07-01 00:27:21,199 INFO Processed 8 / 25.0 frames
+2023-07-01 00:27:21,216 INFO -- count: 0
+2023-07-01 00:27:21,218 INFO Processed 9 / 25.0 frames
+2023-07-01 00:27:21,234 INFO -- count: 0
+2023-07-01 00:27:21,236 INFO Processed 10 / 25.0 frames
+2023-07-01 00:27:21,254 INFO -- count: 0
+2023-07-01 00:27:21,256 INFO Processed 11 / 25.0 frames
+2023-07-01 00:27:21,274 INFO -- count: 0
+2023-07-01 00:27:21,276 INFO Processed 12 / 25.0 frames
+2023-07-01 00:27:21,292 INFO -- count: 0
+2023-07-01 00:27:21,295 INFO Processed 13 / 25.0 frames
+2023-07-01 00:27:21,311 INFO -- count: 0
+2023-07-01 00:27:21,314 INFO Processed 14 / 25.0 frames
+2023-07-01 00:27:21,331 INFO -- count: 0
+2023-07-01 00:27:21,333 INFO Processed 15 / 25.0 frames
+2023-07-01 00:27:21,350 INFO -- count: 0
+2023-07-01 00:27:21,352 INFO Processed 16 / 25.0 frames
+2023-07-01 00:27:21,370 INFO -- count: 0
+2023-07-01 00:27:21,372 INFO Processed 17 / 25.0 frames
+2023-07-01 00:27:21,389 INFO -- count: 0
+2023-07-01 00:27:21,391 INFO Processed 18 / 25.0 frames
+2023-07-01 00:27:21,408 INFO -- count: 0
+2023-07-01 00:27:21,410 INFO Processed 19 / 25.0 frames
+2023-07-01 00:27:21,428 INFO -- count: 0
+2023-07-01 00:27:21,430 INFO Processed 20 / 25.0 frames
+2023-07-01 00:27:21,450 INFO -- count: 0
+2023-07-01 00:27:21,453 INFO Processed 21 / 25.0 frames
+2023-07-01 00:27:21,471 INFO -- count: 0
+2023-07-01 00:27:21,473 INFO Processed 22 / 25.0 frames
+2023-07-01 00:27:21,491 INFO -- count: 0
+2023-07-01 00:27:21,493 INFO Processed 23 / 25.0 frames
+2023-07-01 00:27:21,517 INFO -- count: 0
+2023-07-01 00:27:21,519 INFO Processed 24 / 25.0 frames
+2023-07-01 00:27:21,536 INFO -- count: 0
+2023-07-01 00:27:21,538 INFO Processed 25 / 25.0 frames
+2023-07-01 00:27:21,554 INFO -- count: 0
+2023-07-01 00:28:40,562 INFO Processed 1 / 25.0 frames
+2023-07-01 00:28:43,208 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 00:28:43,318 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 00:28:43,393 INFO -- count: 0
+2023-07-01 00:28:43,396 INFO Processed 2 / 25.0 frames
+2023-07-01 00:28:43,465 INFO -- count: 0
+2023-07-01 00:28:43,468 INFO Processed 3 / 25.0 frames
+2023-07-01 00:28:43,517 INFO -- count: 0
+2023-07-01 00:28:43,520 INFO Processed 4 / 25.0 frames
+2023-07-01 00:28:43,566 INFO -- count: 0
+2023-07-01 00:28:43,568 INFO Processed 5 / 25.0 frames
+2023-07-01 00:28:43,624 INFO -- count: 0
+2023-07-01 00:28:43,627 INFO Processed 6 / 25.0 frames
+2023-07-01 00:28:43,690 INFO -- count: 0
+2023-07-01 00:28:43,692 INFO Processed 7 / 25.0 frames
+2023-07-01 00:28:43,761 INFO -- count: 0
+2023-07-01 00:28:43,766 INFO Processed 8 / 25.0 frames
+2023-07-01 00:28:43,897 INFO -- count: 0
+2023-07-01 00:28:43,900 INFO Processed 9 / 25.0 frames
+2023-07-01 00:28:43,953 INFO -- count: 0
+2023-07-01 00:28:43,956 INFO Processed 10 / 25.0 frames
+2023-07-01 00:28:44,017 INFO -- count: 0
+2023-07-01 00:28:44,019 INFO Processed 11 / 25.0 frames
+2023-07-01 00:28:44,074 INFO -- count: 0
+2023-07-01 00:28:44,076 INFO Processed 12 / 25.0 frames
+2023-07-01 00:28:44,126 INFO -- count: 0
+2023-07-01 00:28:44,129 INFO Processed 13 / 25.0 frames
+2023-07-01 00:28:44,214 INFO -- count: 0
+2023-07-01 00:28:44,223 INFO Processed 14 / 25.0 frames
+2023-07-01 00:28:44,322 INFO -- count: 0
+2023-07-01 00:28:44,329 INFO Processed 15 / 25.0 frames
+2023-07-01 00:28:44,532 INFO -- count: 0
+2023-07-01 00:28:44,538 INFO Processed 16 / 25.0 frames
+2023-07-01 00:28:44,658 INFO -- count: 0
+2023-07-01 00:28:44,663 INFO Processed 17 / 25.0 frames
+2023-07-01 00:28:44,751 INFO -- count: 0
+2023-07-01 00:28:44,755 INFO Processed 18 / 25.0 frames
+2023-07-01 00:28:44,838 INFO -- count: 0
+2023-07-01 00:28:44,842 INFO Processed 19 / 25.0 frames
+2023-07-01 00:28:44,936 INFO -- count: 0
+2023-07-01 00:28:44,940 INFO Processed 20 / 25.0 frames
+2023-07-01 00:28:45,015 INFO -- count: 0
+2023-07-01 00:28:45,019 INFO Processed 21 / 25.0 frames
+2023-07-01 00:28:45,091 INFO -- count: 0
+2023-07-01 00:28:45,095 INFO Processed 22 / 25.0 frames
+2023-07-01 00:28:45,163 INFO -- count: 0
+2023-07-01 00:28:45,167 INFO Processed 23 / 25.0 frames
+2023-07-01 00:28:45,235 INFO -- count: 0
+2023-07-01 00:28:45,238 INFO Processed 24 / 25.0 frames
+2023-07-01 00:28:45,298 INFO -- count: 0
+2023-07-01 00:28:45,301 INFO Processed 25 / 25.0 frames
+2023-07-01 00:28:45,368 INFO -- count: 0
+2023-07-01 00:30:38,328 INFO Processed 1 / 25.0 frames
+2023-07-01 00:30:40,944 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 00:30:41,068 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 00:30:41,128 INFO -- count: 0
+2023-07-01 00:30:41,131 INFO Processed 2 / 25.0 frames
+2023-07-01 00:30:41,205 INFO -- count: 0
+2023-07-01 00:30:41,209 INFO Processed 3 / 25.0 frames
+2023-07-01 00:30:41,264 INFO -- count: 0
+2023-07-01 00:30:41,267 INFO Processed 4 / 25.0 frames
+2023-07-01 00:30:41,325 INFO -- count: 0
+2023-07-01 00:30:41,328 INFO Processed 5 / 25.0 frames
+2023-07-01 00:30:41,402 INFO -- count: 0
+2023-07-01 00:30:41,404 INFO Processed 6 / 25.0 frames
+2023-07-01 00:30:41,473 INFO -- count: 0
+2023-07-01 00:30:41,475 INFO Processed 7 / 25.0 frames
+2023-07-01 00:30:41,541 INFO -- count: 0
+2023-07-01 00:30:41,543 INFO Processed 8 / 25.0 frames
+2023-07-01 00:30:41,615 INFO -- count: 0
+2023-07-01 00:30:41,618 INFO Processed 9 / 25.0 frames
+2023-07-01 00:30:41,678 INFO -- count: 0
+2023-07-01 00:30:41,680 INFO Processed 10 / 25.0 frames
+2023-07-01 00:30:41,753 INFO -- count: 0
+2023-07-01 00:30:41,757 INFO Processed 11 / 25.0 frames
+2023-07-01 00:30:41,863 INFO -- count: 0
+2023-07-01 00:30:41,868 INFO Processed 12 / 25.0 frames
+2023-07-01 00:30:41,952 INFO -- count: 0
+2023-07-01 00:30:41,954 INFO Processed 13 / 25.0 frames
+2023-07-01 00:30:42,033 INFO -- count: 0
+2023-07-01 00:30:42,036 INFO Processed 14 / 25.0 frames
+2023-07-01 00:30:42,095 INFO -- count: 0
+2023-07-01 00:30:42,099 INFO Processed 15 / 25.0 frames
+2023-07-01 00:30:42,185 INFO -- count: 0
+2023-07-01 00:30:42,189 INFO Processed 16 / 25.0 frames
+2023-07-01 00:30:42,266 INFO -- count: 0
+2023-07-01 00:30:42,269 INFO Processed 17 / 25.0 frames
+2023-07-01 00:30:42,331 INFO -- count: 0
+2023-07-01 00:30:42,334 INFO Processed 18 / 25.0 frames
+2023-07-01 00:30:42,393 INFO -- count: 0
+2023-07-01 00:30:42,396 INFO Processed 19 / 25.0 frames
+2023-07-01 00:30:42,467 INFO -- count: 0
+2023-07-01 00:30:42,469 INFO Processed 20 / 25.0 frames
+2023-07-01 00:30:42,529 INFO -- count: 0
+2023-07-01 00:30:42,534 INFO Processed 21 / 25.0 frames
+2023-07-01 00:30:42,590 INFO -- count: 0
+2023-07-01 00:30:42,593 INFO Processed 22 / 25.0 frames
+2023-07-01 00:30:42,650 INFO -- count: 0
+2023-07-01 00:30:42,653 INFO Processed 23 / 25.0 frames
+2023-07-01 00:30:42,707 INFO -- count: 0
+2023-07-01 00:30:42,709 INFO Processed 24 / 25.0 frames
+2023-07-01 00:30:42,762 INFO -- count: 0
+2023-07-01 00:30:42,764 INFO Processed 25 / 25.0 frames
+2023-07-01 00:30:42,828 INFO -- count: 0
+2023-07-01 00:49:05,093 INFO Processed 1 / 25.0 frames
+2023-07-01 00:49:08,013 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 00:49:08,200 INFO -- count: 0
+2023-07-01 00:49:08,203 INFO Processed 2 / 25.0 frames
+2023-07-01 00:49:08,266 INFO -- count: 0
+2023-07-01 00:49:08,270 INFO Processed 3 / 25.0 frames
+2023-07-01 00:49:08,280 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 00:49:08,326 INFO -- count: 0
+2023-07-01 00:49:08,330 INFO Processed 4 / 25.0 frames
+2023-07-01 00:49:08,383 INFO -- count: 0
+2023-07-01 00:49:08,386 INFO Processed 5 / 25.0 frames
+2023-07-01 00:49:08,442 INFO -- count: 0
+2023-07-01 00:49:08,445 INFO Processed 6 / 25.0 frames
+2023-07-01 00:49:08,508 INFO -- count: 0
+2023-07-01 00:49:08,511 INFO Processed 7 / 25.0 frames
+2023-07-01 00:49:08,585 INFO -- count: 0
+2023-07-01 00:49:08,588 INFO Processed 8 / 25.0 frames
+2023-07-01 00:49:08,648 INFO -- count: 0
+2023-07-01 00:49:08,650 INFO Processed 9 / 25.0 frames
+2023-07-01 00:49:08,702 INFO -- count: 0
+2023-07-01 00:49:08,704 INFO Processed 10 / 25.0 frames
+2023-07-01 00:49:08,761 INFO -- count: 0
+2023-07-01 00:49:08,763 INFO Processed 11 / 25.0 frames
+2023-07-01 00:49:08,821 INFO -- count: 0
+2023-07-01 00:49:08,823 INFO Processed 12 / 25.0 frames
+2023-07-01 00:49:08,874 INFO -- count: 0
+2023-07-01 00:49:08,877 INFO Processed 13 / 25.0 frames
+2023-07-01 00:49:08,937 INFO -- count: 0
+2023-07-01 00:49:08,939 INFO Processed 14 / 25.0 frames
+2023-07-01 00:49:08,989 INFO -- count: 0
+2023-07-01 00:49:08,991 INFO Processed 15 / 25.0 frames
+2023-07-01 00:49:09,052 INFO -- count: 0
+2023-07-01 00:49:09,054 INFO Processed 16 / 25.0 frames
+2023-07-01 00:49:09,118 INFO -- count: 0
+2023-07-01 00:49:09,120 INFO Processed 17 / 25.0 frames
+2023-07-01 00:49:09,173 INFO -- count: 0
+2023-07-01 00:49:09,176 INFO Processed 18 / 25.0 frames
+2023-07-01 00:49:09,227 INFO -- count: 0
+2023-07-01 00:49:09,230 INFO Processed 19 / 25.0 frames
+2023-07-01 00:49:09,292 INFO -- count: 0
+2023-07-01 00:49:09,294 INFO Processed 20 / 25.0 frames
+2023-07-01 00:49:09,352 INFO -- count: 0
+2023-07-01 00:49:09,355 INFO Processed 21 / 25.0 frames
+2023-07-01 00:49:09,411 INFO -- count: 0
+2023-07-01 00:49:09,413 INFO Processed 22 / 25.0 frames
+2023-07-01 00:49:09,465 INFO -- count: 0
+2023-07-01 00:49:09,467 INFO Processed 23 / 25.0 frames
+2023-07-01 00:49:09,521 INFO -- count: 0
+2023-07-01 00:49:09,524 INFO Processed 24 / 25.0 frames
+2023-07-01 00:49:09,582 INFO -- count: 0
+2023-07-01 00:49:09,584 INFO Processed 25 / 25.0 frames
+2023-07-01 00:49:09,647 INFO -- count: 0
+2023-07-01 00:55:06,324 INFO Processed 1 / 25.0 frames
+2023-07-01 00:55:08,954 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 00:55:09,064 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 00:55:09,125 INFO -- count: 0
+2023-07-01 00:55:09,128 INFO Processed 2 / 25.0 frames
+2023-07-01 00:55:09,195 INFO -- count: 0
+2023-07-01 00:55:09,197 INFO Processed 3 / 25.0 frames
+2023-07-01 00:55:09,249 INFO -- count: 0
+2023-07-01 00:55:09,252 INFO Processed 4 / 25.0 frames
+2023-07-01 00:55:09,304 INFO -- count: 0
+2023-07-01 00:55:09,307 INFO Processed 5 / 25.0 frames
+2023-07-01 00:55:09,366 INFO -- count: 0
+2023-07-01 00:55:09,369 INFO Processed 6 / 25.0 frames
+2023-07-01 00:55:09,446 INFO -- count: 0
+2023-07-01 00:55:09,449 INFO Processed 7 / 25.0 frames
+2023-07-01 00:55:09,518 INFO -- count: 0
+2023-07-01 00:55:09,521 INFO Processed 8 / 25.0 frames
+2023-07-01 00:55:09,596 INFO -- count: 0
+2023-07-01 00:55:09,600 INFO Processed 9 / 25.0 frames
+2023-07-01 00:55:09,662 INFO -- count: 0
+2023-07-01 00:55:09,665 INFO Processed 10 / 25.0 frames
+2023-07-01 00:55:09,733 INFO -- count: 0
+2023-07-01 00:55:09,735 INFO Processed 11 / 25.0 frames
+2023-07-01 00:55:09,812 INFO -- count: 0
+2023-07-01 00:55:09,816 INFO Processed 12 / 25.0 frames
+2023-07-01 00:55:09,911 INFO -- count: 0
+2023-07-01 00:55:09,917 INFO Processed 13 / 25.0 frames
+2023-07-01 00:55:10,048 INFO -- count: 0
+2023-07-01 00:55:10,058 INFO Processed 14 / 25.0 frames
+2023-07-01 00:55:10,187 INFO -- count: 0
+2023-07-01 00:55:10,197 INFO Processed 15 / 25.0 frames
+2023-07-01 00:55:10,355 INFO -- count: 0
+2023-07-01 00:55:10,361 INFO Processed 16 / 25.0 frames
+2023-07-01 00:55:10,503 INFO -- count: 0
+2023-07-01 00:55:10,509 INFO Processed 17 / 25.0 frames
+2023-07-01 00:55:10,614 INFO -- count: 0
+2023-07-01 00:55:10,618 INFO Processed 18 / 25.0 frames
+2023-07-01 00:55:10,692 INFO -- count: 0
+2023-07-01 00:55:10,695 INFO Processed 19 / 25.0 frames
+2023-07-01 00:55:10,777 INFO -- count: 0
+2023-07-01 00:55:10,780 INFO Processed 20 / 25.0 frames
+2023-07-01 00:55:10,847 INFO -- count: 0
+2023-07-01 00:55:10,850 INFO Processed 21 / 25.0 frames
+2023-07-01 00:55:10,909 INFO -- count: 0
+2023-07-01 00:55:10,911 INFO Processed 22 / 25.0 frames
+2023-07-01 00:55:10,971 INFO -- count: 0
+2023-07-01 00:55:10,974 INFO Processed 23 / 25.0 frames
+2023-07-01 00:55:11,031 INFO -- count: 0
+2023-07-01 00:55:11,033 INFO Processed 24 / 25.0 frames
+2023-07-01 00:55:11,092 INFO -- count: 0
+2023-07-01 00:55:11,094 INFO Processed 25 / 25.0 frames
+2023-07-01 00:55:11,161 INFO -- count: 0
+2023-07-01 00:55:55,919 INFO Processed 1 / 25.0 frames
+2023-07-01 00:55:58,477 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 00:55:58,597 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 00:55:58,679 INFO -- count: 0
+2023-07-01 00:55:58,681 INFO Processed 2 / 25.0 frames
+2023-07-01 00:55:58,741 INFO -- count: 0
+2023-07-01 00:55:58,744 INFO Processed 3 / 25.0 frames
+2023-07-01 00:55:58,798 INFO -- count: 0
+2023-07-01 00:55:58,801 INFO Processed 4 / 25.0 frames
+2023-07-01 00:55:58,852 INFO -- count: 0
+2023-07-01 00:55:58,855 INFO Processed 5 / 25.0 frames
+2023-07-01 00:55:58,919 INFO -- count: 0
+2023-07-01 00:55:58,922 INFO Processed 6 / 25.0 frames
+2023-07-01 00:55:58,983 INFO -- count: 0
+2023-07-01 00:55:58,985 INFO Processed 7 / 25.0 frames
+2023-07-01 00:55:59,047 INFO -- count: 0
+2023-07-01 00:55:59,050 INFO Processed 8 / 25.0 frames
+2023-07-01 00:55:59,113 INFO -- count: 0
+2023-07-01 00:55:59,116 INFO Processed 9 / 25.0 frames
+2023-07-01 00:55:59,169 INFO -- count: 0
+2023-07-01 00:55:59,172 INFO Processed 10 / 25.0 frames
+2023-07-01 00:55:59,234 INFO -- count: 0
+2023-07-01 00:55:59,238 INFO Processed 11 / 25.0 frames
+2023-07-01 00:55:59,301 INFO -- count: 0
+2023-07-01 00:55:59,304 INFO Processed 12 / 25.0 frames
+2023-07-01 00:55:59,397 INFO -- count: 0
+2023-07-01 00:55:59,401 INFO Processed 13 / 25.0 frames
+2023-07-01 00:55:59,524 INFO -- count: 0
+2023-07-01 00:55:59,529 INFO Processed 14 / 25.0 frames
+2023-07-01 00:55:59,626 INFO -- count: 0
+2023-07-01 00:55:59,630 INFO Processed 15 / 25.0 frames
+2023-07-01 00:55:59,729 INFO -- count: 0
+2023-07-01 00:55:59,734 INFO Processed 16 / 25.0 frames
+2023-07-01 00:55:59,826 INFO -- count: 0
+2023-07-01 00:55:59,829 INFO Processed 17 / 25.0 frames
+2023-07-01 00:55:59,896 INFO -- count: 0
+2023-07-01 00:55:59,899 INFO Processed 18 / 25.0 frames
+2023-07-01 00:55:59,962 INFO -- count: 0
+2023-07-01 00:55:59,965 INFO Processed 19 / 25.0 frames
+2023-07-01 00:56:00,037 INFO -- count: 0
+2023-07-01 00:56:00,040 INFO Processed 20 / 25.0 frames
+2023-07-01 00:56:00,098 INFO -- count: 0
+2023-07-01 00:56:00,101 INFO Processed 21 / 25.0 frames
+2023-07-01 00:56:00,158 INFO -- count: 0
+2023-07-01 00:56:00,161 INFO Processed 22 / 25.0 frames
+2023-07-01 00:56:00,221 INFO -- count: 0
+2023-07-01 00:56:00,225 INFO Processed 23 / 25.0 frames
+2023-07-01 00:56:00,284 INFO -- count: 0
+2023-07-01 00:56:00,286 INFO Processed 24 / 25.0 frames
+2023-07-01 00:56:00,341 INFO -- count: 0
+2023-07-01 00:56:00,343 INFO Processed 25 / 25.0 frames
+2023-07-01 00:56:00,410 INFO -- count: 0
+2023-07-01 00:57:40,039 INFO Processed 1 / 25.0 frames
+2023-07-01 00:57:42,760 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 00:57:42,863 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 00:57:43,026 INFO -- count: 0
+2023-07-01 00:57:43,029 INFO Processed 2 / 25.0 frames
+2023-07-01 00:57:43,179 INFO -- count: 0
+2023-07-01 00:57:43,182 INFO Processed 3 / 25.0 frames
+2023-07-01 00:57:43,325 INFO -- count: 0
+2023-07-01 00:57:43,328 INFO Processed 4 / 25.0 frames
+2023-07-01 00:57:43,465 INFO -- count: 0
+2023-07-01 00:57:43,468 INFO Processed 5 / 25.0 frames
+2023-07-01 00:57:43,621 INFO -- count: 0
+2023-07-01 00:57:43,625 INFO Processed 6 / 25.0 frames
+2023-07-01 00:57:43,781 INFO -- count: 0
+2023-07-01 00:57:43,784 INFO Processed 7 / 25.0 frames
+2023-07-01 00:57:43,928 INFO -- count: 0
+2023-07-01 00:57:43,930 INFO Processed 8 / 25.0 frames
+2023-07-01 00:57:44,090 INFO -- count: 0
+2023-07-01 00:57:44,092 INFO Processed 9 / 25.0 frames
+2023-07-01 00:57:44,228 INFO -- count: 0
+2023-07-01 00:57:44,232 INFO Processed 10 / 25.0 frames
+2023-07-01 00:57:44,391 INFO -- count: 0
+2023-07-01 00:57:44,393 INFO Processed 11 / 25.0 frames
+2023-07-01 00:57:44,538 INFO -- count: 0
+2023-07-01 00:57:44,540 INFO Processed 12 / 25.0 frames
+2023-07-01 00:57:44,685 INFO -- count: 0
+2023-07-01 00:57:44,688 INFO Processed 13 / 25.0 frames
+2023-07-01 00:57:44,833 INFO -- count: 0
+2023-07-01 00:57:44,836 INFO Processed 14 / 25.0 frames
+2023-07-01 00:57:44,981 INFO -- count: 0
+2023-07-01 00:57:44,984 INFO Processed 15 / 25.0 frames
+2023-07-01 00:57:45,131 INFO -- count: 0
+2023-07-01 00:57:45,133 INFO Processed 16 / 25.0 frames
+2023-07-01 00:57:45,290 INFO -- count: 0
+2023-07-01 00:57:45,292 INFO Processed 17 / 25.0 frames
+2023-07-01 00:57:45,427 INFO -- count: 0
+2023-07-01 00:57:45,429 INFO Processed 18 / 25.0 frames
+2023-07-01 00:57:45,565 INFO -- count: 0
+2023-07-01 00:57:45,568 INFO Processed 19 / 25.0 frames
+2023-07-01 00:57:45,721 INFO -- count: 0
+2023-07-01 00:57:45,723 INFO Processed 20 / 25.0 frames
+2023-07-01 00:57:45,860 INFO -- count: 0
+2023-07-01 00:57:45,862 INFO Processed 21 / 25.0 frames
+2023-07-01 00:57:46,011 INFO -- count: 0
+2023-07-01 00:57:46,013 INFO Processed 22 / 25.0 frames
+2023-07-01 00:57:46,152 INFO -- count: 0
+2023-07-01 00:57:46,154 INFO Processed 23 / 25.0 frames
+2023-07-01 00:57:46,303 INFO -- count: 0
+2023-07-01 00:57:46,307 INFO Processed 24 / 25.0 frames
+2023-07-01 00:57:46,446 INFO -- count: 0
+2023-07-01 00:57:46,448 INFO Processed 25 / 25.0 frames
+2023-07-01 00:57:46,606 INFO -- count: 0
+2023-07-01 00:58:02,307 INFO Processed 1 / 25.0 frames
+2023-07-01 00:58:04,870 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 00:58:04,981 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 00:58:05,121 INFO -- count: 0
+2023-07-01 00:58:05,121 INFO Processed 2 / 25.0 frames
+2023-07-01 00:58:05,239 INFO -- count: 0
+2023-07-01 00:58:05,240 INFO Processed 3 / 25.0 frames
+2023-07-01 00:58:05,355 INFO -- count: 0
+2023-07-01 00:58:05,356 INFO Processed 4 / 25.0 frames
+2023-07-01 00:58:05,481 INFO -- count: 0
+2023-07-01 00:58:05,482 INFO Processed 5 / 25.0 frames
+2023-07-01 00:58:05,606 INFO -- count: 0
+2023-07-01 00:58:05,606 INFO Processed 6 / 25.0 frames
+2023-07-01 00:58:05,724 INFO -- count: 0
+2023-07-01 00:58:05,724 INFO Processed 7 / 25.0 frames
+2023-07-01 00:58:05,844 INFO -- count: 0
+2023-07-01 00:58:05,844 INFO Processed 8 / 25.0 frames
+2023-07-01 00:58:05,978 INFO -- count: 0
+2023-07-01 00:58:05,978 INFO Processed 9 / 25.0 frames
+2023-07-01 00:58:06,107 INFO -- count: 0
+2023-07-01 00:58:06,107 INFO Processed 10 / 25.0 frames
+2023-07-01 00:58:06,229 INFO -- count: 0
+2023-07-01 00:58:06,230 INFO Processed 11 / 25.0 frames
+2023-07-01 00:58:06,347 INFO -- count: 0
+2023-07-01 00:58:06,347 INFO Processed 12 / 25.0 frames
+2023-07-01 00:58:06,462 INFO -- count: 0
+2023-07-01 00:58:06,462 INFO Processed 13 / 25.0 frames
+2023-07-01 00:58:06,588 INFO -- count: 0
+2023-07-01 00:58:06,588 INFO Processed 14 / 25.0 frames
+2023-07-01 00:58:06,717 INFO -- count: 0
+2023-07-01 00:58:06,717 INFO Processed 15 / 25.0 frames
+2023-07-01 00:58:06,831 INFO -- count: 0
+2023-07-01 00:58:06,832 INFO Processed 16 / 25.0 frames
+2023-07-01 00:58:06,948 INFO -- count: 0
+2023-07-01 00:58:06,948 INFO Processed 17 / 25.0 frames
+2023-07-01 00:58:07,062 INFO -- count: 0
+2023-07-01 00:58:07,062 INFO Processed 18 / 25.0 frames
+2023-07-01 00:58:07,192 INFO -- count: 0
+2023-07-01 00:58:07,193 INFO Processed 19 / 25.0 frames
+2023-07-01 00:58:07,320 INFO -- count: 0
+2023-07-01 00:58:07,320 INFO Processed 20 / 25.0 frames
+2023-07-01 00:58:07,440 INFO -- count: 0
+2023-07-01 00:58:07,440 INFO Processed 21 / 25.0 frames
+2023-07-01 00:58:07,559 INFO -- count: 0
+2023-07-01 00:58:07,560 INFO Processed 22 / 25.0 frames
+2023-07-01 00:58:07,688 INFO -- count: 0
+2023-07-01 00:58:07,689 INFO Processed 23 / 25.0 frames
+2023-07-01 00:58:07,816 INFO -- count: 0
+2023-07-01 00:58:07,816 INFO Processed 24 / 25.0 frames
+2023-07-01 00:58:07,932 INFO -- count: 0
+2023-07-01 00:58:07,933 INFO Processed 25 / 25.0 frames
+2023-07-01 00:58:08,049 INFO -- count: 0
+2023-07-01 00:59:40,693 INFO Processed 1 / 25.0 frames
+2023-07-01 00:59:43,143 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 00:59:43,265 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 00:59:43,401 INFO -- count: 0
+2023-07-01 00:59:43,402 INFO Processed 2 / 25.0 frames
+2023-07-01 00:59:43,521 INFO -- count: 0
+2023-07-01 00:59:43,522 INFO Processed 3 / 25.0 frames
+2023-07-01 00:59:43,637 INFO -- count: 0
+2023-07-01 00:59:43,638 INFO Processed 4 / 25.0 frames
+2023-07-01 00:59:43,758 INFO -- count: 0
+2023-07-01 00:59:43,758 INFO Processed 5 / 25.0 frames
+2023-07-01 00:59:43,886 INFO -- count: 0
+2023-07-01 00:59:43,887 INFO Processed 6 / 25.0 frames
+2023-07-01 00:59:44,013 INFO -- count: 0
+2023-07-01 00:59:44,014 INFO Processed 7 / 25.0 frames
+2023-07-01 00:59:44,131 INFO -- count: 0
+2023-07-01 00:59:44,132 INFO Processed 8 / 25.0 frames
+2023-07-01 00:59:44,258 INFO -- count: 0
+2023-07-01 00:59:44,259 INFO Processed 9 / 25.0 frames
+2023-07-01 00:59:44,389 INFO -- count: 0
+2023-07-01 00:59:44,390 INFO Processed 10 / 25.0 frames
+2023-07-01 00:59:44,531 INFO -- count: 0
+2023-07-01 00:59:44,531 INFO Processed 11 / 25.0 frames
+2023-07-01 00:59:44,648 INFO -- count: 0
+2023-07-01 00:59:44,649 INFO Processed 12 / 25.0 frames
+2023-07-01 00:59:44,776 INFO -- count: 0
+2023-07-01 00:59:44,776 INFO Processed 13 / 25.0 frames
+2023-07-01 00:59:44,902 INFO -- count: 0
+2023-07-01 00:59:44,902 INFO Processed 14 / 25.0 frames
+2023-07-01 00:59:45,021 INFO -- count: 0
+2023-07-01 00:59:45,021 INFO Processed 15 / 25.0 frames
+2023-07-01 00:59:45,143 INFO -- count: 0
+2023-07-01 00:59:45,144 INFO Processed 16 / 25.0 frames
+2023-07-01 00:59:45,265 INFO -- count: 0
+2023-07-01 00:59:45,265 INFO Processed 17 / 25.0 frames
+2023-07-01 00:59:45,393 INFO -- count: 0
+2023-07-01 00:59:45,394 INFO Processed 18 / 25.0 frames
+2023-07-01 00:59:45,521 INFO -- count: 0
+2023-07-01 00:59:45,522 INFO Processed 19 / 25.0 frames
+2023-07-01 00:59:45,640 INFO -- count: 0
+2023-07-01 00:59:45,641 INFO Processed 20 / 25.0 frames
+2023-07-01 00:59:45,759 INFO -- count: 0
+2023-07-01 00:59:45,760 INFO Processed 21 / 25.0 frames
+2023-07-01 00:59:45,889 INFO -- count: 0
+2023-07-01 00:59:45,889 INFO Processed 22 / 25.0 frames
+2023-07-01 00:59:46,016 INFO -- count: 0
+2023-07-01 00:59:46,017 INFO Processed 23 / 25.0 frames
+2023-07-01 00:59:46,132 INFO -- count: 0
+2023-07-01 00:59:46,132 INFO Processed 24 / 25.0 frames
+2023-07-01 00:59:46,250 INFO -- count: 0
+2023-07-01 00:59:46,250 INFO Processed 25 / 25.0 frames
+2023-07-01 00:59:46,376 INFO -- count: 0
+2023-07-01 01:01:33,185 INFO Processed 1 / 25.0 frames
+2023-07-01 01:01:35,811 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 01:01:35,919 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 01:01:36,054 INFO -- count: 0
+2023-07-01 01:01:36,055 INFO Processed 2 / 25.0 frames
+2023-07-01 01:01:36,177 INFO -- count: 0
+2023-07-01 01:01:36,177 INFO Processed 3 / 25.0 frames
+2023-07-01 01:01:36,300 INFO -- count: 0
+2023-07-01 01:01:36,301 INFO Processed 4 / 25.0 frames
+2023-07-01 01:01:36,421 INFO -- count: 0
+2023-07-01 01:01:36,422 INFO Processed 5 / 25.0 frames
+2023-07-01 01:01:36,535 INFO -- count: 0
+2023-07-01 01:01:36,536 INFO Processed 6 / 25.0 frames
+2023-07-01 01:01:36,650 INFO -- count: 0
+2023-07-01 01:01:36,650 INFO Processed 7 / 25.0 frames
+2023-07-01 01:01:36,793 INFO -- count: 0
+2023-07-01 01:01:36,794 INFO Processed 8 / 25.0 frames
+2023-07-01 01:01:36,921 INFO -- count: 0
+2023-07-01 01:01:36,922 INFO Processed 9 / 25.0 frames
+2023-07-01 01:01:37,035 INFO -- count: 0
+2023-07-01 01:01:37,036 INFO Processed 10 / 25.0 frames
+2023-07-01 01:01:37,155 INFO -- count: 0
+2023-07-01 01:01:37,156 INFO Processed 11 / 25.0 frames
+2023-07-01 01:01:37,283 INFO -- count: 0
+2023-07-01 01:01:37,283 INFO Processed 12 / 25.0 frames
+2023-07-01 01:01:37,409 INFO -- count: 0
+2023-07-01 01:01:37,409 INFO Processed 13 / 25.0 frames
+2023-07-01 01:01:37,525 INFO -- count: 0
+2023-07-01 01:01:37,526 INFO Processed 14 / 25.0 frames
+2023-07-01 01:01:37,643 INFO -- count: 0
+2023-07-01 01:01:37,644 INFO Processed 15 / 25.0 frames
+2023-07-01 01:01:37,765 INFO -- count: 0
+2023-07-01 01:01:37,765 INFO Processed 16 / 25.0 frames
+2023-07-01 01:01:37,897 INFO -- count: 0
+2023-07-01 01:01:37,898 INFO Processed 17 / 25.0 frames
+2023-07-01 01:01:38,021 INFO -- count: 0
+2023-07-01 01:01:38,022 INFO Processed 18 / 25.0 frames
+2023-07-01 01:01:38,141 INFO -- count: 0
+2023-07-01 01:01:38,141 INFO Processed 19 / 25.0 frames
+2023-07-01 01:01:38,259 INFO -- count: 0
+2023-07-01 01:01:38,260 INFO Processed 20 / 25.0 frames
+2023-07-01 01:01:38,390 INFO -- count: 0
+2023-07-01 01:01:38,391 INFO Processed 21 / 25.0 frames
+2023-07-01 01:01:38,520 INFO -- count: 0
+2023-07-01 01:01:38,521 INFO Processed 22 / 25.0 frames
+2023-07-01 01:01:38,637 INFO -- count: 0
+2023-07-01 01:01:38,638 INFO Processed 23 / 25.0 frames
+2023-07-01 01:01:38,753 INFO -- count: 0
+2023-07-01 01:01:38,754 INFO Processed 24 / 25.0 frames
+2023-07-01 01:01:38,881 INFO -- count: 0
+2023-07-01 01:01:38,882 INFO Processed 25 / 25.0 frames
+2023-07-01 01:01:39,005 INFO -- count: 0
+2023-07-01 01:23:27,042 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 01:23:27,059 INFO Processed 1 / 25.0 frames
+2023-07-01 01:23:27,154 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 01:23:27,285 INFO -- count: 0
+2023-07-01 01:23:27,330 INFO Processed 2 / 25.0 frames
+2023-07-01 01:23:27,432 INFO -- count: 0
+2023-07-01 01:23:27,445 INFO Processed 3 / 25.0 frames
+2023-07-01 01:23:27,546 INFO -- count: 0
+2023-07-01 01:23:27,561 INFO Processed 4 / 25.0 frames
+2023-07-01 01:23:27,662 INFO -- count: 0
+2023-07-01 01:23:27,677 INFO Processed 5 / 25.0 frames
+2023-07-01 01:23:27,789 INFO -- count: 0
+2023-07-01 01:23:27,802 INFO Processed 6 / 25.0 frames
+2023-07-01 01:23:27,915 INFO -- count: 0
+2023-07-01 01:23:27,929 INFO Processed 7 / 25.0 frames
+2023-07-01 01:23:28,030 INFO -- count: 0
+2023-07-01 01:23:28,047 INFO Processed 8 / 25.0 frames
+2023-07-01 01:23:28,154 INFO -- count: 0
+2023-07-01 01:23:28,170 INFO Processed 9 / 25.0 frames
+2023-07-01 01:23:28,284 INFO -- count: 0
+2023-07-01 01:23:28,308 INFO Processed 10 / 25.0 frames
+2023-07-01 01:23:28,421 INFO -- count: 0
+2023-07-01 01:23:28,436 INFO Processed 11 / 25.0 frames
+2023-07-01 01:23:28,539 INFO -- count: 0
+2023-07-01 01:23:28,553 INFO Processed 12 / 25.0 frames
+2023-07-01 01:23:28,655 INFO -- count: 0
+2023-07-01 01:23:28,669 INFO Processed 13 / 25.0 frames
+2023-07-01 01:23:28,784 INFO -- count: 0
+2023-07-01 01:23:28,801 INFO Processed 14 / 25.0 frames
+2023-07-01 01:23:28,915 INFO -- count: 0
+2023-07-01 01:23:28,929 INFO Processed 15 / 25.0 frames
+2023-07-01 01:23:29,032 INFO -- count: 0
+2023-07-01 01:23:29,048 INFO Processed 16 / 25.0 frames
+2023-07-01 01:23:29,152 INFO -- count: 0
+2023-07-01 01:23:29,166 INFO Processed 17 / 25.0 frames
+2023-07-01 01:23:29,278 INFO -- count: 0
+2023-07-01 01:23:29,298 INFO Processed 18 / 25.0 frames
+2023-07-01 01:23:29,412 INFO -- count: 0
+2023-07-01 01:23:29,428 INFO Processed 19 / 25.0 frames
+2023-07-01 01:23:29,533 INFO -- count: 0
+2023-07-01 01:23:29,552 INFO Processed 20 / 25.0 frames
+2023-07-01 01:23:29,659 INFO -- count: 0
+2023-07-01 01:23:29,674 INFO Processed 21 / 25.0 frames
+2023-07-01 01:23:29,788 INFO -- count: 0
+2023-07-01 01:23:29,802 INFO Processed 22 / 25.0 frames
+2023-07-01 01:23:29,915 INFO -- count: 0
+2023-07-01 01:23:29,928 INFO Processed 23 / 25.0 frames
+2023-07-01 01:23:30,030 INFO -- count: 0
+2023-07-01 01:23:30,043 INFO Processed 24 / 25.0 frames
+2023-07-01 01:23:30,145 INFO -- count: 0
+2023-07-01 01:23:30,159 INFO Processed 25 / 25.0 frames
+2023-07-01 01:23:30,260 INFO -- count: 0
+2023-07-01 01:24:13,503 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 01:24:13,616 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 01:31:25,870 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 01:31:25,977 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0
+2023-07-01 01:31:58,874 DEBUG Starting new HTTPS connection (1): www.google-analytics.com:443
+2023-07-01 01:31:58,978 DEBUG https://www.google-analytics.com:443 "POST /mp/collect?measurement_id=G-X8NCJYTQXM&api_secret=QLQrATrNSwGRFRLE-cbHJw HTTP/1.1" 204 0

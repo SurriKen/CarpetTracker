@@ -529,6 +529,8 @@ class PolyTracker:
             print('self.dead_boxes', self.dead_boxes)
 
 
+
+
 if __name__ == '__main__':
     # Problem test 17 - Acc=100%, Sen=98,8%, F=99,4%
     # vid_1 = 'videos/sync_test/test 17_cam 1_sync.mp4'
@@ -579,15 +581,15 @@ if __name__ == '__main__':
     # start, finish = (0 * 60 + 0) * 25, (10 * 60 + 49) * 25
 
     # Problem test 20 - Acc=%, Sen=%, F=%
-    vid_1 = 'videos/sync_test/test 20_cam 1_sync.mp4'
-    vid_2 = 'videos/sync_test/test 20_cam 2_sync.mp4'
-    true_bb_1 = load_data(
-        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 20 (mix+ 100ep, F% Acc% Sen%).dict'))
-    true_bb_2 = load_data(
-        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 20 (mix+ 100ep, F% Acc% Sen%).dict'))
-    # start, finish = (0 * 60 + 10) * 25, (0 * 60 + 15) * 25
-    # start, finish = (8 * 60 + 5) * 25, (8 * 60 + 10) * 25
-    start, finish = (0 * 60 + 0) * 25, (9 * 60 + 18) * 25
+    # vid_1 = 'videos/sync_test/test 20_cam 1_sync.mp4'
+    # vid_2 = 'videos/sync_test/test 20_cam 2_sync.mp4'
+    # true_bb_1 = load_data(
+    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 20 (mix+ 100ep, F% Acc% Sen%).dict'))
+    # true_bb_2 = load_data(
+    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 20 (mix+ 100ep, F% Acc% Sen%).dict'))
+    # # start, finish = (0 * 60 + 10) * 25, (0 * 60 + 15) * 25
+    # # start, finish = (8 * 60 + 5) * 25, (8 * 60 + 10) * 25
+    # start, finish = (0 * 60 + 0) * 25, (9 * 60 + 18) * 25
 
     # Problem test 21 - Acc=%, Sen=%, F=%
     # vid_1 = 'videos/sync_test/test 21_cam 1_sync.mp4'
@@ -605,32 +607,69 @@ if __name__ == '__main__':
     # start, finish = (8 * 60 + 19) * 25, (8 * 60 + 30) * 25
     # start, finish = (0 * 60 + 0) * 25, (7 * 60 + 34) * 25
 
+    # Problem test 21 - Acc=%, Sen=%, F=%
+    vid_1 = 'videos/sync_test/test 22_cam 1_sync.mp4'
+    vid_2 = 'videos/sync_test/test 22_cam 2_sync.mp4'
+    true_bb_1 = load_data(
+        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 22 (mix+ 100ep, F% Acc% Sen%).dict'))
+    print('true_bb_1', len(true_bb_1))
+    true_bb_2 = load_data(
+        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 22 (mix+ 100ep, F% Acc% Sen%).dict'))
+    print('true_bb_2', len(true_bb_2))
+    start, finish = (0 * 60 + 9) * 25, (0 * 60 + 13) * 25
+
     tracker_1 = PolyTracker(polygon_in=POLY_CAM1_IN, polygon_out=POLY_CAM1_OUT, name='camera 1')
     tracker_2 = PolyTracker(polygon_in=POLY_CAM2_IN, polygon_out=POLY_CAM2_OUT, name='camera 2')
     names = ['carpet']
     colors = get_colors(names)
     out_size = (640, 360)
-    out = cv2.VideoWriter(os.path.join(ROOT_DIR, 'temp/test.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), 25,
-                          (out_size[0], out_size[1] * 2))
+    # out = cv2.VideoWriter(os.path.join(ROOT_DIR, 'temp/test.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), 25,
+    #                       (out_size[0], out_size[1] * 2))
     vc1 = cv2.VideoCapture()
     vc1.open(os.path.join(ROOT_DIR, vid_1))
+    f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
+    fps1 = vc1.get(cv2.CAP_PROP_FPS)
     vc2 = cv2.VideoCapture()
     vc2.open(os.path.join(ROOT_DIR, vid_2))
+    f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
+    fps2 = vc2.get(cv2.CAP_PROP_FPS)
     print('fps 1 =', vc1.get(cv2.CAP_PROP_FPS), '\nfps 2 =', vc2.get(cv2.CAP_PROP_FPS))
+
+    step = min([fps1, fps2])
+    range_1 = [(i, round(i * 1000 / fps1, 1)) for i in range(int(f1))]
+    range_2 = [(i, round(i * 1000 / fps2, 1)) for i in range(int(f2))]
+    (min_range, max_range) = (range_1, range_2) if step == fps1 else (range_2, range_1)
+    (min_vc, max_vc) = (vc1, vc2) if step == fps1 else (vc2, vc1)
+
+    def get_closest_id(x: float, data: list[tuple, ...]) -> int:
+        dist = [(abs(data[i][1] - x), i) for i in range(len(data))]
+        dist = sorted(dist)
+        # print("Dist", dist)
+        return dist[0][1]
 
     count = 0
     last_track_seq = {'tr1': [], 'tr2': []}
     for i in range(0, finish):
         # itt = time.time()
-        _, img1 = vc1.read()
-        _, img2 = vc2.read()
+        # _, img1 = vc1.read()
+        # _, img2 = vc2.read()
+        _, img1 = min_vc.read()
+
+        closest_id = get_closest_id(min_range[0][1], max_range[:10])
+        min_range.pop(0)
+        ids = list(range(closest_id)) if closest_id else [0]
+        ids = sorted(ids, reverse=True)
+        for id in ids:
+            max_range.pop(id)
+            _, img2 = max_vc.read()
 
         if i >= start:
             boxes_1 = true_bb_1[i]
             tracker_1.process(frame_id=i, boxes=boxes_1, img_shape=img1.shape[:2], debug=False)
             boxes_2 = true_bb_2[i]
             tracker_2.process(frame_id=i, boxes=boxes_2, img_shape=img2.shape[:2], debug=False)
-            # print('================================================================')
+            print('================================================================')
+            print('tracker_1.current_boxes', tracker_1.current_boxes)
             # print(f" - frame={i}, count={count}, boxes_1={[[int(c) for c in box[:4]] for box in boxes_1]},"
             #       f" boxes_2={[[int(c) for c in box[:4]] for box in boxes_2]}")
 
@@ -640,7 +679,7 @@ if __name__ == '__main__':
                 tracker_1_count_frames=copy.deepcopy(tracker_1.count_frames),
                 tracker_2_count_frames=copy.deepcopy(tracker_2.count_frames),
                 frame_id=i,
-                debug=False
+                debug=True
             )
 
             # Draw all figures on image
@@ -675,12 +714,12 @@ if __name__ == '__main__':
                 headline=headline
             )
             # cv_img = cv2.cvtColor(img)
-            # cv2.imshow('image', img1)
-            # cv2.waitKey(0)
+            cv2.imshow('image', img)
+            cv2.waitKey(1)
 
             if (i + 1) % 100 == 0:
                 logger.info(f"Frames {i + 1} / {finish} was processed. Current count: {count}")
-            out.write(img)
+            # out.write(img)
             # break
     logger.info(f"\nFinal count={count}")
-    out.release()
+    # out.release()

@@ -648,3 +648,201 @@
 - Process time: 9 min 48 sec
 
 
+30/06/2023 00:35:55   30/06/2023 00:35:55 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 22_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 22_cam 2_sync.mp4', 'save_path': 'temp/test 22.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '20'
+- Saves as 'test 22 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 2000, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 1 min 54 sec
+
+
+30/06/2023 00:53:51   30/06/2023 00:53:51 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 22_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 22_cam 2_sync.mp4', 'save_path': 'temp/test 22.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '98'
+- Saves as 'temp/test 22 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 9 min 11 sec
+
+
+30/06/2023 01:12:02   30/06/2023 01:12:02 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 22_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 22_cam 2_sync.mp4', 'save_path': 'temp/test 22.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '9'
+- Saves as 'temp/test 22 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 1000, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 55 sec
+
+
+30/06/2023 01:15:59   30/06/2023 01:15:59 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 22_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 22_cam 2_sync.mp4', 'save_path': 'temp/test 22.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '9'
+- Saves as 'temp/test 22 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 1000, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 1 min 1 sec
+
+
+30/06/2023 01:29:35   30/06/2023 01:29:35 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 22_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 22_cam 2_sync.mp4', 'save_path': 'temp/test 22.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '114'
+- Saves as 'temp/test 22 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 9 min 1 sec
+
+
+30/06/2023 01:40:45   30/06/2023 01:40:45 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 23_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 23_cam 2_sync.mp4', 'save_path': 'temp/test 23.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '122'
+- Saves as 'temp/test 23 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 11 min 9 sec
+
+
+30/06/2023 01:52:01   30/06/2023 01:52:01 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 24_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 24_cam 2_sync.mp4', 'save_path': 'temp/test 24.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '159'
+- Saves as 'temp/test 24 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 11 min 16 sec
+
+
+30/06/2023 02:00:42   30/06/2023 02:00:42 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 25_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 25_cam 2_sync.mp4', 'save_path': 'temp/test 25.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '120'
+- Saves as 'temp/test 25 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 8 min 40 sec
+
+
+30/06/2023 02:09:43   30/06/2023 02:09:43 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 26_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 26_cam 2_sync.mp4', 'save_path': 'temp/test 26.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '133'
+- Saves as 'temp/test 26 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 9 min 1 sec
+
+
+30/06/2023 02:19:58   30/06/2023 02:19:58 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 27_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 27_cam 2_sync.mp4', 'save_path': 'temp/test 27.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '146'
+- Saves as 'temp/test 27 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 10 min 15 sec
+
+
+30/06/2023 02:30:40   30/06/2023 02:30:40 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 28_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 28_cam 2_sync.mp4', 'save_path': 'temp/test 28.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '150'
+- Saves as 'temp/test 28 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 10 min 41 sec
+
+
+30/06/2023 02:42:46   30/06/2023 02:42:46 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 29_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 29_cam 2_sync.mp4', 'save_path': 'temp/test 29.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '126'
+- Saves as 'temp/test 29 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 12 min 6 sec
+
+
+30/06/2023 02:53:03   30/06/2023 02:53:03 =========== Predict is finished ===========
+- Model (mix+ 100ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 30_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 30_cam 2_sync.mp4', 'save_path': 'temp/test 30.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '167'
+- Saves as 'temp/test 30 (mix+ 100ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 10 min 17 sec
+
+
+30/06/2023 03:01:54   30/06/2023 03:01:54 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 22_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 22_cam 2_sync.mp4', 'save_path': 'temp/test 22.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '115'
+- Saves as 'temp/test 22 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 8 min 50 sec
+
+
+30/06/2023 03:12:58   30/06/2023 03:12:58 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 23_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 23_cam 2_sync.mp4', 'save_path': 'temp/test 23.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '130'
+- Saves as 'temp/test 23 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 11 min 4 sec
+
+
+30/06/2023 03:24:08   30/06/2023 03:24:08 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 24_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 24_cam 2_sync.mp4', 'save_path': 'temp/test 24.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '158'
+- Saves as 'temp/test 24 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 11 min 9 sec
+
+
+30/06/2023 03:32:46   30/06/2023 03:32:46 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 25_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 25_cam 2_sync.mp4', 'save_path': 'temp/test 25.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '122'
+- Saves as 'temp/test 25 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 8 min 38 sec
+
+
+30/06/2023 03:41:43   30/06/2023 03:41:43 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 26_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 26_cam 2_sync.mp4', 'save_path': 'temp/test 26.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '133'
+- Saves as 'temp/test 26 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 8 min 57 sec
+
+
+30/06/2023 03:52:02   30/06/2023 03:52:02 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 27_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 27_cam 2_sync.mp4', 'save_path': 'temp/test 27.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '147'
+- Saves as 'temp/test 27 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 10 min 18 sec
+
+
+30/06/2023 04:02:44   30/06/2023 04:02:44 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 28_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 28_cam 2_sync.mp4', 'save_path': 'temp/test 28.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '153'
+- Saves as 'temp/test 28 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 10 min 42 sec
+
+
+30/06/2023 04:14:47   30/06/2023 04:14:47 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 29_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 29_cam 2_sync.mp4', 'save_path': 'temp/test 29.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '126'
+- Saves as 'temp/test 29 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 12 min 2 sec
+
+
+30/06/2023 04:24:59   30/06/2023 04:24:59 =========== Predict is finished ===========
+- Model (mix++ 150ep, F% Acc% Sen%)
+- Video '{'model_1': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 30_cam 1_sync.mp4', 'model_2': '/media/deny/Новый том/AI/CarpetTracker/videos/sync_test/test 30_cam 2_sync.mp4', 'save_path': 'temp/test 30.mp4', 'true_count': 0}'
+- True count: '0; Predict count: '168'
+- Saves as 'temp/test 30 (mix++ 150ep, F% Acc% Sen%).mp4'
+- Predict args: {'conf': 0.3, 'iou': 0.0, 'mode': 'standard', 'POLY_CAM1_IN': [[110, 0], [410, 650], [725, 415], [545, 0]], 'POLY_CAM1_OUT': [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]], 'POLY_CAM2_IN': [[140, 0], [140, 150], [260, 185], [260, 0]], 'POLY_CAM2_OUT': [[80, 0], [80, 140], [120, 190], [260, 235], [330, 200], [330, 0]], 'start_frame': 0, 'end_frame': 0, 'MIN_OBJ_SEQUENCE': 6, 'MIN_EMPTY_SEQUENCE': 10}
+- Process time: 10 min 12 sec
+
+

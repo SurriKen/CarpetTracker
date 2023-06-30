@@ -4,7 +4,7 @@ from datetime import datetime
 from ultralytics import YOLO
 
 from parameters import *
-from utils import logger, time_converter, save_txt
+from utils import logger, time_converter, save_txt, get_name_from_link
 from yolo8 import detect_synchro_video_polygon
 
 model1 = {
@@ -15,9 +15,30 @@ model2 = {
     'model_1': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_1_mix++_8n_150ep/weights/best.pt')),
     'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_2_mix++_8n_150ep/weights/best.pt'))
 }
+model3 = {
+    'model_1': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_1_mix+++_8n_200ep/weights/best.pt')),
+    'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_2_mix+++_8n_200ep/weights/best.pt'))
+}
+model_diff = {
+    'model_1': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_1_diff_100ep/weights/best.pt')),
+    'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_2_diff_100ep/weights/best.pt'))
+}
+model_masked = {
+    'model_1': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_1_masked_100ep/weights/best.pt')),
+    'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_2_masked_100ep/weights/best.pt'))
+}
+model_red = {
+    'model_1': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_1_red_100ep/weights/best.pt')),
+    'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_2_red_100ep/weights/best.pt'))
+}
+
 models = [
-    (model1, "(mix+ 100ep, F% Acc% Sen%)"),
+    # (model1, "(mix+ 100ep, F% Acc% Sen%)"),
     # (model2, "(mix++ 150ep, F% Acc% Sen%)"),
+    (model3, "(mix+++ 200ep, F% Acc% Sen%)"),
+    # (model_diff, "(diff 100ep, F% Acc% Sen%)"),
+    # (model_masked, "(masked 100ep, F% Acc% Sen%)"),
+    # (model_red, "(red 100ep, F% Acc% Sen%)"),
 ]
 video_paths = [
 #     # {
@@ -116,73 +137,76 @@ video_paths = [
 #         'save_path': 'temp/test 21.mp4',
 #         'true_count': 137
 #     },
-    {
-        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 22_cam 1_sync.mp4'),
-        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 22_cam 2_sync.mp4'),
-        'save_path': 'temp/test 22.mp4',
-        'true_count': 0
-    },
+#     {
+#         'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 22_cam 1_sync.mp4'),
+#         'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 22_cam 2_sync.mp4'),
+#         'save_path': 'temp/test 22.mp4',
+#         'true_count': 115
+#     },
     {
         'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 23_cam 1_sync.mp4'),
         'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 23_cam 2_sync.mp4'),
         'save_path': 'temp/test 23.mp4',
-        'true_count': 0
+        'true_count': 130
     },
-    {
-        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 24_cam 1_sync.mp4'),
-        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 24_cam 2_sync.mp4'),
-        'save_path': 'temp/test 24.mp4',
-        'true_count': 0
-    },
-    {
-        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 25_cam 1_sync.mp4'),
-        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 25_cam 2_sync.mp4'),
-        'save_path': 'temp/test 25.mp4',
-        'true_count': 0
-    },
-    {
-        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 26_cam 1_sync.mp4'),
-        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 26_cam 2_sync.mp4'),
-        'save_path': 'temp/test 26.mp4',
-        'true_count': 0
-    },
-    {
-        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 27_cam 1_sync.mp4'),
-        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 27_cam 2_sync.mp4'),
-        'save_path': 'temp/test 27.mp4',
-        'true_count': 0
-    },
-    {
-        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 28_cam 1_sync.mp4'),
-        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 28_cam 2_sync.mp4'),
-        'save_path': 'temp/test 28.mp4',
-        'true_count': 0
-    },
-    {
-        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 29_cam 1_sync.mp4'),
-        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 29_cam 2_sync.mp4'),
-        'save_path': 'temp/test 29.mp4',
-        'true_count': 0
-    },
-    {
-        'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 30_cam 1_sync.mp4'),
-        'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 30_cam 2_sync.mp4'),
-        'save_path': 'temp/test 30.mp4',
-        'true_count': 0
-    },
+    # {
+    #     'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 24_cam 1_sync.mp4'),
+    #     'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 24_cam 2_sync.mp4'),
+    #     'save_path': 'temp/test 24.mp4',
+    #     'true_count': 159
+    # },
+    # {
+    #     'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 25_cam 1_sync.mp4'),
+    #     'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 25_cam 2_sync.mp4'),
+    #     'save_path': 'temp/test 25.mp4',
+    #     'true_count': 123
+    # },
+    # {
+    #     'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 26_cam 1_sync.mp4'),
+    #     'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 26_cam 2_sync.mp4'),
+    #     'save_path': 'temp/test 26.mp4',
+    #     'true_count': 132
+    # },
+    # {
+    #     'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 27_cam 1_sync.mp4'),
+    #     'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 27_cam 2_sync.mp4'),
+    #     'save_path': 'temp/test 27.mp4',
+    #     'true_count': 146
+    # },
+    # {
+    #     'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 28_cam 1_sync.mp4'),
+    #     'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 28_cam 2_sync.mp4'),
+    #     'save_path': 'temp/test 28.mp4',
+    #     'true_count': 153
+    # },
+    # {
+    #     'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 29_cam 1_sync.mp4'),
+    #     'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 29_cam 2_sync.mp4'),
+    #     'save_path': 'temp/test 29.mp4',
+    #     'true_count': 130
+    # },
+    # {
+    #     'model_1': os.path.join(ROOT_DIR, 'videos/sync_test/test 30_cam 1_sync.mp4'),
+    #     'model_2': os.path.join(ROOT_DIR, 'videos/sync_test/test 30_cam 2_sync.mp4'),
+    #     'save_path': 'temp/test 30.mp4',
+    #     'true_count': 167
+    # },
 ]
 
 for mod in models:
     for i in range(len(video_paths)):
         args = {
-            'conf': 0.3, 'iou': 0.,
+            'conf': 0.3, 'iou': 0., 'mode': 'standard',
             'POLY_CAM1_IN': POLY_CAM1_IN, 'POLY_CAM1_OUT': POLY_CAM1_OUT,
             'POLY_CAM2_IN': POLY_CAM2_IN, 'POLY_CAM2_OUT': POLY_CAM2_OUT,
             'start_frame': 0, 'end_frame': 0,
             'MIN_OBJ_SEQUENCE': MIN_OBJ_SEQUENCE, 'MIN_EMPTY_SEQUENCE': MIN_EMPTY_SEQUENCE,
         }
         st = time.time()
-        sp = f"{video_paths[i].get('save_path').split('.')[0]} {mod[1]}.mp4" \
+        spf = ''
+        for x in video_paths[i].get('save_path').split('/')[:-1]:
+            spf = f"{spf}/{x}"
+        sp = f"{spf[1:]}/{get_name_from_link(video_paths[i].get('save_path'))} {mod[1]}.mp4" \
             if video_paths[i].get('save_path') else None
         pred_count = detect_synchro_video_polygon(
             models=mod,
@@ -192,7 +216,9 @@ for mod in models:
             finish=args['end_frame'],
             iou=args['iou'],
             conf=args['conf'],
-            interactive_video=True
+            interactive_video=False,
+            mode=args['mode'],
+            save_boxes=False
         )
         dt = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         txt = f"{dt} =========== Predict is finished ===========\n" \

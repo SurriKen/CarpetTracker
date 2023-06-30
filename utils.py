@@ -11,6 +11,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from matplotlib import pyplot as plt
 from scipy import stats
+from skimage import measure
 from sklearn.metrics import confusion_matrix
 
 
@@ -336,6 +337,54 @@ def remove_empty_xml(xml_folder):
         box_info = read_xml(f"{xml_folder}/{xml}")
         if not box_info['coords']:
             os.remove(f"{xml_folder}/{xml}")
+
+
+def get_name_from_link(link: str):
+    vn = link.split('/')[-1].split('.')[:-1]
+    video_name = ''
+    for v in vn:
+        video_name = f"{video_name}.{v}"
+    return video_name[1:]
+
+
+def clean_mask_from_noise(input_mask):
+    labels_mask = measure.label(input_mask)
+    regions = measure.regionprops(labels_mask)
+    regions.sort(key=lambda x: x.area, reverse=True)
+    sum_area = input_mask.shape[0] * input_mask.shape[1]
+
+    if len(regions) > 1:
+        for rg in regions:
+            if rg.area / sum_area < 0.0001:
+                labels_mask[rg.coords[:, 0], rg.coords[:, 1]] = 0
+    labels_mask[labels_mask != 0] = 1
+    labels_mask = measure.label(1 - labels_mask)
+    regions = measure.regionprops(labels_mask)
+    regions.sort(key=lambda x: x.area, reverse=True)
+    if len(regions) > 1:
+        for rg in regions:
+            if rg.area / sum_area < 0.0001:
+                labels_mask[rg.coords[:, 0], rg.coords[:, 1]] = 0
+    labels_mask[labels_mask != 0] = 1
+    return labels_mask
+
+
+def clean_diff_image(image, low_color=0, high_color=255):
+    COLOR_LVL = (0, 245)
+    min_img = np.min(image, axis=-1)
+    min_img = np.expand_dims(min_img, axis=-1)
+    max_img = np.min(image, axis=-1)
+    max_img = np.expand_dims(max_img, axis=-1)
+    img = np.where(max_img < COLOR_LVL[1], image, (255, 0, 0))
+    img = np.where(min_img > COLOR_LVL[0], img, (255, 0, 0))
+    gray_mask = np.max(img, axis=-1) - np.min(img, axis=-1)
+    mask = np.where(low_color < gray_mask, 1, 0)
+    mask = np.where(high_color > gray_mask, mask, 0)
+    mask = clean_mask_from_noise(mask)
+    mask = np.expand_dims(mask, axis=-1)
+    cleaned_image = np.where(mask == 0, image, (0, 0, 0))
+    cleaned_image = cleaned_image.astype(np.uint8)
+    return cleaned_image, mask
 
 
 if __name__ == '__main__':
