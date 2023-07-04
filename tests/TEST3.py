@@ -1,416 +1,241 @@
-import copy
-import time
+# fill_dict - model1
+# 115x200 {'fill_both': 507, 'empty_both': 7, 'fill_1_empty_2': 26, 'empty_1_fill_2': 21}
+# 115x400 {'fill_both': 2, 'empty_both': 2, 'fill_1_empty_2': 12, 'empty_1_fill_2': 2}
+# 150x300 {'fill_both': 152, 'empty_both': 5, 'fill_1_empty_2': 112, 'empty_1_fill_2': 3}
+# 60x90 {'fill_both': 56, 'empty_both': 2, 'fill_1_empty_2': 2, 'empty_1_fill_2': 28}
+# 85x150 {'fill_both': 400, 'empty_both': 1, 'fill_1_empty_2': 8, 'empty_1_fill_2': 40}
 
-import numpy as np
-
-from parameters import MIN_OBJ_SEQUENCE, MIN_EMPTY_SEQUENCE
-from tracker import Tracker
-from utils import time_converter, load_data
-
-# tracker_1_dict = load_dict(pickle_path='/media/deny/Новый том/AI/CarpetTracker/tests/tracker_1_dict.dict')
-# tracker_2_dict = load_dict(pickle_path='/media/deny/Новый том/AI/CarpetTracker/tests/tracker_2_dict.dict')
-patterns = load_data(pickle_path='/media/deny/Новый том/AI/CarpetTracker/tests/patterns.dict')
-true_bb_1 = load_data(pickle_path='/media/deny/Новый том/AI/CarpetTracker/tests/true_bb_1.dict')
-true_bb_2 = load_data(pickle_path='/media/deny/Новый том/AI/CarpetTracker/tests/true_bb_2.dict')
-
-
-def get_distribution(pattern, tracker_1_dict, tracker_2_dict) -> dict:
-    # print("================================")
-    # for k in tracker_1_dict.keys():
-    #     print("get_distribution begin", k, tracker_1_dict[k]['frame_id'])
-    keys1 = list(tracker_1_dict.keys())
-    keys2 = list(tracker_2_dict.keys())
-    dist = {}
-    # pat_for_analysis = []
-    for i, pat in enumerate(pattern):
-        dist[i] = {'cam1': [], 'cam2': [], 'tr_num': 0, 'sequence': pat}
-        if keys1:
-            for k in tracker_1_dict.keys():
-                if min(tracker_1_dict.get(k).get('frame_id')) in pat and max(
-                        tracker_1_dict.get(k).get('frame_id')) in pat:
-                    dist[i]['cam1'].append(k)
-                    dist[i]['tr_num'] = len(dist[i]['cam1']) if dist[i]['tr_num'] < len(dist[i]['cam1']) else \
-                        dist[i]['tr_num']
-                    keys1.pop(keys1.index(k))
-        if keys2:
-            for k in tracker_2_dict.keys():
-                if min(tracker_2_dict.get(k).get('frame_id')) in pat and max(
-                        tracker_2_dict.get(k).get('frame_id')) in pat:
-                    dist[i]['cam2'].append(k)
-                    dist[i]['tr_num'] = len(dist[i]['cam2']) if dist[i]['tr_num'] < len(dist[i]['cam2']) else \
-                        dist[i][
-                            'tr_num']
-                    keys2.pop(keys2.index(k))
-        # if dist[i]['tr_num'] > 1:
-        #     pat_for_analysis.append(i)
-    # for k in tracker_1_dict.keys():
-    #     print("get_distribution end", k, tracker_1_dict[k]['frame_id'])
-    return dist
-
-
-def get_center(coord: list[int, int, int, int]) -> tuple[int, int]:
-    return int((coord[0] + coord[2]) / 2), int((coord[1] + coord[3]) / 2)
-
-
-def tracker_analysis(pattern, main_track, main_cam):
-    vecs = {}
-    for id in pattern.get(main_cam):
-        start = [int(i) for i in main_track.get(id).get('coords')[0][:4]]
-        fin = [int(i) for i in main_track.get(id).get('coords')[-1][:4]]
-        vector_x = get_center(fin)[0] - get_center(start)[0]
-        vecs[id] = {'start': start, 'fin': fin, 'vector_x': vector_x,
-                    'frame_start': main_track.get(id).get('frame_id')[0],
-                    'frame_fin': main_track.get(id).get('frame_id')[-1]}
-
-    for id in vecs.keys():
-        vecs[id]['cross_vecs'] = {}
-        vecs[id]['follow_id'] = []
-        for id2 in vecs.keys():
-            if id2 != id:
-                vecs[id]['cross_vecs'][id2] = \
-                    get_center(vecs[id2]['start'])[0] - get_center(vecs[id]['fin'])[0]
-                if vecs[id]['cross_vecs'][id2] > 0 and vecs[id2]['frame_start'] > vecs[id]['frame_fin']:
-                    vecs[id]['follow_id'].append(id2)
-
-    uniq = list(vecs.keys())
-    follow = []
-    for id in vecs.keys():
-        # print(id, vecs[id])
-        if vecs[id]['follow_id']:
-            for id2 in vecs[id]['follow_id']:
-                if id2 in uniq:
-                    uniq.pop(uniq.index(id2))
-                if id2 not in follow:
-                    follow.append(id2)
-
-    new_patterns = []
-    for id in uniq:
-        new_vec = {
-            'track_id': id,
-            'start': vecs[id]['start'],
-            'frame_idx': copy.deepcopy(main_track.get(id).get('frame_id')),
-        }
-        if vecs[id]['follow_id']:
-            for v in vecs[id]['follow_id']:
-                new_vec['frame_idx'].extend(main_track.get(v).get('frame_id'))
-            new_vec['frame_idx'] = sorted(list(set(new_vec['frame_idx'])))
-        new_patterns.append(new_vec)
-    return new_patterns
-
-
-def combine_res(main_res, sec_res):
-    # print('main_res', main_res)
-    res = {
-        main_res[id]['track_id']: {'seq_id': [], 'frame_idx': main_res[id]['frame_idx']} for id in range(len(main_res))}
-    # print('RES', res)
-    frame_dist = []
-    for sid in range(len(sec_res)):
-        for mid in range(len(main_res)):
-            frame_dist.append(
-                (abs(main_res[mid]['frame_idx'][0] - sec_res[sid]['frame_idx'][0]), mid, sid))
-    frame_dist = sorted(frame_dist)
-    # print("Frame dist", frame_dist)
-    m_key = [i for i in range(len(main_res))]
-    s_key = [i for i in range(len(sec_res))]
-    # print('main_res end', main_res)
-    for fr in frame_dist:
-        if fr[1] in m_key and fr[2] in s_key:
-            res[main_res[fr[1]]['track_id']]['seq_id'].append(sec_res[fr[2]]['track_id'])
-            res[main_res[fr[1]]['track_id']]['frame_idx'].extend(sec_res[fr[2]]['frame_idx'])
-            res[main_res[fr[1]]['track_id']]['frame_idx'] = sorted(
-                list(set(res[main_res[fr[1]]['track_id']]['frame_idx'])))
-            m_key.pop(m_key.index(fr[1]))
-            s_key.pop(s_key.index(fr[2]))
-        else:
-            continue
-
-        if not s_key:
-            break
-    return res
-
-
-def pattern_analisys(pattern: dict, tracker_1_dict: dict, tracker_2_dict: dict):
-    if pattern.get('tr_num') == 1:
-        return [pattern]
-    else:
-        if len(pattern.get('cam1')) > 1:
-            res_1 = tracker_analysis(
-                pattern=pattern,
-                main_track=tracker_1_dict,
-                main_cam='cam1'
-            )
-        elif not pattern.get('cam1'):
-            res_1 = {}
-        else:
-            res_1 = [{
-                'track_id': pattern.get('cam1')[0],
-                'start': [int(i) for i in tracker_1_dict.get(pattern.get('cam1')[0]).get('coords')[0][:4]],
-                'frame_idx': copy.deepcopy(tracker_1_dict.get(pattern.get('cam1')[0]).get('frame_id')),
-            }]
-        # print(f'res_1: {len(res_1)} {res_1}')
-
-        if len(pattern.get('cam2')) > 1:
-            res_2 = tracker_analysis(
-                pattern=pattern,
-                main_track=tracker_2_dict,
-                main_cam='cam2'
-            )
-        elif not pattern.get('cam2'):
-            res_2 = {}
-        else:
-            res_2 = [{
-                'track_id': pattern.get('cam2')[0],
-                'start': [int(i) for i in tracker_2_dict.get(pattern.get('cam2')[0]).get('coords')[0][:4]],
-                'frame_idx': copy.deepcopy(tracker_2_dict.get(pattern.get('cam2')[0]).get('frame_id')),
-            }]
-        # print(f'res_2: {len(res_2)} {res_2}')
-
-        if not res_2:
-            return [
-                {'cam1': [res_1[i]['track_id']], 'cam2': [], 'tr_num': 1,
-                 'sequence': res_1[i]['frame_idx']} for i in range(len(res_1))
-            ]
-        if not res_1:
-            return [
-                {'cam1': [], 'cam2': [res_2[i]['track_id']], 'tr_num': 1,
-                 'sequence': res_2[i]['frame_idx']} for i in range(len(res_2))
-            ]
-
-        main_res = res_1 if len(res_1) > len(res_2) else res_2
-        sec_res = res_2 if main_res == res_1 else res_1
-        # for k in tracker_1_dict.keys():
-        #     print(f"pattern_analisys", k, tracker_1_dict[k]['frame_id'])
-        res = combine_res(main_res, sec_res)
-        # print('res', res)
-        # for k in tracker_1_dict.keys():
-        #     print(f"pattern_analisys", k, tracker_1_dict[k]['frame_id'])
-        return [
-            {'cam1': [id], 'cam2': res[id]['seq_id'], 'tr_num': 1,
-             'sequence': res[id]['frame_idx']} for id in res.keys()
-        ]
-
-
-def update_pattern(pattern, tracker_1_dict, tracker_2_dict) -> list:
-    # print("================================")
-    # for k in tracker_1_dict.keys():
-    #     print("update_pattern begin", k, tracker_1_dict[k]['frame_id'])
-    # x = time.time()
-    dist = get_distribution(
-        pattern=pattern,
-        tracker_1_dict=tracker_1_dict,
-        tracker_2_dict=tracker_2_dict
-    )
-    # for k, v in dist.items():
-    #     print(f"pat {k}: {v}")
-    # for k in tracker_1_dict.keys():
-    #     print("get_distribution end", k, tracker_1_dict[k]['frame_id'])
-    # print('================================================================')
-    # print("time Tracker.get_distribution:", len(pattern), time_converter(time.time() - x))
-    # x = time.time()
-    new_pat = []
-    for i in dist.keys():
-        pat = pattern_analisys(
-            pattern=dist.get(i),
-            tracker_1_dict=tracker_1_dict,
-            tracker_2_dict=tracker_2_dict
-        )
-        # print(pat)
-        pat = [p['sequence'] for p in pat]
-        new_pat.extend(pat)
-        # print("time Tracker.pattern_analisys:", len(dist), time_converter(time.time() - x))
-        # for k in tracker_1_dict.keys():
-        #     print(f"pattern_analisys {i}", k, tracker_1_dict[k]['frame_id'])
-    # print('================================================================')
-    return new_pat
-
-
-def get_pattern(input: list) -> list:
-    """
-    Process list of unique indexes to relevant sequences
-
-    :param input: list of unique indexes
-    :return: list of frame_id sequences
-    """
-    pattern = []
-    cur_line = []
-    for i in input:
-        if not cur_line or (i - cur_line[-1]) <= MIN_EMPTY_SEQUENCE:
-            cur_line.append(i)
-        else:
-            pattern.append(cur_line)
-            cur_line = [i]
-
-        if i == input[-1]:
-            pattern.append(cur_line)
-    patten_upd = []
-    for i in pattern:
-        if len(i) > MIN_OBJ_SEQUENCE:
-            patten_upd.append(i)
-    return patten_upd
-
-
-def clean_tracks(frame, pattern, tracker_1_dict, tracker_2_dict):
-    old_pattern_count = 0
-    # print('pattern', pattern)
-    relevant, not_rel = [], []
-    for i, pat in enumerate(pattern):
-        if frame - pat[-1] <= 2 * MIN_EMPTY_SEQUENCE:
-            relevant.append(i)
-        else:
-            not_rel.append(i)
-            old_pattern_count += 1
-    # print('relevant', relevant)
-    rel_pattern = []
-    if relevant:
-        rel_pattern = np.array(pattern, dtype=object)[relevant].tolist()
-
-    old_pat = []
-    if not_rel:
-        old_pat = np.array(pattern, dtype=object)[not_rel].tolist()
-
-    remove_keys = []
-    for key in tracker_1_dict.keys():
-        if frame - tracker_1_dict[key]['frame_id'][-1] > 2 * MIN_EMPTY_SEQUENCE:
-            remove_keys.append(key)
-    for key in remove_keys:
-        tracker_1_dict.pop(key)
-
-    remove_keys = []
-    for key in tracker_2_dict.keys():
-        if frame - tracker_2_dict[key]['frame_id'][-1] > 2 * MIN_EMPTY_SEQUENCE:
-            remove_keys.append(key)
-    for key in remove_keys:
-        tracker_2_dict.pop(key)
-
-    return old_pattern_count, rel_pattern, old_pat
-
-
-# x = time.time()
-# patterns = update_pattern(
-#     pattern=patterns,
-#     tracker_1_dict=tracker_1_dict,
-#     tracker_2_dict=tracker_2_dict
-# )
-# print("time Tracker.update_pattern:", time_converter(time.time() - x))
-start, finish = 400, 490
-tracker_1 = Tracker()
-tracker_2 = Tracker()
-st = time.time()
-cur_count = 0
-old_patterns = []
-for i in range(start, len(true_bb_1)):
-    itt = time.time()
-    # x = time.time()
-    result = {'boxes': true_bb_1[i], 'orig_shape': (1080, 1920)}
-    tracker_1.process(
-        frame_id=i,
-        predict=result,
-        remove_perimeter_boxes=True,
-        speed_limit_percent=0.01
-    )
-    result = {'boxes': true_bb_2[i], 'orig_shape': (360, 640)}
-    tracker_2.process(
-        frame_id=i,
-        predict=result,
-        remove_perimeter_boxes=False,
-        speed_limit_percent=0.01
-    )
-    print("result", i,
-          [[int(c) for c in box[:4]] for box in tracker_1.current_boxes],
-          [[int(c) for c in box[:4]] for box in tracker_2.current_boxes])
-    # print("time process:", time_converter(time.time() - x))
-
-    # x = time.time()
-    test_patterns = Tracker.get_pattern(
-        input=Tracker.join_frame_id(
-            tracker_dict_1=tracker_1.tracker_dict,
-            tracker_dict_2=tracker_2.tracker_dict
-        )
-    )
-    # print("time get_pattern:", time_converter(time.time() - x))
-
-    # x = time.time()
-    test_patterns = update_pattern(
-        pattern=test_patterns,
-        tracker_1_dict=tracker_1.tracker_dict,
-        tracker_2_dict=tracker_2.tracker_dict
-    )
-    # print("time update_pattern:", time_converter(time.time() - x))
-
-    # x = time.time()
-    # if test_patterns:
-    #     # print("test_patterns:", test_patterns)
-    #     old_pattern_count, test_patterns, old_pat = clean_tracks(
-    #         frame=i,
-    #         pattern=test_patterns,
-    #         tracker_1_dict=tracker_1.tracker_dict,
-    #         tracker_2_dict=tracker_2.tracker_dict
-    #     )
-    #     cur_count += old_pattern_count
-    #     if old_pat:
-    #         old_patterns.extend(old_pat)
-    # print("time clean_tracks:", time_converter(time.time() - x))
-    tracker_1.current_id = []
-    tracker_1.current_boxes = []
-    tracker_2.current_id = []
-    tracker_2.current_boxes = []
-    print("Iteration:", i, "Iteration time:", time_converter(time.time() - itt), "Find patterns:", cur_count + len(test_patterns))
-    print()
-    if i > finish:
-        print("Total time:", time_converter(time.time() - st))
-        break
-
-
-for i in range(len(old_patterns)):
-    print('old_patterns', i, old_patterns[i])
-print("===================================================")
-for i in range(len(test_patterns)):
-    print('test_patterns', i, test_patterns[i])
-print("===================================================")
-for k in tracker_1.tracker_dict.keys():
-    print('tracker_1.tracker_dict', k, tracker_1.tracker_dict[k]['frame_id'])
 #
-# print("===================================================")
-# for k in tracker_1_dict.keys():
-#     print('tracker_1_dict.tracker_dict', k, tracker_1_dict[k]['frame_id'])
+# fill_dict model2
+# 115x200 {'fill_both': 517, 'empty_both': 6, 'fill_1_empty_2': 25, 'empty_1_fill_2': 13}
+# 115x400 {'fill_both': 5, 'empty_both': 0, 'fill_1_empty_2': 11, 'empty_1_fill_2': 2}
+# 150x300 {'fill_both': 182, 'empty_both': 3, 'fill_1_empty_2': 86, 'empty_1_fill_2': 1}
+# 60x90 {'fill_both': 62, 'empty_both': 3, 'fill_1_empty_2': 1, 'empty_1_fill_2': 22}
+# 85x150 {'fill_both': 418, 'empty_both': 1, 'fill_1_empty_2': 3, 'empty_1_fill_2': 27}
 
-print("===================================================")
-for k in tracker_2.tracker_dict.keys():
-    print('tracker_2.tracker_dict', k, tracker_2.tracker_dict[k]['frame_id'])
-
-# print("===================================================")
-# for k in tracker_2_dict.keys():
-#     print('tracker_2_dict', k, tracker_2_dict[k]['frame_id'])
+# fill_dict - model3
+# 115x200 {'fill_both': 531, 'empty_both': 5, 'fill_1_empty_2': 12, 'empty_1_fill_2': 13}
+# 115x400 {'fill_both': 6, 'empty_both': 0, 'fill_1_empty_2': 12, 'empty_1_fill_2': 0}
+# 150x300 {'fill_both': 240, 'empty_both': 0, 'fill_1_empty_2': 30, 'empty_1_fill_2': 2}
+# 60x90 {'fill_both': 69, 'empty_both': 3, 'fill_1_empty_2': 4, 'empty_1_fill_2': 12}
+# 85x150 {'fill_both': 436, 'empty_both': 1, 'fill_1_empty_2': 0, 'empty_1_fill_2': 12}
 #
-print("===================================================")
-for i, p in enumerate(patterns):
-    if p[-1] > start and (p[-1] <= finish or finish in p):
-        print('pattern', i, p)
-
-# print("===================================================")
-# for i, p in enumerate(test_patterns):
-#     print('pattern', i, p)
-
-# DOUBLE - 4:07
-# pattern 60 [6214, 6215, 6216, 6217, 6218, 6219, 6220, 6221]
-# pattern 61 [6236, 6237, 6238, 6239, 6240, 6241, 6242, 6243, 6244, 6245, 6246, 6247, 6248, 6249, 6250, 6251, 6252]
-
-# EMPTY BETWEEN - 5:02
-# pattern 70 [7494, 7495, 7496, 7497, 7498, 7499, 7508, 7509, 7510, 7511, 7512, 7513, 7514, 7515]
-# pattern 71 [7712, 7713, 7714, 7715, 7716, 7717, 7718, 7719, 7720, 7725]
-
-# DOUBLE - 5:30
-# pattern 77 [8327, 8328, 8329, 8330, 8331, 8332, 8333, 8334, 8335, 8336, 8337, 8338, 8339, 8340, 8341, 8342, 8343]
-# pattern 78 [8411, 8412, 8413, 8414, 8415, 8416, 8417, 8418, 8419, 8420, 8421, 8422, 8423, 8424, 8425, 8426,
-# 8427, 8428, 8429, 8430, 8431, 8432]
-
-# EMPTY BETWEEN = 6:46
-# pattern 100 [10112, 10113, 10114, 10115, 10116, 10117, 10118, 10119, 10120, 10121, 10123, 10124,
-# 10125, 10126, 10127, 10128, 10129, 10130, 10131, 10132, 10133, 10134, 10135, 10136, 10138, 10139, 10144, 10145,
-# 10146, 10147, 10153, 10155, 10156, 10157, 10158, 10160, 10161, 10162, 10163, 10164, 10165, 10166, 10167, 10168,
-# 10169, 10170, 10171, 10172, 10173, 10174, 10175, 10176, 10177, 10178, 10179, 10180, 10181, 10182, 10183]
-# pattern 101 [10218, 10219, 10220, 10221, 10222, 10223, 10224, 10225, 10226, 10227, 10228, 10229, 10230, 10231, 10232,
-# 10233, 10234, 10235, 10236, 10237, 10239]
-
-# Test 15
-#  71 - 4:21, 43 - 3:00
+# squares 1 115x200 start min=0.00511 max=0.05158 mean=0.0226
+# squares 2 115x200 start min=0.0024 max=0.17256 mean=0.0355
+# squares 1 115x400 start min=0.0084 max=0.02687 mean=0.01833
+# squares 2 115x400 start min=0.00229 max=0.03437 mean=0.017
+# squares 1 150x300 start min=0.00514 max=0.06179 mean=0.02253
+# squares 2 150x300 start min=0.00135 max=0.20248 mean=0.0264
+# squares 1 60x90 start min=0.00605 max=0.02056 mean=0.01249
+# squares 2 60x90 start min=0.00352 max=0.04876 mean=0.01754
+# squares 1 85x150 start min=0.00429 max=0.04037 mean=0.0166
+# squares 2 85x150 start min=0.0028 max=0.06652 mean=0.0215
+#
+# squares 1 115x200 end min=0.00315 max=0.05185 mean=0.02033
+# squares 2 115x200 end min=0.00234 max=0.29807 mean=0.10245
+# squares 1 115x400 end min=0.01147 max=0.06335 mean=0.0337
+# squares 2 115x400 end min=0.00511 max=0.03781 mean=0.02917
+# squares 1 150x300 end min=0.00407 max=0.09531 mean=0.02764
+# squares 2 150x300 end min=0.0028 max=0.20195 mean=0.0794
+# squares 1 60x90 end min=0.00347 max=0.01975 mean=0.0086
+# squares 2 60x90 end min=0.00744 max=0.06375 mean=0.02734
+# squares 1 85x150 end min=0.0037 max=0.02839 mean=0.01117
+# squares 2 85x150 end min=0.00365 max=0.11623 mean=0.04375
+#
+# squares 1 115x200 min min=0.0029 max=0.03345 mean=0.01489
+# squares 2 115x200 min min=0.00203 max=0.17256 mean=0.03073
+# squares 1 115x400 min min=0.0084 max=0.02666 mean=0.01683
+# squares 2 115x400 min min=0.00229 max=0.03035 mean=0.01567
+# squares 1 150x300 min min=0.00407 max=0.03949 mean=0.01594
+# squares 2 150x300 min min=0.00135 max=0.15945 mean=0.01855
+# squares 1 60x90 min min=0.00331 max=0.01373 mean=0.00679
+# squares 2 60x90 min min=0.00352 max=0.03858 mean=0.01427
+# squares 1 85x150 min min=0.00299 max=0.02192 mean=0.00895
+# squares 2 85x150 min min=0.0028 max=0.06303 mean=0.01864
+#
+# squares 1 115x200 max min=0.01204 max=0.06093 mean=0.02791
+# squares 2 115x200 max min=0.00796 max=0.29807 mean=0.11592
+# squares 1 115x400 max min=0.01862 max=0.06368 mean=0.04047
+# squares 2 115x400 max min=0.01 max=0.06532 mean=0.04045
+# squares 1 150x300 max min=0.00982 max=0.10301 mean=0.035
+# squares 2 150x300 max min=0.00438 max=0.2584 mean=0.10247
+# squares 1 60x90 max min=0.00762 max=0.02856 mean=0.01487
+# squares 2 60x90 max min=0.0117 max=0.0668 mean=0.03581
+# squares 1 85x150 max min=0.00963 max=0.04598 mean=0.01994
+# squares 2 85x150 max min=0.00762 max=0.13139 mean=0.05419
+#
+# squares 1 115x200 mean min=0.00865 max=0.0395 mean=0.02119
+# squares 2 115x200 mean min=0.0064 max=0.21973 mean=0.06901
+# squares 1 115x400 mean min=0.01357 max=0.03917 mean=0.02718
+# squares 2 115x400 mean min=0.00491 max=0.04081 mean=0.02613
+# squares 1 150x300 mean min=0.00884 max=0.052 mean=0.02502
+# squares 2 150x300 mean min=0.00348 max=0.1811 mean=0.05044
+# squares 1 60x90 mean min=0.00595 max=0.01699 mean=0.01038
+# squares 2 60x90 mean min=0.01073 max=0.05238 mean=0.02436
+# squares 1 85x150 mean min=0.00645 max=0.03182 mean=0.01393
+# squares 2 85x150 mean min=0.00726 max=0.0864 mean=0.03584
+#
+# h 1 115x200 start min=0.09352 max=0.35926 mean=0.19625
+# h 2 115x200 start min=0.06389 max=0.60833 mean=0.21661
+# h 1 115x400 start min=0.12407 max=0.25093 mean=0.18555
+# h 2 115x400 start min=0.08611 max=0.275 mean=0.16713
+# h 1 150x300 start min=0.08519 max=0.35278 mean=0.1873
+# h 2 150x300 start min=0.06111 max=0.59444 mean=0.2037
+# h 1 60x90 start min=0.09444 max=0.2037 mean=0.14876
+# h 2 60x90 start min=0.08333 max=0.30833 mean=0.15264
+# h 1 85x150 start min=0.06389 max=0.32685 mean=0.17387
+# h 2 85x150 start min=0.04722 max=0.43889 mean=0.1774
+#
+# h 1 115x200 end min=0.05185 max=0.36204 mean=0.16277
+# h 2 115x200 end min=0.06944 max=0.65833 mean=0.38344
+# h 1 115x400 end min=0.15185 max=0.35833 mean=0.23909
+# h 2 115x400 end min=0.10556 max=0.30278 mean=0.21065
+# h 1 150x300 end min=0.06389 max=0.43889 mean=0.21843
+# h 2 150x300 end min=0.07222 max=0.63611 mean=0.30378
+# h 1 60x90 end min=0.05185 max=0.20833 mean=0.10941
+# h 2 60x90 end min=0.09722 max=0.3 mean=0.19328
+# h 1 85x150 end min=0.05463 max=0.21667 mean=0.12322
+# h 2 85x150 end min=0.075 max=0.51944 mean=0.23213
+#
+# h 1 115x200 min min=0.05185 max=0.24907 mean=0.13303
+# h 2 115x200 min min=0.05 max=0.53056 mean=0.19486
+# h 1 115x400 min min=0.11667 max=0.23148 mean=0.17551
+# h 2 115x400 min min=0.08611 max=0.225 mean=0.15185
+# h 1 150x300 min min=0.06389 max=0.28889 mean=0.16017
+# h 2 150x300 min min=0.06111 max=0.43611 mean=0.16301
+# h 1 60x90 min min=0.05093 max=0.15833 mean=0.09193
+# h 2 60x90 min min=0.08333 max=0.28333 mean=0.13642
+# h 1 85x150 min min=0.04722 max=0.18796 mean=0.09992
+# h 2 85x150 min min=0.04722 max=0.36111 mean=0.15218
+#
+# h 1 115x200 max min=0.13611 max=0.38889 mean=0.23505
+# h 2 115x200 max min=0.11389 max=0.70833 mean=0.43137
+# h 1 115x400 max min=0.17963 max=0.425 mean=0.27706
+# h 2 115x400 max min=0.13889 max=0.30278 mean=0.25787
+# h 1 150x300 max min=0.1463 max=0.47778 mean=0.25902
+# h 2 150x300 max min=0.11667 max=0.675 mean=0.38019
+# h 1 60x90 max min=0.09815 max=0.24352 mean=0.15973
+# h 2 60x90 max min=0.11667 max=0.35 mean=0.23529
+# h 1 85x150 max min=0.11944 max=0.32685 mean=0.19131
+# h 2 85x150 max min=0.13056 max=0.54722 mean=0.28973
+#
+# h 1 115x200 mean min=0.10509 max=0.27623 mean=0.18446
+# h 2 115x200 mean min=0.10833 max=0.59556 mean=0.31247
+# h 1 115x400 mean min=0.1706 max=0.32694 mean=0.22094
+# h 2 115x400 mean min=0.10934 max=0.25174 mean=0.20727
+# h 1 150x300 mean min=0.13515 max=0.37999 mean=0.21091
+# h 2 150x300 mean min=0.09236 max=0.54097 mean=0.27592
+# h 1 60x90 mean min=0.09032 max=0.18801 mean=0.12457
+# h 2 60x90 mean min=0.11167 max=0.31056 mean=0.18718
+# h 1 85x150 mean min=0.08957 max=0.22835 mean=0.14386
+# h 2 85x150 mean min=0.1184 max=0.43662 mean=0.22578
+#
+# w 1 115x200 start min=0.04063 max=0.1875 mean=0.11578
+# w 2 115x200 start min=0.025 max=0.35625 mean=0.14249
+# w 1 115x400 start min=0.06771 max=0.12708 mean=0.09728
+# w 2 115x400 start min=0.02656 max=0.13906 mean=0.09323
+# w 1 150x300 start min=0.04219 max=0.24844 mean=0.11952
+# w 2 150x300 start min=0.02031 max=0.37813 mean=0.09713
+# w 1 60x90 start min=0.05052 max=0.12708 mean=0.08389
+# w 2 60x90 start min=0.03437 max=0.23438 mean=0.1114
+# w 1 85x150 start min=0.03854 max=0.17083 mean=0.09503
+# w 2 85x150 start min=0.02188 max=0.32187 mean=0.11636
+#
+# w 1 115x200 end min=0.04792 max=0.20937 mean=0.12345
+# w 2 115x200 end min=0.02344 max=0.46406 mean=0.26051
+# w 1 115x400 end min=0.06771 max=0.20417 mean=0.14083
+# w 2 115x400 end min=0.04844 max=0.16875 mean=0.13255
+# w 1 150x300 end min=0.04427 max=0.25521 mean=0.12365
+# w 2 150x300 end min=0.02969 max=0.44844 mean=0.2336
+# w 1 60x90 end min=0.03802 max=0.12812 mean=0.07686
+# w 2 60x90 end min=0.05 max=0.2125 mean=0.13791
+# w 1 85x150 end min=0.03958 max=0.15885 mean=0.08951
+# w 2 85x150 end min=0.03438 max=0.32188 mean=0.18251
+#
+# w 1 115x200 min min=0.03958 max=0.14635 mean=0.08448
+# w 2 115x200 min min=0.02344 max=0.34219 mean=0.12585
+# w 1 115x400 min min=0.0651 max=0.12188 mean=0.08631
+# w 2 115x400 min min=0.02656 max=0.13906 mean=0.08333
+# w 1 150x300 min min=0.04167 max=0.15156 mean=0.08171
+# w 2 150x300 min min=0.02031 max=0.32969 mean=0.0817
+# w 1 60x90 min min=0.03125 max=0.09844 mean=0.06323
+# w 2 60x90 min min=0.03281 max=0.17188 mean=0.09207
+# w 1 85x150 min min=0.03229 max=0.11771 mean=0.07027
+# w 2 85x150 min min=0.02188 max=0.21719 mean=0.10341
+#
+# w 1 115x200 max min=0.07031 max=0.21563 mean=0.1458
+# w 2 115x200 max min=0.06094 max=0.46406 mean=0.29162
+# w 1 115x400 max min=0.10365 max=0.22969 mean=0.164
+# w 2 115x400 max min=0.07344 max=0.23281 mean=0.16146
+# w 1 150x300 max min=0.07135 max=0.26615 mean=0.15484
+# w 2 150x300 max min=0.03906 max=0.45938 mean=0.27407
+# w 1 60x90 max min=0.075 max=0.16406 mean=0.10351
+# w 2 60x90 max min=0.07656 max=0.23438 mean=0.16456
+# w 1 85x150 max min=0.06615 max=0.18333 mean=0.12031
+# w 2 85x150 max min=0.04219 max=0.32188 mean=0.20991
+#
+# w 1 115x200 mean min=0.06167 max=0.16057 mean=0.1154
+# w 2 115x200 mean min=0.04492 max=0.41289 mean=0.20776
+# w 1 115x400 mean min=0.07917 max=0.16982 mean=0.12178
+# w 2 115x400 mean min=0.0429 max=0.18438 mean=0.11693
+# w 1 150x300 mean min=0.05641 max=0.20998 mean=0.11742
+# w 2 150x300 mean min=0.02708 max=0.37793 mean=0.15993
+# w 1 60x90 mean min=0.06181 max=0.10972 mean=0.08211
+# w 2 60x90 mean min=0.06442 max=0.19505 mean=0.1278
+# w 1 85x150 mean min=0.06063 max=0.14251 mean=0.09605
+# w 2 85x150 mean min=0.04063 max=0.27437 mean=0.15538
+#
+# diagonal 1 115x200 start min=0.10833 max=0.37693 mean=0.2306
+# diagonal 2 115x200 start min=0.07408 max=0.6638 mean=0.26373
+# diagonal 1 115x400 start min=0.14135 max=0.27249 mean=0.21002
+# diagonal 2 115x400 start min=0.09011 max=0.30208 mean=0.19398
+# diagonal 1 150x300 start min=0.12746 max=0.38711 mean=0.22542
+# diagonal 2 150x300 start min=0.06663 max=0.68512 mean=0.22958
+# diagonal 1 60x90 start min=0.11412 max=0.21965 mean=0.17173
+# diagonal 2 60x90 start min=0.0934 max=0.3395 mean=0.19224
+# diagonal 1 85x150 start min=0.09309 max=0.34567 mean=0.19949
+# diagonal 2 85x150 start min=0.07586 max=0.46432 mean=0.2154
+#
+# diagonal 1 115x200 end min=0.08135 max=0.38934 mean=0.20681
+# diagonal 2 115x200 end min=0.08125 max=0.79781 mean=0.47087
+# diagonal 1 115x400 end min=0.1703 max=0.39709 mean=0.2812
+# diagonal 2 115x400 end min=0.11614 max=0.32581 mean=0.25101
+# diagonal 1 150x300 end min=0.09424 max=0.46298 mean=0.25302
+# diagonal 2 150x300 end min=0.08924 max=0.68995 mean=0.3894
+# diagonal 1 60x90 end min=0.08347 max=0.22888 mean=0.13507
+# diagonal 2 60x90 end min=0.1394 max=0.36764 mean=0.23985
+# diagonal 1 85x150 end min=0.09817 max=0.25014 mean=0.15379
+# diagonal 2 85x150 end min=0.1042 max=0.53615 mean=0.29838
+#
+# diagonal 1 115x200 min min=0.0762 max=0.28032 mean=0.18024
+# diagonal 2 115x200 min min=0.07408 max=0.62531 mean=0.24654
+# diagonal 1 115x400 min min=0.14135 max=0.25958 mean=0.20339
+# diagonal 2 115x400 min min=0.09011 max=0.25541 mean=0.18441
+# diagonal 1 150x300 min min=0.09385 max=0.30605 mean=0.19656
+# diagonal 2 150x300 min min=0.06663 max=0.5691 mean=0.19372
+# diagonal 1 60x90 min min=0.08346 max=0.17061 mean=0.1205
+# diagonal 2 60x90 min min=0.0934 max=0.32697 mean=0.17552
+# diagonal 1 85x150 min min=0.0808 max=0.24113 mean=0.1376
+# diagonal 2 85x150 min min=0.07586 max=0.41906 mean=0.19909
+#
+# diagonal 1 115x200 max min=0.16841 max=0.40328 mean=0.25953
+# diagonal 2 115x200 max min=0.13088 max=0.79781 mean=0.50905
+# diagonal 1 115x400 max min=0.20739 max=0.43544 mean=0.31446
+# diagonal 2 115x400 max min=0.15466 max=0.36457 mean=0.29628
+# diagonal 1 150x300 max min=0.15992 max=0.49775 mean=0.28773
+# diagonal 2 150x300 max min=0.12255 max=0.776 mean=0.46315
+# diagonal 1 60x90 max min=0.12425 max=0.25912 mean=0.18398
+# diagonal 2 60x90 max min=0.17089 max=0.38721 mean=0.28055
+# diagonal 1 85x150 max min=0.14329 max=0.34904 mean=0.21523
+# diagonal 2 85x150 max min=0.18542 max=0.58131 mean=0.34318
+#
+# diagonal 1 115x200 mean min=0.13908 max=0.3162 mean=0.22066
+# diagonal 2 115x200 mean min=0.12381 max=0.67769 mean=0.38155
+# diagonal 1 115x400 mean min=0.1884 max=0.34739 mean=0.25469
+# diagonal 2 115x400 mean min=0.11784 max=0.29082 mean=0.24065
+# diagonal 1 150x300 mean min=0.15413 max=0.39882 mean=0.24409
+# diagonal 2 150x300 mean min=0.1001 max=0.62043 mean=0.32481
+# diagonal 1 60x90 mean min=0.11261 max=0.20536 mean=0.15036
+# diagonal 2 60x90 mean min=0.16575 max=0.3372 mean=0.2297
+# diagonal 1 85x150 mean min=0.11982 max=0.27359 mean=0.17495
+# diagonal 2 85x150 mean min=0.18327 max=0.48095 mean=0.278

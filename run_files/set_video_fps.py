@@ -2,6 +2,7 @@ import os
 import shutil
 
 from dataset_processing import DatasetProcessing
+from parameters import ROOT_DIR
 
 # Link to video (from repository/content root)
 vid = [
@@ -14,12 +15,20 @@ vid = [
     # 'videos/classification_videos/16-10 ЦП.mp4', 'videos/classification_videos/16-10 ЦП_2.mp4',
     # 'videos/classification_videos/МОС,19-40.mp4', 'videos/classification_videos/МОС,19-40_2.mp4',
     # 'videos/classification_videos/НОЧЬ,20-11.mp4', 'videos/classification_videos/НОЧЬ,20-11_2.mp4',
-    'videos/test 6_cam 1.mp4', 'videos/test 6_cam 2.mp4',
+    # 'videos/test 6_cam 1.mp4', 'videos/test 6_cam 2.mp4',
+    # 'videos/test 21_cam 1.mp4', 'videos/test 21_cam 2.mp4',
+    'videos/classification_videos/05.06.23_cam 1.mp4', 'videos/classification_videos/05.06.23_cam 2.mp4',
+    'videos/classification_videos/05.06.23 вечер_cam 1.mp4', 'videos/classification_videos/05.06.23 вечер_cam 2.mp4',
+    'videos/classification_videos/19.06 в 13.40_cam 1.mp4', 'videos/classification_videos/19.06 в 13.40_cam 2.mp4',
+    'videos/classification_videos/20.06 в 14.02_cam 1.mp4', 'videos/classification_videos/20.06 в 14.02_cam 2.mp4',
+    'videos/classification_videos/21.06 в 14.40_cam 1.mp4', 'videos/classification_videos/21.06 в 14.40_cam 2.mp4',
+    'videos/classification_videos/21.06 в 16.44_cam 1.mp4', 'videos/classification_videos/21.06 в 16.44_cam 2.mp4',
 ]
 
 TARGET_FPS = 25
 
 for v in vid:
+    v = os.path.join(ROOT_DIR, v)
     shutil.move(v, 'test.mp4')
     DatasetProcessing.change_fps(
         video_path='test.mp4',

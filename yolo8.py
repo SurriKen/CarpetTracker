@@ -12,8 +12,9 @@ from ultralytics import YOLO
 from dataset_processing import DatasetProcessing
 from tracker import Tracker, PolyTracker
 from parameters import SPEED_LIMIT_PERCENT, IMAGE_IRRELEVANT_SPACE_PERCENT, MIN_OBJ_SEQUENCE, MIN_EMPTY_SEQUENCE, \
-    POLY_CAM1_IN, POLY_CAM1_OUT, POLY_CAM2_OUT, POLY_CAM2_IN
-from utils import get_colors, load_data, add_headline_to_cv_image, logger, time_converter, save_txt, save_data
+    POLY_CAM1_IN, POLY_CAM1_OUT, POLY_CAM2_OUT, POLY_CAM2_IN, ROOT_DIR
+from utils import get_colors, load_data, add_headline_to_cv_image, logger, time_converter, save_data, \
+    clean_diff_image, save_txt
 
 yolov8_types = {
     "yolov8n": {"Test Size": 640, "link": "https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8n.pt"},
@@ -39,6 +40,29 @@ def load_yolo_v8(v8_mode="yolov8n") -> None:
         wget.download(url, f"yolov8/{v8_mode}.pt")
 
 
+def process_image_for_predict(image: np.ndarray, last_image: np.ndarray, mode: str = 'standard'):
+    if mode == 'standard':
+        return image
+    if mode == 'diff':
+        diff1 = image - last_image
+        cleaned_image, mask = clean_diff_image(diff1, high_color=245)
+        return cleaned_image
+    if mode == 'masked':
+        diff1 = image - last_image
+        cleaned_image, mask = clean_diff_image(diff1, high_color=245)
+        b_img = np.where(mask == 0, image, (0, 0, 0))
+        b_img = b_img.astype(np.uint8)
+        b_img = cv2.addWeighted(b_img, 0.4, image, 0.6, 0)
+        return b_img
+    if mode == 'red':
+        diff1 = image - last_image
+        cleaned_image, mask = clean_diff_image(diff1, high_color=245)
+        r_img = np.where(mask == 0, (0, 0, 255), (255, 0, 0))
+        r_img = r_img.astype(np.uint8)
+        r_img = cv2.addWeighted(r_img, 0.2, image, 0.8, 0)
+        return r_img
+
+
 def load_kmeans_model(path, name, dict_=False):
     with open(f"{path}/{name}.pkl", "rb") as f:
         model = pickle.load(f)
@@ -48,94 +72,120 @@ def load_kmeans_model(path, name, dict_=False):
     return model, lbl_dict
 
 
-def detect_video(model, video_path, save_path, remove_perimeter_boxes=False):
-    # Kmeans_model, Kmeans_cluster_names = load_kmeans_model(
-    #     path=KMEANS_MODEL_FOLDER,
-    #     dict_=True,
-    #     name=KMEANS_MODEL_NAME,
-    # )
+def detect_mono_video_polygon(
+        model: YOLO,
+        camera: int,
+        video_path: str,
+        save_path: str,
+        start: int = 0,
+        finish: int = 0,
+        iou: float = 0.0,
+        conf: float = 0.3,
+        interactive_video: bool = False,
+        save_boxes_path: str = None,
+        save_boxes_mode: str = 'separate',  # single_file
+        debug: bool = False,
+        normilize: bool = False,
+):
+    """
+    Detect two synchronized videos and save them as one video with boxes to save_path.
 
+    Args:
+        video_path:
+        model_path:
+        save_boxes_mode:
+        save_boxes_path:
+        conf:
+        iou:
+        finish:
+        start:
+        interactive_video:
+        save_path: save_path
+
+    Returns:
+
+    """
     # Get names and colors
     names = ['carpet']
     colors = get_colors(names)
 
-    # video_path = '/home/deny/Рабочий стол/CarpetTracker/videos/Test_0.mp4'
-    # save_path = 'tracked_video.mp4'
-    tracker = Tracker()
-
+    if camera == 1:
+        polygon_in = POLY_CAM1_IN
+        polygon_out = POLY_CAM1_OUT
+    if camera == 2:
+        polygon_in = POLY_CAM2_IN
+        polygon_out = POLY_CAM2_OUT
+    tracker = PolyTracker(polygon_in=polygon_in, polygon_out=polygon_out, name='mono camera')
+    # model = YOLO(model_path)
     vc = cv2.VideoCapture()
     vc.open(video_path)
     f = vc.get(cv2.CAP_PROP_FRAME_COUNT)
     fps = vc.get(cv2.CAP_PROP_FPS)
     w = int(vc.get(cv2.CAP_PROP_FRAME_WIDTH))
     h = int(vc.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-    # Reformat video on 25 fps
-    if fps != 25:
-        shutil.move(video_path, 'test.mp4')
-        DatasetProcessing.change_fps(
-            video_path='test.mp4',
-            save_path=video_path,
-            set_fps=25
-        )
-        os.remove('test.mp4')
-        vc = cv2.VideoCapture()
-        vc.open(video_path)
-        f = vc.get(cv2.CAP_PROP_FRAME_COUNT)
-        fps = vc.get(cv2.CAP_PROP_FPS)
-
-    # model = YOLO('runs/detect/train21/weights/best.pt')
+    if debug:
+        print(f"Video data: frames={f}, fps={fps}, width={w}, height={h}")
     if save_path:
-        print(save_path, fps, (w, h))
-        out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc('m', 'p', '4', 'v'), fps, (w, h))
+        out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), 25, (w, h * 2))
 
-    result = {}
-    for i in range(int(f)):
-        print(f"Processed {i + 1} / {f} frames")
-        ret, frame = vc.read()
-        res = model(frame)
-        result[i] = {'boxes': res[0].boxes, 'orig_shape': res[0].orig_shape}
-        tracker.process(predict=res, remove_perimeter_boxes=remove_perimeter_boxes)
+    finish = int(f) if finish == 0 or finish < start else finish
+    true_bb = {}
+    count = 0
+    for i in range(0, finish):
+        fr_time = time.time()
+        _, frame = vc.read()
 
-        if save_path:
-            if tracker.id_coords[-1]:
-                tracker_id = tracker.id_coords[-1]
-                # if tracker_id < len(res[0].boxes):
-                #     for box in res[0].boxes:
-                #         if
+        if i >= start:
+            res = model.predict(frame, iou=iou, conf=conf)
+            tracker.process(frame_id=i, boxes=res[0].boxes.data.tolist(), img_shape=res[0].orig_shape[:2], debug=debug)
+            if debug:
+                logger.info(f"Processed {i + 1} / {f} frames")
+                print("track_list", tracker.track_list)
+                print("current_boxes", tracker.current_boxes)
 
-                coords = tracker.coordinates[-1]
-                # print(tracker_id, res[0].boxes)
-                labels = [
-                    f"# {tracker_id[i]} {model.model.names[coords[i][-1]]} {coords[i][-2]:0.2f}"
-                    for i in range(len(tracker.coordinates[-1]))
-                ]
+            for track in tracker.track_list:
+                true_bb[track.get('id')] = track.get('boxes')
 
-                if len(labels) > 1:
-                    cl = colors * len(labels)
-                else:
-                    cl = colors
+            frame = PolyTracker.prepare_image(
+                image=frame,
+                colors=colors,
+                tracker_current_boxes=tracker.current_boxes,
+                polygon_in=polygon_in,
+                polygon_out=polygon_out,
+                poly_width=5,
+                reshape=(w, h)
+            )
 
-                fr = tracker.put_box_on_image(
-                    save_path=None,
-                    results=res,
-                    labels=labels,
-                    color_list=cl,
-                    coordinates=tracker.coordinates
-                )
-                fr = np.array(fr)
-            else:
-                fr = res[0].orig_img[:, :, ::-1].copy()
-
-            headline = f"Обнаружено объектов: {tracker.obj_count}\n"
-            fr = add_headline_to_cv_image(
-                image=fr,
+            headline = f"Обнаружено ковров: {tracker.count}"
+            img = add_headline_to_cv_image(
+                image=frame,
                 headline=headline
             )
-            cv_img = cv2.cvtColor(fr, cv2.COLOR_RGB2BGR)
-            out.write(cv_img)
-            # if i > 10:
-            #     break
+            if interactive_video:
+                cv2.imshow('1', img)
+                cv2.waitKey(1)
+
+            if (i + 1) % 100 == 0:
+                logger.info(f"Frames {i + 1} / {finish} was processed")
+            if save_path:
+                out.write(img)
+            if debug:
+                print("frame time:", time_converter(time.time() - fr_time), '\n')
+                logger.info(f"-- count: {count}")
+
+    if save_path:
+        out.release()
+    if save_boxes_path and save_boxes_mode == 'separate':
+        for i, boxes in enumerate(true_bb):
+            txt = ''
+            for coord in boxes:
+                txt = f"{txt}{int(coord)} "
+            txt = f"{txt[:-1]}\n"
+            save_txt(txt=txt[:-2], txt_path=os.path.join(save_boxes_path, f"{i}.txt"))
+    if save_boxes_path and save_boxes_mode == 'single_file':
+        save_data(data=true_bb, folder_path=save_boxes_path,
+                  filename=f"true_bb_2_{video_path.split('/')[-1].split('_')[0]}")
+    return true_bb
 
 
 def detect_synchro_video(
@@ -278,8 +328,10 @@ def detect_synchro_video(
             if save_path:
                 fr1 = res1[0].orig_img[:, :, ::-1].copy()
                 if draw_polygon:
-                    fr1 = DatasetProcessing.draw_polygons(image=fr1, polygons=POLY_CAM1_IN, outline=(0, 200, 0), width=5)
-                    fr1 = DatasetProcessing.draw_polygons(image=fr1, polygons=POLY_CAM1_OUT, outline=(200, 0, 0), width=5)
+                    fr1 = DatasetProcessing.draw_polygons(image=fr1, polygons=POLY_CAM1_IN, outline=(0, 200, 0),
+                                                          width=5)
+                    fr1 = DatasetProcessing.draw_polygons(image=fr1, polygons=POLY_CAM1_OUT, outline=(200, 0, 0),
+                                                          width=5)
                 if tracker_1.current_id:
                     tracker_id = tracker_1.current_id
                     coords = tracker_1.current_boxes
@@ -317,8 +369,10 @@ def detect_synchro_video(
 
                 fr2 = res2[0].orig_img[:, :, ::-1].copy()
                 if draw_polygon:
-                    fr2 = DatasetProcessing.draw_polygons(image=fr2, polygons=POLY_CAM2_IN, outline=(0, 200, 0), width=2)
-                    fr2 = DatasetProcessing.draw_polygons(image=fr2, polygons=POLY_CAM2_OUT, outline=(200, 0, 0), width=2)
+                    fr2 = DatasetProcessing.draw_polygons(image=fr2, polygons=POLY_CAM2_IN, outline=(0, 200, 0),
+                                                          width=2)
+                    fr2 = DatasetProcessing.draw_polygons(image=fr2, polygons=POLY_CAM2_OUT, outline=(200, 0, 0),
+                                                          width=2)
                 if tracker_2.current_id:
                     tracker_id = tracker_2.current_id
                     coords = tracker_2.current_boxes
@@ -367,7 +421,7 @@ def detect_synchro_video(
             print("frame time:", time_converter(time.time() - fr_time), '\n')
             logger.info(f"-- patterns: {cur_count + len(patterns)}")
             if i >= finish - 1:
-            # if i >= 1500:
+                # if i >= 1500:
                 if save_path:
                     out.release()
                 break
@@ -412,6 +466,9 @@ def detect_synchro_video_polygon(
         finish: int = 0,
         iou: float = 0.3,
         conf: float = 0.5,
+        interactive_video: bool = False,
+        mode: str = 'standard',  # standard, diff, masked, red
+        save_boxes: bool = False,
 ):
     """
     Detect two synchronized videos and save them as one video with boxes to save_path.
@@ -445,58 +502,65 @@ def detect_synchro_video_polygon(
     fps2 = vc2.get(cv2.CAP_PROP_FPS)
     w2 = int(vc2.get(cv2.CAP_PROP_FRAME_WIDTH))
     h2 = int(vc2.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    print(f"fps1={fps1}, fps2={fps2}\n")
 
     w = min([w1, w2])
     h = min([h1, h2])
 
-    # Reformat video on 25 fps
-    if fps1 != 25:
-        shutil.move(video_paths.get("model_1"), 'test.mp4')
-        DatasetProcessing.change_fps(
-            video_path='test.mp4',
-            save_path=video_paths.get("model_1"),
-            set_fps=25
-        )
-        os.remove('test.mp4')
-        vc1 = cv2.VideoCapture()
-        vc1.open(video_paths.get("model_1"))
-        f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
+    step = min([fps1, fps2])
+    range_1 = [(i, round(i * 1000 / fps1, 1)) for i in range(int(f1))]
+    range_2 = [(i, round(i * 1000 / fps2, 1)) for i in range(int(f2))]
+    (min_range, max_range) = (range_1, range_2) if step == fps1 else (range_2, range_1)
+    (min_vc, max_vc) = (vc1, vc2) if step == fps1 else (vc2, vc1)
 
-    if fps2 != 25:
-        shutil.move(video_paths.get("model_2"), 'test.mp4')
-        DatasetProcessing.change_fps(
-            video_path='test.mp4',
-            save_path=video_paths.get("model_2"),
-            set_fps=25
-        )
-        os.remove('test.mp4')
-        vc2 = cv2.VideoCapture()
-        vc2.open(video_paths.get("model_2"))
-        f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
+    def get_closest_id(x: float, data: list[tuple, ...]) -> int:
+        dist = [(abs(data[i][1] - x), i) for i in range(len(data))]
+        dist = sorted(dist)
+        # print("Dist", dist)
+        return dist[0][1]
 
-    if save_path:
+    if save_path and mode in ['standard', 'masked', 'red']:
         out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), 25, (w, h * 2))
+    if save_path and mode in ['diff']:
+        out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), 25, (w * 2, h * 2))
 
-    f = min([f1, f2])
+    # f = min([f1, f2])
+    f = f1 if step == fps1 else f2
     finish = int(f) if finish == 0 or finish < start else finish
     true_bb_1, true_bb_2 = [], []
     count = 0
     last_track_seq = {'tr1': [], 'tr2': []}
+    last_img_1, last_img_2 = [], []
     for i in range(0, finish):
         fr_time = time.time()
-        logger.info(f'-- Process {i + 1} / {finish} frame')
-        _, frame1 = vc1.read()
-        _, frame2 = vc2.read()
+        _, frame1 = min_vc.read()
 
-        if i >= start:
+        closest_id = get_closest_id(min_range[0][1], max_range[:10])
+        min_range.pop(0)
+        ids = list(range(closest_id)) if closest_id else [0]
+        ids = sorted(ids, reverse=True)
+        for id in ids:
+            max_range.pop(id)
+            _, frame2 = max_vc.read()
+        # logger.info(f'-- min_range {min_range[:5]}, \nmax_range {max_range[:5]}')
+
+        if i >= start and len(last_img_1) and len(last_img_2):
             logger.info(f"Processed {i + 1} / {f} frames")
-            res1 = models[0].get('model_1').predict(frame1, iou=iou, conf=conf)
+            # image_1_time = time.time()
+            image_1 = process_image_for_predict(image=frame1, last_image=last_img_1, mode=mode)
+            # print("image_1_time process", time_converter(time.time() - image_1_time))
+            res1 = models[0].get('model_1').predict(image_1, iou=iou, conf=conf)
             true_bb_1.append(res1[0].boxes.data.tolist())
-            tracker_1.process(frame_id=i, boxes=res1[0].boxes.data.tolist(), img_shape=res1[0].orig_shape[:2], debug=False)
+            tracker_1.process(frame_id=i, boxes=res1[0].boxes.data.tolist(), img_shape=res1[0].orig_shape[:2],
+                              debug=False)
 
-            res2 = models[0].get('model_2').predict(frame2, iou=iou, conf=conf)
+            # image_2_time = time.time()
+            image_2 = process_image_for_predict(image=frame2, last_image=last_img_2, mode=mode)
+            # print("image_2_time process", time_converter(time.time() - image_2_time))
+            res2 = models[0].get('model_2').predict(image_2, iou=iou, conf=conf)
             true_bb_2.append(res2[0].boxes.data.tolist())
-            tracker_2.process(frame_id=i, boxes=res2[0].boxes.data.tolist(), img_shape=res2[0].orig_shape[:2], debug=False)
+            tracker_2.process(frame_id=i, boxes=res2[0].boxes.data.tolist(), img_shape=res2[0].orig_shape[:2],
+                              debug=False)
 
             count, last_track_seq = PolyTracker.combine_count(
                 count=count,
@@ -505,9 +569,9 @@ def detect_synchro_video_polygon(
                 tracker_2_count_frames=copy.deepcopy(tracker_2.count_frames),
                 frame_id=i
             )
-
+            # save_time = time.time()
             if save_path:
-                frame1 = PolyTracker.prepare_image(
+                frame_1 = PolyTracker.prepare_image(
                     image=frame1,
                     colors=colors,
                     tracker_current_boxes=tracker_1.current_boxes,
@@ -516,8 +580,9 @@ def detect_synchro_video_polygon(
                     poly_width=5,
                     reshape=(w, h)
                 )
+
                 # frame2 = cv2.cvtColor(frame2, cv2.COLOR_RGB2BGR)
-                frame2 = PolyTracker.prepare_image(
+                frame_2 = PolyTracker.prepare_image(
                     image=frame2,
                     colors=colors,
                     tracker_current_boxes=tracker_2.current_boxes,
@@ -526,35 +591,71 @@ def detect_synchro_video_polygon(
                     poly_width=2,
                     reshape=(w, h)
                 )
-                img = np.concatenate((frame1, frame2), axis=0)
+                if mode in ['diff', 'masked', 'red']:
+                    image_1 = PolyTracker.prepare_image(
+                        image=image_1,
+                        colors=colors,
+                        tracker_current_boxes=tracker_1.current_boxes,
+                        polygon_in=POLY_CAM1_IN,
+                        polygon_out=POLY_CAM1_OUT,
+                        poly_width=5,
+                        reshape=(w, h)
+                    )
+                    image_2 = PolyTracker.prepare_image(
+                        image=image_2,
+                        colors=colors,
+                        tracker_current_boxes=tracker_2.current_boxes,
+                        polygon_in=POLY_CAM2_IN,
+                        polygon_out=POLY_CAM2_OUT,
+                        poly_width=2,
+                        reshape=(w, h)
+                    )
+                img_process = time.time()
+                if save_path and mode == 'standard':
+                    img = np.concatenate((frame_1, frame_2), axis=0)
+                if save_path and mode in ['diff']:
+                    img1 = np.concatenate((frame_1, frame_2), axis=0)
+                    img2 = np.concatenate((image_1, image_2), axis=0)
+                    img = np.concatenate((img1, img2), axis=1)
+                if save_path and mode in ['masked', 'red']:
+                    img = np.concatenate((image_1, image_2), axis=0)
+
                 headline = f"Обнаружено ковров: {count}\nТрекер 1: {tracker_1.count}\nТрекер 2: {tracker_2.count}"
                 img = add_headline_to_cv_image(
                     image=img,
                     headline=headline
                 )
+                if interactive_video:
+                    cv2.imshow('1', img)
+                    cv2.waitKey(1)
 
                 if (i + 1) % 100 == 0:
                     logger.info(f"Frames {i + 1} / {finish} was processed")
                 out.write(img)
 
             # print("time save_path:", time_converter(time.time() - x))
-            print("frame time:", time_converter(time.time() - fr_time), '\n')
+            print("frame time:", time_converter(time.time() - fr_time),
+                  # "save_time", time_converter(time.time() - save_time),
+                  # "img_process", time_converter(img_process - save_time),
+                  '\n')
             logger.info(f"-- count: {count}")
-            if i >= finish - 1:
-            # if i >= 1500:
-                if save_path:
-                    out.release()
+            if i >= finish - 1 or not min_range or not max_range:
                 break
 
-    path = '/media/deny/Новый том/AI/CarpetTracker/tests'
-    save_data(data=true_bb_1, file_path=path,
-              filename=f"true_bb_1_{video_paths.get('model_1').split('/')[-1].split('_')[0]} {models[1]}")
-    save_data(data=true_bb_2, file_path=path,
-              filename=f"true_bb_2_{video_paths.get('model_2').split('/')[-1].split('_')[0]} {models[1]}")
+        last_img_1 = frame1
+        last_img_2 = frame2
+    if save_path:
+        out.release()
+    if save_boxes:
+        path = os.path.join(ROOT_DIR, 'tests/boxes')
+        save_data(data=true_bb_1, folder_path=path,
+                  filename=f"true_bb_1_{video_paths.get('model_1').split('/')[-1].split('_')[0]} {models[1]}")
+        save_data(data=true_bb_2, folder_path=path,
+                  filename=f"true_bb_2_{video_paths.get('model_2').split('/')[-1].split('_')[0]} {models[1]}")
     return count
 
 
-def train(weights='yolo8/yolov8n.pt', config='data_custom.yaml', epochs=50, batch_size=4, name=None):
+def train(weights='yolo_weights/yolov8n.pt', config='data_custom.yaml', epochs=50, batch_size=4, name=None):
     model = YOLO(weights)
     model.train(data=config, epochs=epochs, batch=batch_size, name=name)
 

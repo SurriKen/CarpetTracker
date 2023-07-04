@@ -1,0 +1,5 @@
+names:
+- carpet
+nc: 1
+train: datasets/yolov8_red_camera_2/train
+val: datasets/yolov8_red_camera_2/val

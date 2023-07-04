@@ -325,7 +325,7 @@ class Clusterizator:
         if save_path:
             save_data(
                 data=stat2,
-                file_path=save_path,
+                folder_path=save_path,
                 filename=name
             )
         return kmeans, stat2
