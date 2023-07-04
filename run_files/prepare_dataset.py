@@ -20,10 +20,6 @@ data = [
      os.path.join(ROOT_DIR, 'datasets/От разметчиков/batch_05_#147536/batch_05_'), 1.0],
     [os.path.join(ROOT_DIR, 'datasets/От разметчиков/batch_mine/obj_train_data/batch_01'),
      os.path.join(ROOT_DIR, 'datasets/От разметчиков/batch_mine/obj_train_data/batch_01_'), 1.0],
-    # [os.path.join(ROOT_DIR, 'datasets/diff/diff/cam_1/red'),
-    #  os.path.join(ROOT_DIR, 'datasets/diff/diff/cam_1/boxes'), 1.0],
-    # [os.path.join(ROOT_DIR,'datasets/diff/diff/cam_2/init',
-    #               os.path.join(ROOT_DIR,'datasets/diff/diff/cam_2/boxes', 1.0]
     [os.path.join(ROOT_DIR, 'datasets/diff/diff/cam_1/init'),
      os.path.join(ROOT_DIR, 'datasets/diff/diff/cam_1/boxes'), 0.25],
     [os.path.join(ROOT_DIR, 'datasets/diff/diff/cam_2/init'),
@@ -31,8 +27,7 @@ data = [
 ]
 
 split = 0.9
-save_path_1 = os.path.join(ROOT_DIR, 'datasets/yolov8_univ')
-# save_path_1 = os.path.join(ROOT_DIR, 'datasets/yolov8_camera_1')
+save_path_1 = os.path.join(ROOT_DIR, 'datasets/yolov8_camera_1')
 save_path_2 = os.path.join(ROOT_DIR, 'datasets/yolov8_camera_2')
 
 # form dataset for camera 1 with frame shape 1920, 1080
@@ -40,7 +35,7 @@ DatasetProcessing.form_dataset_for_train(
     data=data,
     split=split,
     save_path=save_path_1,
-    # condition={'orig_shape': (1920, 1080)}
+    condition={'orig_shape': (1920, 1080)}
 )
 # put box on image to check quality of dataset
 # for l in ['train', 'val']:
@@ -51,12 +46,12 @@ DatasetProcessing.form_dataset_for_train(
 #     )
 
 # form dataset for camera 2 with frame shape 640, 360
-# DatasetProcessing.form_dataset_for_train(
-#     data=data,
-#     split=split,
-#     save_path=save_path_2,
-#     condition={'orig_shape': (640, 360)}
-# )
+DatasetProcessing.form_dataset_for_train(
+    data=data,
+    split=split,
+    save_path=save_path_2,
+    condition={'orig_shape': (640, 360)}
+)
 # # put box on image to check quality of dataset
 # for l in ['train', 'val']:
 #     DatasetProcessing.put_box_on_image(
