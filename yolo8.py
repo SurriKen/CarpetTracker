@@ -85,6 +85,7 @@ def detect_mono_video_polygon(
         save_boxes_path: str = None,
         save_boxes_mode: str = 'separate',  # single_file
         debug: bool = False,
+        normilize: bool = False,
 ):
     """
     Detect two synchronized videos and save them as one video with boxes to save_path.
@@ -162,7 +163,7 @@ def detect_mono_video_polygon(
             )
             if interactive_video:
                 cv2.imshow('1', img)
-                cv2.waitKey(100)
+                cv2.waitKey(1)
 
             if (i + 1) % 100 == 0:
                 logger.info(f"Frames {i + 1} / {finish} was processed")
@@ -182,7 +183,7 @@ def detect_mono_video_polygon(
             txt = f"{txt[:-1]}\n"
             save_txt(txt=txt[:-2], txt_path=os.path.join(save_boxes_path, f"{i}.txt"))
     if save_boxes_path and save_boxes_mode == 'single_file':
-        save_data(data=true_bb, file_path=save_boxes_path,
+        save_data(data=true_bb, folder_path=save_boxes_path,
                   filename=f"true_bb_2_{video_path.split('/')[-1].split('_')[0]}")
     return true_bb
 
@@ -647,9 +648,9 @@ def detect_synchro_video_polygon(
         out.release()
     if save_boxes:
         path = os.path.join(ROOT_DIR, 'tests/boxes')
-        save_data(data=true_bb_1, file_path=path,
+        save_data(data=true_bb_1, folder_path=path,
                   filename=f"true_bb_1_{video_paths.get('model_1').split('/')[-1].split('_')[0]} {models[1]}")
-        save_data(data=true_bb_2, file_path=path,
+        save_data(data=true_bb_2, folder_path=path,
                   filename=f"true_bb_2_{video_paths.get('model_2').split('/')[-1].split('_')[0]} {models[1]}")
     return count
 

@@ -31,7 +31,8 @@ data = [
 ]
 
 split = 0.9
-save_path_1 = os.path.join(ROOT_DIR, 'datasets/yolov8_camera_1')
+save_path_1 = os.path.join(ROOT_DIR, 'datasets/yolov8_univ')
+# save_path_1 = os.path.join(ROOT_DIR, 'datasets/yolov8_camera_1')
 save_path_2 = os.path.join(ROOT_DIR, 'datasets/yolov8_camera_2')
 
 # form dataset for camera 1 with frame shape 1920, 1080
@@ -39,7 +40,7 @@ DatasetProcessing.form_dataset_for_train(
     data=data,
     split=split,
     save_path=save_path_1,
-    condition={'orig_shape': (1920, 1080)}
+    # condition={'orig_shape': (1920, 1080)}
 )
 # put box on image to check quality of dataset
 # for l in ['train', 'val']:
@@ -50,12 +51,12 @@ DatasetProcessing.form_dataset_for_train(
 #     )
 
 # form dataset for camera 2 with frame shape 640, 360
-DatasetProcessing.form_dataset_for_train(
-    data=data,
-    split=split,
-    save_path=save_path_2,
-    condition={'orig_shape': (640, 360)}
-)
+# DatasetProcessing.form_dataset_for_train(
+#     data=data,
+#     split=split,
+#     save_path=save_path_2,
+#     condition={'orig_shape': (640, 360)}
+# )
 # # put box on image to check quality of dataset
 # for l in ['train', 'val']:
 #     DatasetProcessing.put_box_on_image(

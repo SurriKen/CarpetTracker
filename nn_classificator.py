@@ -25,35 +25,19 @@ lbl = DatasetProcessing.ohe_from_list([1], 5)
 
 
 class Net(nn.Module):
-
-    def __init__(self, device='cpu'):
+    def __init__(self, device='cpu', num_classes: int = 5, input_size=(256, 256)):
         super(Net, self).__init__()
-        # 1 input image channel, 6 output channels, 5x5 square convolution
-        # kernel
-        self.conv3d_1 = nn.Conv3d(in_channels=3, out_channels=32, kernel_size=5, padding='same', device=device)
-        self.conv3d_2 = nn.Conv3d(in_channels=32, out_channels=16, kernel_size=5, padding='same', device=device)
-        self.conv3d_3 = nn.Conv3d(in_channels=16, out_channels=5, kernel_size=5, padding='same', device=device)
-        # an affine operation: y = Wx + b
-        # self.fc1 = nn.Linear(16 * 5 * 5, 120)  # 5*5 from image dimension
-        # self.fc2 = nn.Linear(120, 84)
-        # self.fc3 = nn.Linear(84, 10)
+        self.dense_1 = nn.Linear(input_size[-1], 32, device=device)
+        self.dense_2 = nn.Linear(32, 16, device=device)
+        # self.conv3d_3 = nn.Conv3d(in_channels=16, out_channels=32, kernel_size=5, padding='same', device=device)
+        self.dense_3 = nn.Linear(16 * input_size[0], num_classes, device=device)
+        self.post = nn.Softmax(dim=1)
 
     def forward(self, x):
-        # n = x.cpu().size()[2]
-        # x = F.interpolate(x, size=(n, 256, 256))
-        x = F.max_pool3d(F.relu(self.conv3d_1(x)), 2)
-        # print(x.size())
-        x = F.max_pool3d(F.relu(self.conv3d_2(x)), 2)
-        # print(x.size())
-        x = F.max_pool3d(F.relu(self.conv3d_3(x)), 2)
-        # print(x.size())
-        x, _ = torch.max(x, 2)
-        # print(x.size())
-        x, _ = torch.max(x, 2)
-        # print(x.size())
-        x, _ = torch.max(x, 2)
-        # print(x.size())
-        x = F.softmax(x, 1)
+        x = F.relu(F.normalize(self.dense_1(x)))
+        x = F.relu(F.normalize(self.dense_2(x)))
+        x = x.reshape(x.size(0), -1)
+        x = self.post(self.dense(x))
         return x
 
 

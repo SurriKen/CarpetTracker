@@ -78,9 +78,9 @@ def get_confusion_matrix(y_true, y_pred, get_percent=True) -> tuple:
     return cm.astype('float').tolist(), cm_percent.astype('float').tolist()
 
 
-def save_data(data, file_path: str, filename: str) -> None:
+def save_data(data, folder_path: str, filename: str) -> None:
     """Save a dictionary to a file"""
-    with open(os.path.join(file_path, f"{filename}.dict"), 'wb') as handle:
+    with open(os.path.join(folder_path, f"{filename}.dict"), 'wb') as handle:
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
