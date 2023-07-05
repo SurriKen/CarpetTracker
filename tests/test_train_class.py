@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 from dataset_processing import DatasetProcessing, VideoClass
 import time
 from parameters import ROOT_DIR
-from utils import logger, time_converter, plot_and_save_gragh, save_dict_to_table_txt
+from utils import logger, time_converter, plot_and_save_gragh, save_dict_to_table_txt, load_data
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 
 logger.info("\n    --- Running classif_models.py ---    \n")
@@ -19,23 +19,45 @@ logger.info("\n    --- Running classif_models.py ---    \n")
 class Net(nn.Module):
     def __init__(self, device='cpu', num_classes: int = 5, input_size=(256, 256)):
         super(Net, self).__init__()
-        self.dense_inp1 = nn.Linear(input_size[-1], 32, device=device)
+        self.input_size = input_size
+        # if len(input_size) < 3 or len(input_size) > 4:
+        self.dense_1 = nn.Linear(input_size[-1], 32, device=device)
         self.dense_2 = nn.Linear(32, 64, device=device)
-        # self.dense_inp2 = nn.Linear(input_size[-1], 32, device=device)
-        # self.dense_3 = nn.Linear(32, 64, device=device)
-        # self.dense_4 = nn.Linear(64, 128, device=device)
         self.dense_5 = nn.Linear(64 * input_size[0], num_classes, device=device)
+        # elif len(input_size) == 3:
+        self.conv2d_1 = nn.Conv2d(in_channels=input_size[-1], out_channels=8, kernel_size=3, padding='same',
+                                  device=device)
+        self.conv2d_2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3, padding='same', device=device)
+        # self.conv3d_3 = nn.Conv3d(in_channels=16, out_channels=32, kernel_size=5, padding='same', device=device)
+        self.dense_2d = nn.Linear(16 * int(input_size[1] / 4) * int(input_size[2] / 4), num_classes,
+                               device=device)
+        # else:
+        self.conv3d_1 = nn.Conv3d(in_channels=input_size[-1], out_channels=8, kernel_size=3, padding='same',
+                                  device=device)
+        self.conv3d_2 = nn.Conv3d(in_channels=8, out_channels=16, kernel_size=3, padding='same', device=device)
+        # self.conv3d_3 = nn.Conv3d(in_channels=16, out_channels=32, kernel_size=5, padding='same', device=device)
+        self.dense_3d = nn.Linear(16 * int(input_size[1] / 4) * int(input_size[2] / 4) * input_size[0], num_classes,
+                               device=device)
         self.post = nn.Softmax(dim=1)
 
     def forward(self, x):
-        x = F.relu(F.normalize(self.dense_inp1(x)))
-        x = F.relu(F.normalize(self.dense_2(x)))
-        # x2 = F.relu(F.normalize(self.dense_inp2(x[:, 1, :])))
-        # x2 = F.relu(F.normalize(self.dense_3(x2)))
-        # x = F.relu(F.normalize(self.dense_4(x)))
-        x = x.reshape(x.size(0), -1)
-        # x = torch.add(x1, x2)
-        x = self.post(self.dense_5(x))
+        if len(self.input_size) < 3 or len(self.input_size) > 4:
+            x = F.relu(F.normalize(self.dense_1(x)))
+            x = F.relu(F.normalize(self.dense_2(x)))
+            x = x.reshape(x.size(0), -1)
+            x = self.post(self.dense_5(x))
+        elif len(self.input_size) == 3:
+            x = x.permute(0, 3, 1, 2)
+            x = F.max_pool2d(F.relu(F.normalize(self.conv2d_1(x))), (2, 2))
+            x = F.max_pool2d(F.relu(F.normalize(self.conv2d_2(x))), (2, 2))
+            x = x.reshape(x.size(0), -1)
+            x = self.post(self.dense_2d(x))
+        else:
+            x = x.permute(0, 4, 1, 2, 3)
+            x = F.max_pool3d(F.relu(F.normalize(self.conv3d_1(x))), (1, 2, 2))
+            x = F.max_pool3d(F.relu(F.normalize(self.conv3d_2(x))), (1, 2, 2))
+            x = x.reshape(x.size(0), -1)
+            x = self.post(self.dense_3d(x))
         return x
 
 
@@ -165,38 +187,83 @@ class VideoClassifier:
         return vc
 
     @staticmethod
+    def resize_list(sequence, length):
+        if len(sequence) >= length:
+            idx = list(range(len(sequence)))
+            x2 = sorted(np.random.choice(idx, size=length, replace=False).tolist())
+            y = [sequence[i] for i in x2]
+        else:
+            idx = list(range(len(sequence)))
+            add = length - len(idx)
+            idx.extend(np.random.choice(idx[1:-1], add))
+            idx = sorted(idx)
+            y = [sequence[i] for i in idx]
+        return y
+
+    @staticmethod
     def create_box_video_dataset(box_path: str, split: float, num_frames: int = 6, frame_size: tuple = (128, 128),
                                  concat_axis: int = None) -> VideoClass:
         vc = VideoClass()
         vc.params['split'] = split
         vc.params['box_path'] = box_path
-        dataset = os.path.join(box_path)
+        dataset = load_data(box_path)
         vc.classes = sorted(list(dataset.keys()))
 
         data = []
         for class_ in dataset.keys():
             cl_id = vc.classes.index(class_)
             for vid in dataset[class_].keys():
-                pass
+                # print(class_, vid)
+                seq_frame_1, seq_frame_2 = [], []
+                cameras = list(dataset[class_][vid].keys())
+                if dataset[class_][vid] != {camera: [] for camera in cameras} and len(
+                        dataset[class_][vid][cameras[0]]) > 2:
+                    sequence = list(range(len(dataset[class_][vid][cameras[0]]))) if len(
+                        dataset[class_][vid][cameras[0]]) \
+                        else list(range(len(dataset[class_][vid][cameras[1]])))
+                    # print(dataset[class_][vid])
+                    idx = VideoClassifier.resize_list(sequence, num_frames)
+                    for fr in range(len(sequence)):
+                        fr1 = np.zeros(frame_size)
+                        fr2 = np.zeros(frame_size)
 
-        # if shuffle:
-        #     data = data.tolist()
-        #     lbl = lbl.tolist()
-        #     zip_data = list(zip(data, lbl))
-        #     random.shuffle(zip_data)
-        #     train, val = zip_data[:int(split * len(lbl))], zip_data[int(split * len(lbl)):]
-        #     vc.x_train, vc.y_train = list(zip(*train))
-        #     vc.x_val, vc.y_val = list(zip(*val))
-        #     vc.x_train = np.array(vc.x_train)
-        #     vc.y_train = np.array(vc.y_train)
-        #     vc.x_val = np.array(vc.x_val)
-        #     vc.y_val = np.array(vc.y_val)
-        # else:
-        #     vc.x_train, vc.x_val = data[:int(split * len(data))], data[int(split * len(data)):]
-        #     vc.y_train, vc.y_val = lbl[:int(split * len(lbl))], lbl[int(split * len(lbl)):]
-        #
-        # vc.train_stat = dict(Counter(vc.y_train.tolist()))
-        # vc.val_stat = dict(Counter(vc.y_val.tolist()))
+                        if dataset[class_][vid][cameras[0]][fr]:
+                            box1 = [int(bb * frame_size[i % 2]) for i, bb in
+                                    enumerate(dataset[class_][vid][cameras[0]][fr])]
+                            fr1[box1[1]:box1[3], box1[0]:box1[2]] = 1.
+                        fr1 = np.expand_dims(fr1, axis=-1)
+                        seq_frame_1.append(fr1)
+
+                        if dataset[class_][vid][cameras[1]][fr]:
+                            box2 = [int(bb * frame_size[i % 2]) for i, bb in
+                                    enumerate(dataset[class_][vid][cameras[1]][fr])]
+                            fr2[box2[1]:box2[3], box2[0]:box2[2]] = 1.
+                        fr2 = np.expand_dims(fr2, axis=-1)
+                        seq_frame_2.append(fr2)
+
+                    seq_frame_1 = np.array(seq_frame_1)[idx]
+                    seq_frame_2 = np.array(seq_frame_2)[idx]
+                    batch = [[seq_frame_1, seq_frame_2], cl_id]
+                    if concat_axis in [0, 1, 2, -1]:
+                        batch = [np.concatenate([seq_frame_1, seq_frame_2], axis=concat_axis), cl_id]
+                    else:
+                        print("Concat_axis is our of range. Choose from None, 0, 1, 2 or -1. "
+                              "Used default value concat_axis=None")
+                    data.append(batch)
+
+        random.shuffle(data)
+        x, y = list(zip(*data))
+        x = np.array(x)
+        y = np.array(y)
+
+        vc.x_train = x[:int(vc.params['split'] * len(x))]
+        vc.y_train = y[:int(vc.params['split'] * len(y))]
+        tr_stat = dict(Counter(vc.y_train))
+        vc.train_stat = tr_stat
+        vc.x_val = x[int(vc.params['split'] * len(x)):]
+        vc.y_val = y[int(vc.params['split'] * len(y)):]
+        v_stat = dict(Counter(vc.y_val))
+        vc.val_stat = v_stat
         return vc
 
     def train(self, dataset: VideoClass, epochs: int, batch_size: int = 1, weights: str = '',
@@ -248,7 +315,7 @@ class VideoClassifier:
                     f"\n- Model structure:\n"
                     f"{inspect.getsource(self.model.__init__) if not weights and not self.weights else ''}\n"
                     f"{inspect.getsource(self.model.forward) if not weights and not self.weights else ''}\n"
-        )
+                    )
 
         train_loss_hist, val_loss_hist, train_acc_hist, val_acc_hist = [], [], [], []
         self.fill_history(status='create')
@@ -377,25 +444,29 @@ if __name__ == "__main__":
     device = 'cuda:0'
     name = 'video data'
     # device = 'cpu'
-
-    dataset = VideoClassifier.create_class_dataset(
-        x_path=os.path.join(ROOT_DIR, 'tests/x_train_max.npy'),
-        y_path=os.path.join(ROOT_DIR, 'tests/y_train_max.npy'),
+    dataset = VideoClassifier.create_box_video_dataset(
+        box_path=os.path.join(ROOT_DIR, 'tests/class_boxes_10_model3_full.dict'),
         split=0.9,
-        classes=classes,
-        remove_coords=False,
-        shuffle=True
+        num_frames=6,
+        frame_size=(128, 128),
+        concat_axis=-1
     )
-    print(dataset.x_train.shape)
+    # dataset = VideoClassifier.create_class_dataset(
+    #     x_path=os.path.join(ROOT_DIR, 'tests/x_train_max.npy'),
+    #     y_path=os.path.join(ROOT_DIR, 'tests/y_train_max.npy'),
+    #     split=0.9,
+    #     classes=classes,
+    #     remove_coords=False,
+    #     shuffle=True
+    # )
+
     logger.info(f'Dataset generator was formed\nclasses {dataset.classes}\ntrain_stat {dataset.train_stat}\n'
                 f'val_stat {dataset.val_stat}\nparameters: {dataset.params}\n')
     # model = torch.jit.load(os.path.join(ROOT_DIR, 'video_class_train/seq data_2/best.pt'))
-    vc = VideoClassifier(num_classes=len(dataset.classes), weights='',
-                         input_size=dataset.x_val.shape[-2:], name=name)
-    print(vc)
+    vc = VideoClassifier(num_classes=len(dataset.classes), weights='', input_size=dataset.x_val.shape[1:], name=name)
     vc.train(
         dataset=dataset,
-        epochs=50,
-        batch_size=4,
-        lr=0.001
+        epochs=200,
+        batch_size=32,
+        lr=0.0001
     )

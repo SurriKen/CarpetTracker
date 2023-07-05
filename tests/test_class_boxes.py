@@ -31,12 +31,11 @@ box_data = {}
 #     - '150x300'
 #     - '60x90'
 #     - '85x150'
-#         - camera 1
-#         - camera 2
-#             - video_name
-#             ...
-#                 - dict(track_num: box sequence)
-#                 ...
+#         - video_name
+#         ...
+#             - camera 1
+#             - camera 2
+#                 - box sequence
 for class_ in os.listdir(dataset):
     box_data[class_] = {}
     for video in os.listdir(os.path.join(dataset, class_, 'camera_1')):
@@ -92,7 +91,8 @@ for class_ in os.listdir(dataset):
                 else:
                     boxes_upd[camera].append([])
         print(class_, video, "boxes_upd", boxes_upd)
-        box_data[class_][video] = boxes_upd
+        if boxes_upd != {camera: [] for camera in os.listdir(os.path.join(dataset, class_))}:
+            box_data[class_][video] = boxes_upd
 
 
 save_data(data=box_data, folder_path=os.path.join(ROOT_DIR, 'tests'), filename=f'class_boxes_10_model3_full')
