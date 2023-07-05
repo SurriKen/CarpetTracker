@@ -94,7 +94,6 @@ class VideoClassifier:
             x1, x2 = [], []
             for batch in x_train:
                 b1, b2 = batch[0], batch[1]
-                # print(x1.shape, x2.shape)
                 sequence = list(range(len(b1)))
                 idx = VideoClassifier.resize_list(sequence, num_frames)
                 b1, b2 = b1[idx], b2[idx]
@@ -147,7 +146,6 @@ class VideoClassifier:
                 disp.plot()
                 plt.savefig(f"{save_path[:-4]}_%.jpg")
                 plt.close()
-        # return cm.astype('float').tolist(), cm_percent.astype('float').tolist()
         return cm
 
     def fill_history(self, epoch: int = 0, train_loss: float = 0, val_loss: float = 0,
@@ -217,8 +215,8 @@ class VideoClassifier:
         return y
 
     @staticmethod
-    def create_box_video_dataset(box_path: str, split: float, num_frames: int = 6, frame_size: tuple = (128, 128),
-                                 concat_axis: int = None) -> VideoClass:
+    def create_box_video_dataset(
+            box_path: str, split: float, num_frames: int = 6, frame_size: tuple = (128, 128)) -> VideoClass:
         vc = VideoClass()
         vc.params['split'] = split
         vc.params['box_path'] = box_path
@@ -229,7 +227,6 @@ class VideoClassifier:
         for class_ in dataset.keys():
             cl_id = vc.classes.index(class_)
             for vid in dataset[class_].keys():
-                # print(class_, vid)
                 seq_frame_1, seq_frame_2 = [], []
                 cameras = list(dataset[class_][vid].keys())
                 if dataset[class_][vid] != {camera: [] for camera in cameras} and len(
@@ -237,8 +234,7 @@ class VideoClassifier:
                     sequence = list(range(len(dataset[class_][vid][cameras[0]]))) if len(
                         dataset[class_][vid][cameras[0]]) \
                         else list(range(len(dataset[class_][vid][cameras[1]])))
-                    # print(dataset[class_][vid])
-                    idx = VideoClassifier.resize_list(sequence, num_frames)
+                    # idx = VideoClassifier.resize_list(sequence, num_frames)
                     for fr in range(len(sequence)):
                         fr1 = np.zeros(frame_size)
                         fr2 = np.zeros(frame_size)
@@ -307,18 +303,13 @@ class VideoClassifier:
 
         st = time.time()
         logger.info("Training is started\n")
-        # dataset.classes = ['upgrade', 'downgrade']
         num_classes = len(dataset.classes)
         num_train_batches = int(len(dataset.x_train) / batch_size)
         train_seq = list(np.arange(len(dataset.x_train)))
         num_val_batches = len(dataset.x_val)
-        # print("num_train_batches", num_train_batches)
 
         optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
-        # optimizer.zero_grad()
-        # optimizer = torch.optim.SGD(self.model.parameters(), lr=lr, momentum=0.9)
         criterion = nn.CrossEntropyLoss()
-        # criterion = nn.MSELoss()
         best_loss, best_acc = 10000., 0.
 
         logger_batch_markers = []
@@ -344,15 +335,10 @@ class VideoClassifier:
             y_true, y_pred = [], []
             for batch in range(num_train_batches):
                 x_batch = dataset.x_train[train_seq[batch * batch_size:(batch + 1) * batch_size]]
-                # x_batch = [dataset.x_train[i] for i in train_seq[batch * batch_size:(batch + 1) * batch_size]]
-                # print("x_batch", f"{batch}/{num_train_batches}", x_batch.shape, train_seq[batch * batch_size:(batch + 1) * batch_size], batch * batch_size, (batch + 1) * batch_size)
                 x_train = self.get_x_batch(x_train=x_batch, num_frames=num_frames, concat_axis=concat_axis)
                 y_batch = dataset.y_train[train_seq[batch * batch_size:(batch + 1) * batch_size]]
-                # y_batch = [dataset.y_train[i] for i in train_seq[batch * batch_size:(batch + 1) * batch_size]]
                 y_train = self.get_y_batch(label=y_batch, num_labels=num_classes)
-                # print(x_train.size, y_train.shape)
                 y_true.extend([dataset.classes[i] for i in y_batch])
-                # print(x_train.shape)
                 output = self.model(x_train)
                 y_pred.extend([dataset.classes[i] for i in np.argmax(output.cpu().detach().numpy(), axis=-1)])
                 loss = criterion(output, y_train)
@@ -363,9 +349,7 @@ class VideoClassifier:
                 optimizer.step()
 
                 if batch + 1 in logger_batch_markers:
-                    save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, f'Train_Confusion Matrix.jpg'
-                                           # f'Ep{epoch + 1}_Train_Confusion Matrix.jpg'
-                                           )
+                    save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, f'Train_Confusion Matrix.jpg')
                     cm = self.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
                     train_acc = self.accuracy(cm)
                     logger.info(
@@ -376,9 +360,7 @@ class VideoClassifier:
                         f"time passed = {time_converter(int(time.time() - st))}"
                     )
 
-            save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, f'Train_Confusion Matrix.jpg'
-                                   # f'Ep{epoch + 1}_Train_Confusion Matrix.jpg'
-                                   )
+            save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, f'Train_Confusion Matrix.jpg')
             cm = self.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
             train_acc = self.accuracy(cm)
             train_loss_hist.append(round(train_loss / num_train_batches, 4))
@@ -386,7 +368,7 @@ class VideoClassifier:
 
             val_loss = 0
             y_true, y_pred = [], []
-            # print("num_val_batches", num_val_batches, dataset.x_val.shape)
+
             with torch.no_grad():
                 for val_batch in range(num_val_batches):
                     x_val = self.get_x_batch(x_train=dataset.x_val[val_batch: val_batch + 1],
@@ -396,13 +378,10 @@ class VideoClassifier:
                     y_true.append(dataset.classes[dataset.y_val[val_batch]])
                     output = self.model(x_val)
                     y_pred.append(dataset.classes[np.argmax(output.cpu().detach().numpy(), axis=-1)[0]])
-                    # y_pred.extend([dataset.classes[i] for i in np.argmax(output.cpu().detach().numpy(), axis=-1)])
                     loss = criterion(output, y_val)
                     val_loss += loss.cpu().detach().numpy()
 
-            save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, f'Val_Confusion Matrix.jpg'
-                                   # f'Ep{epoch + 1}_Val_Confusion Matrix.jpg'
-                                   )
+            save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, f'Val_Confusion Matrix.jpg')
             cm = self.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
             val_acc = self.accuracy(cm)
             val_loss_hist.append(round(val_loss / num_val_batches, 4))
@@ -440,9 +419,6 @@ class VideoClassifier:
         logger.info(f"Training is finished, "
                     f"train time = {time_converter(int(time.time() - st))}\n")
 
-    # except Exception as e:
-    #     logger.error(f"Error training: \n{e}")
-
     def predict(self, array, weights: str = '', classes: list = None) -> list:
         if classes is None:
             classes = []
@@ -461,17 +437,15 @@ if __name__ == "__main__":
     # y = np.load(os.path.join(ROOT_DIR, 'tests/y_train_stat.npy'))
     classes = ['115x200', '115x400', '150x300', '60x90', '85x150']
     st = time.time()
-    # device = 'cuda:0'
+    device = 'cuda:0'
     num_frames = 6
     concat_axis = 2
     name = 'video data'
-    device = 'cpu'
+    # device = 'cpu'
     dataset = VideoClassifier.create_box_video_dataset(
         box_path=os.path.join(ROOT_DIR, 'tests/class_boxes_10_model3_full.dict'),
         split=0.9,
-        # num_frames=6,
         frame_size=(128, 128),
-        # concat_axis=2
     )
     # dataset = VideoClassifier.create_class_dataset(
     #     x_path=os.path.join(ROOT_DIR, 'tests/x_train_max.npy'),
@@ -484,15 +458,13 @@ if __name__ == "__main__":
 
     logger.info(f'Dataset generator was formed\nclasses {dataset.classes}\ntrain_stat {dataset.train_stat}\n'
                 f'val_stat {dataset.val_stat}\nparameters: {dataset.params}\n')
-    # # model = torch.jit.load(os.path.join(ROOT_DIR, 'video_class_train/seq data_2/best.pt'))
     inp = [num_frames, *dataset.x_val[0][0][0].shape]
-    inp[concat_axis-1] = inp[concat_axis-1] * 2
-    # print(tuple(inp))  # [32, 6, 256, 128, 1]
+    inp[concat_axis - 1] = inp[concat_axis - 1] * 2
     vc = VideoClassifier(num_classes=len(dataset.classes), weights='',
                          input_size=tuple(inp), name=name, device=device)
     vc.train(
         dataset=dataset,
-        epochs=200,
+        epochs=100,
         batch_size=32,
         lr=0.0001,
         num_frames=num_frames,
