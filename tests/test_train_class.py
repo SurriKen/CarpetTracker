@@ -130,12 +130,12 @@ class VideoClassifier:
     def get_confusion_matrix(y_true: list, y_pred: list, classes: list, save_path: str = '',
                              get_percent: bool = False) -> np.ndarray:
         cm = confusion_matrix(y_true, y_pred, labels=classes)
-        if save_path and not get_percent:
+        if save_path:
             disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
             disp.plot()
             plt.savefig(save_path)
             plt.close()
-        # cm_percent = None
+
         if get_percent:
             cm_percent = np.zeros_like(cm).astype('float')
             for i in range(len(cm)):
