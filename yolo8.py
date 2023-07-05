@@ -85,7 +85,6 @@ def detect_mono_video_polygon(
         save_boxes_path: str = None,
         save_boxes_mode: str = 'separate',  # single_file
         debug: bool = False,
-        normilize: bool = False,
 ):
     """
     Detect two synchronized videos and save them as one video with boxes to save_path.
@@ -144,7 +143,7 @@ def detect_mono_video_polygon(
                 print("current_boxes", tracker.current_boxes)
 
             for track in tracker.track_list:
-                true_bb[track.get('id')] = track.get('boxes')
+                true_bb[track.get('id')] = [track.get('boxes'), track.get('frame_id')]
 
             frame = PolyTracker.prepare_image(
                 image=frame,
