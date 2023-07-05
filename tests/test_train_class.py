@@ -30,14 +30,14 @@ class Net(nn.Module):
         self.conv2d_2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3, padding='same', device=device)
         # self.conv3d_3 = nn.Conv3d(in_channels=16, out_channels=32, kernel_size=5, padding='same', device=device)
         self.dense_2d = nn.Linear(16 * int(input_size[1] / 4) * int(input_size[2] / 4), num_classes,
-                               device=device)
+                                  device=device)
         # else:
         self.conv3d_1 = nn.Conv3d(in_channels=input_size[-1], out_channels=8, kernel_size=3, padding='same',
                                   device=device)
         self.conv3d_2 = nn.Conv3d(in_channels=8, out_channels=16, kernel_size=3, padding='same', device=device)
         # self.conv3d_3 = nn.Conv3d(in_channels=16, out_channels=32, kernel_size=5, padding='same', device=device)
         self.dense_3d = nn.Linear(16 * int(input_size[1] / 4) * int(input_size[2] / 4) * input_size[0], num_classes,
-                               device=device)
+                                  device=device)
         self.post = nn.Softmax(dim=1)
 
     def forward(self, x):
@@ -89,7 +89,23 @@ class VideoClassifier:
         model_scripted = torch.jit.script(self.model)  # Export to TorchScript
         model_scripted.save(os.path.join(ROOT_DIR, 'video_class_train', name, f"{mode}.pt"))  # Save
 
-    def get_x_batch(self, x_train: list) -> torch.Tensor:
+    def get_x_batch(self, x_train: list, num_frames: int = None, concat_axis: int = None) -> torch.Tensor:
+        if num_frames and 3 < num_frames:
+            x1, x2 = [], []
+            for batch in x_train:
+                b1, b2 = batch[0], batch[1]
+                # print(x1.shape, x2.shape)
+                sequence = list(range(len(b1)))
+                idx = VideoClassifier.resize_list(sequence, num_frames)
+                b1, b2 = b1[idx], b2[idx]
+                x1.append(b1)
+                x2.append(b2)
+            if concat_axis in [1, 2, -1]:
+                x_train = np.concatenate([x1, x2], axis=concat_axis)
+            else:
+                x_train = np.concatenate([x1, x2], axis=1)
+                print("Concat_axis is our of range. Choose from None, 0, 1, 2 or -1. "
+                      "Used default value concat_axis=None")
         x_train = torch.from_numpy(np.array(x_train))
         if 'cuda' in self.device:
             return x_train.to(self.torch_device, dtype=torch.float)
@@ -241,14 +257,16 @@ class VideoClassifier:
                         fr2 = np.expand_dims(fr2, axis=-1)
                         seq_frame_2.append(fr2)
 
-                    seq_frame_1 = np.array(seq_frame_1)[idx]
-                    seq_frame_2 = np.array(seq_frame_2)[idx]
+                    # seq_frame_1 = np.array(seq_frame_1)[idx]
+                    # seq_frame_2 = np.array(seq_frame_2)[idx]
+                    seq_frame_1 = np.array(seq_frame_1)
+                    seq_frame_2 = np.array(seq_frame_2)
                     batch = [[seq_frame_1, seq_frame_2], cl_id]
-                    if concat_axis in [0, 1, 2, -1]:
-                        batch = [np.concatenate([seq_frame_1, seq_frame_2], axis=concat_axis), cl_id]
-                    else:
-                        print("Concat_axis is our of range. Choose from None, 0, 1, 2 or -1. "
-                              "Used default value concat_axis=None")
+                    # if concat_axis in [0, 1, 2, -1]:
+                    #     batch = [np.concatenate([seq_frame_1, seq_frame_2], axis=concat_axis), cl_id]
+                    # else:
+                    #     print("Concat_axis is our of range. Choose from None, 0, 1, 2 or -1. "
+                    #           "Used default value concat_axis=None")
                     data.append(batch)
 
         random.shuffle(data)
@@ -267,7 +285,7 @@ class VideoClassifier:
         return vc
 
     def train(self, dataset: VideoClass, epochs: int, batch_size: int = 1, weights: str = '',
-              lr: float = 0.005) -> None:
+              lr: float = 0.005, num_frames: int = 6, concat_axis: int = 2) -> None:
         # try:
         if weights:
             self.load_model(weights)
@@ -328,12 +346,13 @@ class VideoClassifier:
                 x_batch = dataset.x_train[train_seq[batch * batch_size:(batch + 1) * batch_size]]
                 # x_batch = [dataset.x_train[i] for i in train_seq[batch * batch_size:(batch + 1) * batch_size]]
                 # print("x_batch", f"{batch}/{num_train_batches}", x_batch.shape, train_seq[batch * batch_size:(batch + 1) * batch_size], batch * batch_size, (batch + 1) * batch_size)
-                x_train = self.get_x_batch(x_train=x_batch)
+                x_train = self.get_x_batch(x_train=x_batch, num_frames=num_frames, concat_axis=concat_axis)
                 y_batch = dataset.y_train[train_seq[batch * batch_size:(batch + 1) * batch_size]]
                 # y_batch = [dataset.y_train[i] for i in train_seq[batch * batch_size:(batch + 1) * batch_size]]
                 y_train = self.get_y_batch(label=y_batch, num_labels=num_classes)
                 # print(x_train.size, y_train.shape)
                 y_true.extend([dataset.classes[i] for i in y_batch])
+                # print(x_train.shape)
                 output = self.model(x_train)
                 y_pred.extend([dataset.classes[i] for i in np.argmax(output.cpu().detach().numpy(), axis=-1)])
                 loss = criterion(output, y_train)
@@ -370,7 +389,8 @@ class VideoClassifier:
             # print("num_val_batches", num_val_batches, dataset.x_val.shape)
             with torch.no_grad():
                 for val_batch in range(num_val_batches):
-                    x_val = self.get_x_batch(x_train=dataset.x_val[val_batch: val_batch + 1])
+                    x_val = self.get_x_batch(x_train=dataset.x_val[val_batch: val_batch + 1],
+                                             num_frames=num_frames, concat_axis=concat_axis)
                     y_val = self.get_y_batch(label=dataset.y_val[val_batch: val_batch + 1],
                                              num_labels=num_classes)
                     y_true.append(dataset.classes[dataset.y_val[val_batch]])
@@ -441,15 +461,17 @@ if __name__ == "__main__":
     # y = np.load(os.path.join(ROOT_DIR, 'tests/y_train_stat.npy'))
     classes = ['115x200', '115x400', '150x300', '60x90', '85x150']
     st = time.time()
-    device = 'cuda:0'
+    # device = 'cuda:0'
+    num_frames = 6
+    concat_axis = 2
     name = 'video data'
-    # device = 'cpu'
+    device = 'cpu'
     dataset = VideoClassifier.create_box_video_dataset(
         box_path=os.path.join(ROOT_DIR, 'tests/class_boxes_10_model3_full.dict'),
         split=0.9,
-        num_frames=6,
+        # num_frames=6,
         frame_size=(128, 128),
-        concat_axis=-1
+        # concat_axis=2
     )
     # dataset = VideoClassifier.create_class_dataset(
     #     x_path=os.path.join(ROOT_DIR, 'tests/x_train_max.npy'),
@@ -462,11 +484,17 @@ if __name__ == "__main__":
 
     logger.info(f'Dataset generator was formed\nclasses {dataset.classes}\ntrain_stat {dataset.train_stat}\n'
                 f'val_stat {dataset.val_stat}\nparameters: {dataset.params}\n')
-    # model = torch.jit.load(os.path.join(ROOT_DIR, 'video_class_train/seq data_2/best.pt'))
-    vc = VideoClassifier(num_classes=len(dataset.classes), weights='', input_size=dataset.x_val.shape[1:], name=name)
+    # # model = torch.jit.load(os.path.join(ROOT_DIR, 'video_class_train/seq data_2/best.pt'))
+    inp = [num_frames, *dataset.x_val[0][0][0].shape]
+    inp[concat_axis-1] = inp[concat_axis-1] * 2
+    # print(tuple(inp))  # [32, 6, 256, 128, 1]
+    vc = VideoClassifier(num_classes=len(dataset.classes), weights='',
+                         input_size=tuple(inp), name=name, device=device)
     vc.train(
         dataset=dataset,
         epochs=200,
         batch_size=32,
-        lr=0.0001
+        lr=0.0001,
+        num_frames=num_frames,
+        concat_axis=2
     )
