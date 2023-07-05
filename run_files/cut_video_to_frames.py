@@ -38,8 +38,15 @@ vid = [
     # 'videos/classification_videos/21.06 в 16.44_cam 1.mp4', 'videos/classification_videos/21.06 в 16.44_cam 2.mp4',
     # 'videos/sync_test/05.06.23_cam 1_sync.mp4', 'videos/sync_test/05.06.23 вечер_cam 1_sync.mp4',
     # 'videos/sync_test/19.06 в 13.40_cam 1_sync.mp4',
-    'videos/sync_test/20.06 в 14.02_cam 1_sync.mp4',
-    'videos/sync_test/21.06 в 14.40_cam 1_sync.mp4', 'videos/sync_test/21.06 в 16.44_cam 1_sync.mp4'
+    # 'videos/sync_test/20.06 в 14.02_cam 1_sync.mp4',
+    # 'videos/sync_test/21.06 в 14.40_cam 1_sync.mp4', 'videos/sync_test/21.06 в 16.44_cam 1_sync.mp4'
+    # 'videos/classification_videos/video/test 34_cam 1.mp4', 'videos/classification_videos/video/test 34_cam 2.mp4',
+    # 'videos/classification_videos/video/test 35_cam 1.mp4', 'videos/classification_videos/video/test 35_cam 2.mp4',
+    # 'videos/init/test 31_cam 1.mp4', 'videos/init/test 31_cam 2.mp4',
+    # 'videos/init/test 32_cam 1.mp4', 'videos/init/test 32_cam 2.mp4',
+    # 'videos/init/test 33_cam 1.mp4', 'videos/init/test 33_cam 2.mp4',
+    # 'videos/sync_test/test 34_cam 1_sync.mp4', 'videos/sync_test/test 35_cam 1_sync.mp4',
+    'videos/classification_videos/video/test 36_cam 1.mp4', 'videos/classification_videos/video/test 36_cam 2.mp4'
 ]
 
 FOLDER_FOR_FRAMES = 'datasets'
@@ -52,6 +59,6 @@ for v in vid:
         video_path=v,
         save_path=os.path.join(ROOT_DIR, FOLDER_FOR_FRAMES),
         from_time=0,
-        # to_time=120,
+        to_time=120,
         size=(640, 360)
     )

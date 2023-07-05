@@ -267,7 +267,7 @@ class VideoClassifier:
 
         random.shuffle(data)
         x, y = list(zip(*data))
-        x = np.array(x)
+        # x = np.array(x)
         y = np.array(y)
 
         vc.x_train = x[:int(vc.params['split'] * len(x))]
@@ -334,7 +334,8 @@ class VideoClassifier:
             train_loss, train_acc = 0., 0.
             y_true, y_pred = [], []
             for batch in range(num_train_batches):
-                x_batch = dataset.x_train[train_seq[batch * batch_size:(batch + 1) * batch_size]]
+                # x_batch = dataset.x_train[train_seq[batch * batch_size:(batch + 1) * batch_size]]
+                x_batch = [dataset.x_train[i] for i in train_seq[batch * batch_size:(batch + 1) * batch_size]]
                 x_train = self.get_x_batch(x_train=x_batch, num_frames=num_frames, concat_axis=concat_axis)
                 y_batch = dataset.y_train[train_seq[batch * batch_size:(batch + 1) * batch_size]]
                 y_train = self.get_y_batch(label=y_batch, num_labels=num_classes)
@@ -466,7 +467,7 @@ if __name__ == "__main__":
         dataset=dataset,
         epochs=100,
         batch_size=32,
-        lr=0.0001,
+        lr=0.00005,
         num_frames=num_frames,
         concat_axis=2
     )
