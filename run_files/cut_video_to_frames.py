@@ -1,60 +1,30 @@
 import os
 
+import cv2
+
 from dataset_processing import DatasetProcessing
 from parameters import ROOT_DIR
+from utils import get_name_from_link
 
 # Link to video (from repository/content root)
-vid = [
-    # 'videos/test 1_cam 1.mp4', 'videos/test 1_cam 2.mp4',
-    # 'videos/test 2_cam 1.mp4', 'videos/test 2_cam 2.mp4',
-    # 'videos/test 3_cam 1.mp4', 'videos/test 3_cam 2.mp4',
-    # 'videos/test 4_cam 1.mp4', 'videos/test 4_cam 2.mp4',
-    # 'videos/test 5_cam 1.mp4', 'videos/test 5_cam 2.mp4',
-    # 'videos/classification_videos/13-05 ВО_cam1.mp4', 'videos/classification_videos/13-05 ВО_cam2.mp4',
-    # 'videos/classification_videos/16-10 ЦП_cam1.mp4', 'videos/classification_videos/16-10 ЦП_cam2.mp4',
-    # 'videos/classification_videos/МОС 19-40_cam1.mp4', 'videos/classification_videos/МОС 19-40_cam2.mp4',
-    # 'videos/classification_videos/Ночь 20-11_cam1.mp4', 'videos/classification_videos/Ночь 20-11_cam2.mp4',
-    # 'videos/classification_videos/13_05 ВО_sync.mp4', 'videos/classification_videos/13_05 ВО_2_sync.mp4',
-    # 'videos/classification_videos/16-10 ЦП_sync.mp4', 'videos/classification_videos/16-10 ЦП_2_sync.mp4',
-    # 'videos/classification_videos/МОС,19-40_sync.mp4', 'videos/classification_videos/МОС,19-40_2_sync.mp4',
-    # 'videos/classification_videos/НОЧЬ,20-11_sync.mp4', 'videos/classification_videos/НОЧЬ,20-11_2_sync.mp4',
-    # 'videos/sync_test/test 5_cam 1_sync.mp4', 'videos/sync_test/test 5_cam 2_sync.mp4',
-    # 'videos/test 6_cam 1.mp4', 'videos/test 6_cam 2.mp4',
-    # 'videos/test 21_cam 1.mp4', 'videos/test 21_cam 2.mp4',
-    # 'videos/init/test 22_cam 1.mp4', 'videos/init/test 22_cam 2.mp4',
-    # 'videos/init/test 23_cam 1.mp4', 'videos/init/test 23_cam 2.mp4',
-    # 'videos/init/test 24_cam 1.mp4', 'videos/init/test 24_cam 2.mp4',
-    # 'videos/init/test 25_cam 1.mp4', 'videos/init/test 25_cam 2.mp4',
-    # 'videos/init/test 26_cam 1.mp4', 'videos/init/test 26_cam 2.mp4',
-    # 'videos/init/test 27_cam 1.mp4', 'videos/init/test 27_cam 2.mp4',
-    # 'videos/init/test 28_cam 1.mp4', 'videos/init/test 28_cam 2.mp4',
-    # 'videos/init/test 29_cam 1.mp4', 'videos/init/test 29_cam 2.mp4',
-    # 'videos/init/test 30_cam 1.mp4', 'videos/init/test 30_cam 2.mp4',
-    # 'videos/classification_videos/05.06.23_cam 1.mp4', 'videos/classification_videos/05.06.23_cam 2.mp4',
-    # 'videos/classification_videos/05.06.23 вечер_cam 1.mp4', 'videos/classification_videos/05.06.23 вечер_cam 2.mp4',
-    # 'videos/classification_videos/19.06 в 13.40_cam 1.mp4', 'videos/classification_videos/19.06 в 13.40_cam 2.mp4',
-    # 'videos/classification_videos/20.06 в 14.02_cam 1.mp4', 'videos/classification_videos/20.06 в 14.02_cam 2.mp4',
-    # 'videos/classification_videos/21.06 в 14.40_cam 1.mp4', 'videos/classification_videos/21.06 в 14.40_cam 2.mp4',
-    # 'videos/classification_videos/21.06 в 16.44_cam 1.mp4', 'videos/classification_videos/21.06 в 16.44_cam 2.mp4',
-    # 'videos/sync_test/05.06.23_cam 1_sync.mp4', 'videos/sync_test/05.06.23 вечер_cam 1_sync.mp4',
-    # 'videos/sync_test/19.06 в 13.40_cam 1_sync.mp4',
-    # 'videos/sync_test/20.06 в 14.02_cam 1_sync.mp4',
-    # 'videos/sync_test/21.06 в 14.40_cam 1_sync.mp4', 'videos/sync_test/21.06 в 16.44_cam 1_sync.mp4'
-    # 'videos/classification_videos/video/test 34_cam 1.mp4', 'videos/classification_videos/video/test 34_cam 2.mp4',
-    # 'videos/classification_videos/video/test 35_cam 1.mp4', 'videos/classification_videos/video/test 35_cam 2.mp4',
-    # 'videos/init/test 31_cam 1.mp4', 'videos/init/test 31_cam 2.mp4',
-    # 'videos/init/test 32_cam 1.mp4', 'videos/init/test 32_cam 2.mp4',
-    # 'videos/init/test 33_cam 1.mp4', 'videos/init/test 33_cam 2.mp4',
-    # 'videos/sync_test/test 34_cam 1_sync.mp4', 'videos/sync_test/test 35_cam 1_sync.mp4',
-    'videos/classification_videos/video/test 36_cam 1.mp4', 'videos/classification_videos/video/test 36_cam 2.mp4'
-]
-
+# folder = 'videos/classification_videos/video'
+folder = 'videos/classification_videos/video_sync'
+vid_num_range = [39, 45]
+vid = []
+for i in range(vid_num_range[0], vid_num_range[1]+1):
+    # vid.extend([f'{folder}/test {i}_cam 1.mp4', f'{folder}/test {i}_cam 2.mp4'])
+    vid.extend([f'{folder}/test {i}_cam 1_sync.mp4'])
+# vid = [
+#     'videos/classification_videos/video/test 37_cam 1.mp4', 'videos/classification_videos/video/test 37_cam 2.mp4',
+# ]
+print(vid)
 FOLDER_FOR_FRAMES = 'datasets'
 
 # from_time - time in video to start cutting, sec (default - 0)
 # to_time - time in video to end cutting, sec (default - 10000), if to_time > frame count -> to_time = frame count
 for v in vid:
     v = os.path.join(ROOT_DIR, v)
+    print(v, os.path.isfile(v))
     DatasetProcessing.video2frames(
         video_path=v,
         save_path=os.path.join(ROOT_DIR, FOLDER_FOR_FRAMES),

@@ -35,13 +35,16 @@ video_links = [
      'videos/classification_videos/csv/21.06.23 в 16.44.csv'],
     ['videos/classification_videos/video_sync/test 33_cam 1_sync.mp4',
      'videos/classification_videos/video_sync/test 33_cam 2_sync.mp4',
-     ''],
+     'videos/classification_videos/csv/test 33_27.06 в 15.13.csv'],
     ['videos/classification_videos/video_sync/test 34_cam 1_sync.mp4',
      'videos/classification_videos/video_sync/test 34_cam 2_sync.mp4',
      'videos/classification_videos/csv/test 34_26.06 в 16.48.csv'],
     ['videos/classification_videos/video_sync/test 35_cam 1_sync.mp4',
      'videos/classification_videos/video_sync/test 35_cam 2_sync.mp4',
-     ''],
+     'videos/classification_videos/csv/test 35_26.06 в 18.35.csv'],
+    ['videos/classification_videos/video_sync/test 36_cam 1_sync.mp4',
+     'videos/classification_videos/video_sync/test 36_cam 2_sync.mp4',
+     'videos/classification_videos/csv/test 36_27.06 в 13.49.csv'],
 ]
 save_folder = f'datasets/class_videos_{len(video_links)}'
 

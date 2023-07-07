@@ -345,14 +345,14 @@ class PolyTracker:
         rel, deleted = [], []
         self.count_frames = []
         for i, trck in enumerate(self.track_list):
-            cut = MIN_OBJ_SEQUENCE - 1
-            if len(trck['shift_center']) > MIN_OBJ_SEQUENCE and \
+            cut = MIN_EMPTY_SEQUENCE - 1
+            if len(trck['shift_center']) > MIN_EMPTY_SEQUENCE and \
                     (
-                            max(trck['shift_center'][-MIN_OBJ_SEQUENCE:]) < distance_limit or
-                            max(trck['shift_top_left'][-MIN_OBJ_SEQUENCE:]) < distance_limit or
-                            max(trck['shift_bottom_right'][-MIN_OBJ_SEQUENCE:]) < distance_limit or
-                            max(trck['shift_top_right'][-MIN_OBJ_SEQUENCE:]) < distance_limit or
-                            max(trck['shift_bottom_left'][-MIN_OBJ_SEQUENCE:]) < distance_limit
+                            max(trck['shift_center'][-MIN_EMPTY_SEQUENCE:]) < distance_limit or
+                            max(trck['shift_top_left'][-MIN_EMPTY_SEQUENCE:]) < distance_limit or
+                            max(trck['shift_bottom_right'][-MIN_EMPTY_SEQUENCE:]) < distance_limit or
+                            max(trck['shift_top_right'][-MIN_EMPTY_SEQUENCE:]) < distance_limit or
+                            max(trck['shift_bottom_left'][-MIN_EMPTY_SEQUENCE:]) < distance_limit
                     ):
                 self.move_boxes_from_track_to_dead(
                     frame_idxs=trck['frame_id'][-cut:],
@@ -532,80 +532,6 @@ class PolyTracker:
 
 
 if __name__ == '__main__':
-    # Problem test 17 - Acc=100%, Sen=98,8%, F=99,4%
-    # vid_1 = 'videos/sync_test/test 17_cam 1_sync.mp4'
-    # vid_2 = 'videos/sync_test/test 17_cam 2_sync.mp4'
-    # true_bb_1 = load_data(
-    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 17 (mix+ 100ep, F% Acc% Sen%).dict'))
-    # true_bb_2 = load_data(
-    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 17 (mix+ 100ep, F% Acc% Sen%).dict'))
-    # start, finish = (5 * 60 + 15) * 25, (5 * 60 + 20) * 25
-    # start, finish = (7 * 60 + 13) * 25, (7 * 60 + 17) * 25
-    # start, finish = (9 * 60 + 0) * 25, (9 * 60 + 10) * 25
-    # start, finish = (15 * 60 + 12) * 25, (15 * 60 + 17) * 25
-    # start, finish = (0 * 60 + 0) * 25, (15 * 60 + 38) * 25
-
-    # Problem test 18 - Acc=100%, Sen=93,8%, F=96,9%
-    # vid_1 = 'videos/sync_test/test 18_cam 1_sync.mp4'
-    # vid_2 = 'videos/sync_test/test 18_cam 2_sync.mp4'
-    # true_bb_1 = load_data(
-    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 18 (mix+ 100ep, F% Acc% Sen%).dict'))
-    # true_bb_2 = load_data(
-    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 18 (mix+ 100ep, F% Acc% Sen%).dict'))
-    # # start, finish = (0 * 60 + 40) * 25, (0 * 60 + 45) * 25
-    # # start, finish = (3 * 60 + 0) * 25, (3 * 60 + 8) * 25
-    # # start, finish = (6 * 60 + 25) * 25, (6 * 60 + 32) * 25
-    # # start, finish = (7 * 60 + 41) * 25, (7 * 60 + 45) * 25
-    # # start, finish = (8 * 60 + 20) * 25, (8 * 60 + 40) * 25
-    # # start, finish = (8 * 60 + 36) * 25, (8 * 60 + 38) * 25
-    # # start, finish = (8 * 60 + 55) * 25, (8 * 60 + 58) * 25
-    # # start, finish = (9 * 60 + 8) * 25, (9 * 60 + 12) * 25
-    # # start, finish = (10 * 60 + 18) * 25, (10 * 60 + 22) * 25
-    # # start, finish = (10 * 60 + 20) * 25, (10 * 60 + 40) * 25
-    # # start, finish = (10 * 60 + 59) * 25, (11 * 60 + 4) * 25
-    # start, finish = (0 * 60 + 0) * 25, (11 * 60 + 55) * 25
-
-    # Problem test 19 - Acc=99,3%, Sen=99,3%, F=99,3%
-    # vid_1 = 'videos/sync_test/test 19_cam 1_sync.mp4'
-    # vid_2 = 'videos/sync_test/test 19_cam 2_sync.mp4'
-    # true_bb_1 = load_data(
-    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 19 (mix+ 100ep, F% Acc% Sen%).dict'))
-    # true_bb_2 = load_data(
-    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 19 (mix+ 100ep, F% Acc% Sen%).dict'))
-    # start, finish = (0 * 60 + 5) * 25, (0 * 60 + 15) * 25
-    # start, finish = (7 * 60 + 0) * 25, (7 * 60 + 10) * 25
-    # start, finish = (10 * 60 + 30) * 25, (10 * 60 + 40) * 25
-    # start, finish = (4 * 60 + 25) * 25, (4 * 60 + 30) * 25
-    # start, finish = (4 * 60 + 45) * 25, (4 * 60 + 50) * 25
-    # start, finish = (10 * 60 + 17) * 25, (10 * 60 + 23) * 25
-    # start, finish = (0 * 60 + 0) * 25, (10 * 60 + 49) * 25
-
-    # Problem test 20 - Acc=%, Sen=%, F=%
-    # vid_1 = 'videos/sync_test/test 20_cam 1_sync.mp4'
-    # vid_2 = 'videos/sync_test/test 20_cam 2_sync.mp4'
-    # true_bb_1 = load_data(
-    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 20 (mix+ 100ep, F% Acc% Sen%).dict'))
-    # true_bb_2 = load_data(
-    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 20 (mix+ 100ep, F% Acc% Sen%).dict'))
-    # # start, finish = (0 * 60 + 10) * 25, (0 * 60 + 15) * 25
-    # # start, finish = (8 * 60 + 5) * 25, (8 * 60 + 10) * 25
-    # start, finish = (0 * 60 + 0) * 25, (9 * 60 + 18) * 25
-
-    # Problem test 21 - Acc=%, Sen=%, F=%
-    # vid_1 = 'videos/sync_test/test 21_cam 1_sync.mp4'
-    # vid_2 = 'videos/sync_test/test 21_cam 2_sync.mp4'
-    # true_bb_1 = load_data(
-    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 21 (mix+ 100ep, F% Acc% Sen%).dict'))
-    # print('true_bb_1', len(true_bb_1))
-    # true_bb_2 = load_data(
-    #     pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 21 (mix+ 100ep, F% Acc% Sen%).dict'))
-    # print('true_bb_2', len(true_bb_2))
-    # start, finish = (2 * 60 + 25) * 25, (2 * 60 + 30) * 25
-    # start, finish = (1 * 60 + 0) * 25, (1 * 60 + 10) * 25
-    # start, finish = (3 * 60 + 10) * 25, (3 * 60 + 20) * 25
-    # start, finish = (4 * 60 + 0) * 25, (4 * 60 + 40) * 25
-    # start, finish = (8 * 60 + 19) * 25, (8 * 60 + 30) * 25
-    # start, finish = (0 * 60 + 0) * 25, (7 * 60 + 34) * 25
 
     # Problem test 21 - Acc=%, Sen=%, F=%
     vid_1 = 'videos/sync_test/test 22_cam 1_sync.mp4'
