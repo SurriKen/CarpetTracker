@@ -2,6 +2,8 @@ import inspect
 import os.path
 import random
 from collections import Counter
+
+import cv2
 import numpy as np
 import torch
 import torch.nn as nn
@@ -42,17 +44,20 @@ class Net(nn.Module):
 
     def forward(self, x):
         if len(self.input_size) < 3 or len(self.input_size) > 4:
+            print('len(self.input_size) < 3 or len(self.input_size) > 4')
             x = F.relu(F.normalize(self.dense_1(x)))
             x = F.relu(F.normalize(self.dense_2(x)))
             x = x.reshape(x.size(0), -1)
             x = self.post(self.dense_5(x))
         elif len(self.input_size) == 3:
+            print('len(self.input_size) == 3')
             x = x.permute(0, 3, 1, 2)
             x = F.max_pool2d(F.relu(F.normalize(self.conv2d_1(x))), (2, 2))
             x = F.max_pool2d(F.relu(F.normalize(self.conv2d_2(x))), (2, 2))
             x = x.reshape(x.size(0), -1)
             x = self.post(self.dense_2d(x))
         else:
+            print('len(self.input_size) == 4')
             x = x.permute(0, 4, 1, 2, 3)
             x = F.max_pool3d(F.relu(F.normalize(self.conv3d_1(x))), (1, 2, 2))
             x = F.max_pool3d(F.relu(F.normalize(self.conv3d_2(x))), (1, 2, 2))
@@ -440,7 +445,7 @@ if __name__ == "__main__":
     st = time.time()
     device = 'cuda:0'
     num_frames = 6
-    concat_axis = 2
+    concat_axis = 1
     name = 'video data'
     # device = 'cpu'
     dataset = VideoClassifier.create_box_video_dataset(
@@ -459,15 +464,30 @@ if __name__ == "__main__":
 
     logger.info(f'Dataset generator was formed\nclasses {dataset.classes}\ntrain_stat {dataset.train_stat}\n'
                 f'val_stat {dataset.val_stat}\nparameters: {dataset.params}\n')
-    inp = [num_frames, *dataset.x_val[0][0][0].shape]
-    inp[concat_axis - 1] = inp[concat_axis - 1] * 2
-    vc = VideoClassifier(num_classes=len(dataset.classes), weights='',
-                         input_size=tuple(inp), name=name, device=device)
-    vc.train(
-        dataset=dataset,
-        epochs=100,
-        batch_size=32,
-        lr=0.00005,
-        num_frames=num_frames,
-        concat_axis=2
-    )
+    print(dataset.x_train[0][0].shape)
+    print(dataset.x_train[0][1].shape)
+
+    out = cv2.VideoWriter(os.path.join(ROOT_DIR, 'temp/test.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), 25, (256, 128))
+    for i in range(len(dataset.x_train[0][0])):
+        img = np.concatenate([dataset.x_train[0][0][i], dataset.x_train[0][1][i]], axis=1)
+        img = np.concatenate([img, img, img], axis=-1) * 255
+        img = img.astype(np.uint8)
+        print(i, img.shape, img.max())
+        # cv2.imshow('image', img)
+        cv2.waitKey(500)
+        for _ in range(10):
+            out.write(img)
+    out.release()
+
+    # inp = [num_frames, *dataset.x_val[0][0][0].shape]
+    # inp[concat_axis - 1] = inp[concat_axis - 1] * 2
+    # vc = VideoClassifier(num_classes=len(dataset.classes), weights='',
+    #                      input_size=tuple(inp), name=name, device=device)
+    # vc.train(
+    #     dataset=dataset,
+    #     epochs=1,
+    #     batch_size=32,
+    #     lr=0.00005,
+    #     num_frames=num_frames,
+    #     concat_axis=2
+    # )

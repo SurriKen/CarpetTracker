@@ -22,7 +22,7 @@ model3 = {
     'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_2_mix+++_8n_200ep/weights/best.pt'))
 }
 # vid = os.path.join(ROOT_DIR, 'datasets/class_videos_10/60x90/camera_2/7.mp4')
-dataset = os.path.join(ROOT_DIR, 'datasets/class_videos_10')
+dataset = os.path.join(ROOT_DIR, 'datasets/class_videos_14')
 target_model = model3
 box_data = {}
 # box_data:
@@ -36,8 +36,10 @@ box_data = {}
 #             - camera 1
 #             - camera 2
 #                 - box sequence
+stat = {}
 for class_ in os.listdir(dataset):
     box_data[class_] = {}
+    filled, empty, total = 0, 0, 0
     for video in os.listdir(os.path.join(dataset, class_, 'camera_1')):
         box_data[class_][video] = {}
         for camera in os.listdir(os.path.join(dataset, class_)):
@@ -71,18 +73,23 @@ for class_ in os.listdir(dataset):
             # box_data[class_][camera][video] = boxes_norm
             box_data[class_][video][camera] = boxes_norm
         # print(box_data[class_][video])
+        if box_data[class_][video] == {c for c in os.listdir(os.path.join(dataset, class_))}:
+            empty += 1
+        else:
+            filled += 1
+        total += 1
         min_frame, max_frame = 1000, 0
         boxes_upd = {camera: [] for camera in os.listdir(os.path.join(dataset, class_))}
         for camera in os.listdir(os.path.join(dataset, class_)):
             if box_data[class_][video][camera]:
             # for camera in os.listdir(os.path.join(dataset, class_)):
-                print(box_data[class_][video][camera])
+            #     print(box_data[class_][video][camera])
                 # if box_data[class_][video][camera][1]:
                 if min_frame > min(box_data[class_][video][camera][1]):
                     min_frame = min(box_data[class_][video][camera][1])
                 if max_frame < max(box_data[class_][video][camera][1]):
                     max_frame = max(box_data[class_][video][camera][1])
-        print(min_frame, max_frame)
+        # print(min_frame, max_frame)
         for i in range(min_frame, max_frame+1):
             for camera in os.listdir(os.path.join(dataset, class_)):
                 if box_data[class_][video][camera] and i in box_data[class_][video][camera][1]:
@@ -93,9 +100,12 @@ for class_ in os.listdir(dataset):
         print(class_, video, "boxes_upd", boxes_upd)
         if boxes_upd != {camera: [] for camera in os.listdir(os.path.join(dataset, class_))}:
             box_data[class_][video] = boxes_upd
+    stat[class_] = dict(total=total, filled=filled, empty=empty)
 
+for k, v in stat.items():
+    print(k, v)
 
-save_data(data=box_data, folder_path=os.path.join(ROOT_DIR, 'tests'), filename=f'class_boxes_10_model3_full')
+save_data(data=box_data, folder_path=os.path.join(ROOT_DIR, 'tests'), filename=f'class_boxes_14_model3_full')
 
 
 # def drop_irrelevant(data: list) -> list:

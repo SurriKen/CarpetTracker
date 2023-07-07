@@ -69,57 +69,51 @@ sync_data = {
     # 'videos/init/test 32_cam 2.mp4': [73, ''],
     # 'videos/init/test 33_cam 1.mp4': [19, ''],
     # 'videos/init/test 33_cam 2.mp4': [531, ''],
-    'videos/classification_videos/video/test 36_cam 1.mp4': [11, ''],
-    'videos/classification_videos/video/test 36_cam 2.mp4': [75, ''],
+    # 'videos/classification_videos/video/test 36_cam 1.mp4': [11, ''],
+    # 'videos/classification_videos/video/test 36_cam 2.mp4': [75, ''],
+    'videos/classification_videos/video/test 37_cam 1.mp4': [120, ''],
+    'videos/classification_videos/video/test 37_cam 2.mp4': [54, ''],
+    'videos/classification_videos/video/test 38_cam 1.mp4': [80, ''],
+    'videos/classification_videos/video/test 38_cam 2.mp4': [169, ''],
+    'videos/classification_videos/video/test 39_cam 1.mp4': [92, ''],
+    'videos/classification_videos/video/test 39_cam 2.mp4': [165, ''],
+    'videos/classification_videos/video/test 40_cam 1.mp4': [55, ''],
+    'videos/classification_videos/video/test 40_cam 2.mp4': [156, ''],
+    'videos/classification_videos/video/test 41_cam 1.mp4': [97, ''],
+    'videos/classification_videos/video/test 41_cam 2.mp4': [305, ''],
+    'videos/classification_videos/video/test 42_cam 1.mp4': [178, ''],
+    'videos/classification_videos/video/test 42_cam 2.mp4': [460, ''],
+    'videos/classification_videos/video/test 43_cam 1.mp4': [26, ''],
+    'videos/classification_videos/video/test 43_cam 2.mp4': [335, ''],
+    'videos/classification_videos/video/test 44_cam 1.mp4': [164, ''],
+    'videos/classification_videos/video/test 44_cam 2.mp4': [111, ''],
+    'videos/classification_videos/video/test 45_cam 1.mp4': [35, ''],
+    'videos/classification_videos/video/test 45_cam 2.mp4': [482, ''],
 }
 
 # List of dicts, each dict in formate {'camera 1': 'link to video from camera 1', 'camera 2': 'link to video from camera 2'}
 # all videos must g=have fps=25
 sync_videos = [
-    # {'camera 1': 'videos/test 1_cam 1.mp4', 'camera 2': 'videos/test 1_cam 2.mp4'},
-    # {'camera 1': 'videos/test 2_cam 1.mp4', 'camera 2': 'videos/test 2_cam 2.mp4'},
-    # {'camera 1': 'videos/test 3_cam 1.mp4', 'camera 2': 'videos/test 3_cam 2.mp4'},
-    # {'camera 1': 'videos/test 4_cam 1.mp4', 'camera 2': 'videos/test 4_cam 2.mp4'},
-    # {'camera 1': 'videos/test 5_cam 1.mp4', 'camera 2': 'videos/test 5_cam 2.mp4'},
-    # {'camera 1': 'videos/classification_videos/13-05 ВО_cam1.mp4', 'camera 2': 'videos/classification_videos/13-05 ВО_cam2.mp4'},
-    # {'camera 1': 'videos/classification_videos/16-10 ЦП_cam1.mp4', 'camera 2': 'videos/classification_videos/16-10 ЦП_cam2.mp4'},
-    # {'camera 1': 'videos/classification_videos/МОС 19-40_cam1.mp4', 'camera 2': 'videos/classification_videos/МОС 19-40_cam2.mp4'},
-    # {'camera 1': 'videos/classification_videos/Ночь 20-11_cam1.mp4', 'camera 2': 'videos/classification_videos/Ночь 20-11_cam2.mp4'},
-    # {'camera 1': 'videos/test 21_cam 1.mp4', 'camera 2': 'videos/test 21_cam 2.mp4'},
-    # {'camera 1': 'videos/init/test 22_cam 1.mp4', 'camera 2': 'videos/init/test 22_cam 2.mp4'},
-    # {'camera 1': 'videos/init/test 23_cam 1.mp4', 'camera 2': 'videos/init/test 23_cam 2.mp4'},
-    # {'camera 1': 'videos/init/test 24_cam 1.mp4', 'camera 2': 'videos/init/test 24_cam 2.mp4'},
-    # {'camera 1': 'videos/init/test 25_cam 1.mp4', 'camera 2': 'videos/init/test 25_cam 2.mp4'},
-    # {'camera 1': 'videos/init/test 26_cam 1.mp4', 'camera 2': 'videos/init/test 26_cam 2.mp4'},
-    # {'camera 1': 'videos/init/test 27_cam 1.mp4', 'camera 2': 'videos/init/test 27_cam 2.mp4'},
-    # {'camera 1': 'videos/init/test 28_cam 1.mp4', 'camera 2': 'videos/init/test 28_cam 2.mp4'},
-    # {'camera 1': 'videos/init/test 29_cam 1.mp4', 'camera 2': 'videos/init/test 29_cam 2.mp4'},
-    # {'camera 1': 'videos/init/test 30_cam 1.mp4', 'camera 2': 'videos/init/test 30_cam 2.mp4'},
-    # {'camera 1': 'videos/classification_videos/05.06.23_cam 1.mp4',
-    #  'camera 2': 'videos/classification_videos/05.06.23_cam 2.mp4'},
-    # {'camera 1': 'videos/classification_videos/05.06.23 вечер_cam 1.mp4',
-    #  'camera 2': 'videos/classification_videos/05.06.23 вечер_cam 2.mp4'},
-    # {'camera 1': 'videos/classification_videos/19.06 в 13.40_cam 1.mp4',
-    #  'camera 2': 'videos/classification_videos/19.06 в 13.40_cam 2.mp4'},
-    # {'camera 1': 'videos/classification_videos/20.06 в 14.02_cam 1.mp4',
-    #  'camera 2': 'videos/classification_videos/20.06 в 14.02_cam 2.mp4'},
-    # {'camera 1': 'videos/classification_videos/21.06 в 14.40_cam 1.mp4',
-    #  'camera 2': 'videos/classification_videos/21.06 в 14.40_cam 2.mp4'},
-    # {'camera 1': 'videos/classification_videos/21.06 в 16.44_cam 1.mp4',
-    #  'camera 2': 'videos/classification_videos/21.06 в 16.44_cam 2.mp4'},
-    # {'camera 1': 'videos/classification_videos/video/test 34_cam 1.mp4',
-    #  'camera 2': 'videos/classification_videos/video/test 34_cam 2.mp4'},
-    # {'camera 1': 'videos/classification_videos/video/test 35_cam 1.mp4',
-    #  'camera 2': 'videos/classification_videos/video/test 35_cam 2.mp4'},
-    # {'camera 1': 'videos/init/test 31_cam 1.mp4',
-    #  'camera 2': 'videos/init/test 31_cam 2.mp4'},
-    # {'camera 1': 'videos/init/test 32_cam 1.mp4',
-    #  'camera 2': 'videos/init/test 32_cam 2.mp4'},
-    # {'camera 1': 'videos/init/test 33_cam 1.mp4',
-    #  'camera 2': 'videos/init/test 33_cam 2.mp4'},
-    {'camera 1': 'videos/classification_videos/video/test 36_cam 1.mp4',
-     'camera 2': 'videos/classification_videos/video/test 36_cam 2.mp4'},
+    {'camera 1': 'videos/classification_videos/video/test 37_cam 1.mp4',
+     'camera 2': 'videos/classification_videos/video/test 37_cam 2.mp4'},
+    {'camera 1': 'videos/classification_videos/video/test 38_cam 1.mp4',
+     'camera 2': 'videos/classification_videos/video/test 38_cam 2.mp4'},
+    {'camera 1': 'videos/classification_videos/video/test 39_cam 1.mp4',
+     'camera 2': 'videos/classification_videos/video/test 39_cam 2.mp4'},
+    {'camera 1': 'videos/classification_videos/video/test 40_cam 1.mp4',
+     'camera 2': 'videos/classification_videos/video/test 40_cam 2.mp4'},
+    {'camera 1': 'videos/classification_videos/video/test 41_cam 1.mp4',
+     'camera 2': 'videos/classification_videos/video/test 41_cam 2.mp4'},
+    {'camera 1': 'videos/classification_videos/video/test 42_cam 1.mp4',
+     'camera 2': 'videos/classification_videos/video/test 42_cam 2.mp4'},
+    {'camera 1': 'videos/classification_videos/video/test 43_cam 1.mp4',
+     'camera 2': 'videos/classification_videos/video/test 43_cam 2.mp4'},
+    {'camera 1': 'videos/classification_videos/video/test 44_cam 1.mp4',
+     'camera 2': 'videos/classification_videos/video/test 44_cam 2.mp4'},
+    {'camera 1': 'videos/classification_videos/video/test 45_cam 1.mp4',
+     'camera 2': 'videos/classification_videos/video/test 45_cam 2.mp4'},
 ]
+save_folder = 'videos/classification_videos/video_sync'
 
 for pair in sync_videos:
     # save_name_1 = f"{pair.get('camera 1').split('/')[-1].split('.')[0]}_sync.mp4"
@@ -131,7 +125,7 @@ for pair in sync_videos:
     print(save_name_1)
     DatasetProcessing.synchronize_video(
         video_path=os.path.join(ROOT_DIR, pair.get('camera 1')),
-        save_path=os.path.join(ROOT_DIR, f"videos/sync_test/{save_name_1}"),
+        save_path=os.path.join(ROOT_DIR, f"{save_folder}/{save_name_1}"),
         from_frame=sync_data.get(pair.get('camera 1'))[0]
     )
     vn = pair.get('camera 2').split('/')[-1].split('.')[:-1]
@@ -142,6 +136,6 @@ for pair in sync_videos:
     print(save_name_2)
     DatasetProcessing.synchronize_video(
         video_path=os.path.join(ROOT_DIR, pair.get('camera 2')),
-        save_path=os.path.join(ROOT_DIR, f"videos/sync_test/{save_name_2}"),
+        save_path=os.path.join(ROOT_DIR, f"{save_folder}/{save_name_2}"),
         from_frame=sync_data.get(pair.get('camera 2'))[0]
     )
