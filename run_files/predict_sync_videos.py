@@ -19,31 +19,11 @@ model3 = {
     'model_1': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_1_mix+++_8n_200ep/weights/best.pt')),
     'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_2_mix+++_8n_200ep/weights/best.pt'))
 }
-model_univ = {
-    'model_1': YOLO(os.path.join(ROOT_DIR, 'runs/detect/univ_200ep3/weights/best.pt')),
-    'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/univ_200ep3/weights/best.pt'))
-}
-model_diff = {
-    'model_1': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_1_diff_100ep/weights/best.pt')),
-    'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_2_diff_100ep/weights/best.pt'))
-}
-model_masked = {
-    'model_1': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_1_masked_100ep/weights/best.pt')),
-    'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_2_masked_100ep/weights/best.pt'))
-}
-model_red = {
-    'model_1': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_1_red_100ep/weights/best.pt')),
-    'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_2_red_100ep/weights/best.pt'))
-}
 
 models = [
     # (model1, "(mix+ 100ep, F% Acc% Sen%)"),
     # (model2, "(mix++ 150ep, F% Acc% Sen%)"),
     (model3, "(mix+++ 200ep, F% Acc% Sen%)"),
-    # (model_univ, "(mix+++ 200ep, F% Acc% Sen%)"),
-    # (model_diff, "(diff 100ep, F% Acc% Sen%)"),
-    # (model_masked, "(masked 100ep, F% Acc% Sen%)"),
-    # (model_red, "(red 100ep, F% Acc% Sen%)"),
 ]
 video_paths = [
     {

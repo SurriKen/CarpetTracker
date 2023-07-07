@@ -9,7 +9,7 @@ from utils import get_name_from_link
 # Link to video (from repository/content root)
 # folder = 'videos/classification_videos/video'
 folder = 'videos/classification_videos/video_sync'
-vid_num_range = [37, 45]
+vid_num_range = [39, 45]
 vid = []
 for i in range(vid_num_range[0], vid_num_range[1]+1):
     # vid.extend([f'{folder}/test {i}_cam 1.mp4', f'{folder}/test {i}_cam 2.mp4'])
@@ -29,6 +29,6 @@ for v in vid:
         video_path=v,
         save_path=os.path.join(ROOT_DIR, FOLDER_FOR_FRAMES),
         from_time=0,
-        # to_time=120,
+        to_time=120,
         size=(640, 360)
     )
