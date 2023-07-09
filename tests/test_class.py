@@ -5,60 +5,19 @@ import pandas as pd
 
 from parameters import ROOT_DIR
 
-
-vid = [
-    ['videos/classification_videos/video_sync/13-05 ВО_cam1_sync.mp4',
-     'videos/classification_videos/video_sync/13-05 ВО_cam2_sync.mp4',
-     'videos/classification_videos/csv/13-05 ВО.csv'],
-    ['videos/classification_videos/video_sync/16-10 ЦП_cam1_sync.mp4',
-     'videos/classification_videos/video_sync/16-10 ЦП_cam2_sync.mp4',
-     'videos/classification_videos/csv/16-10 ЦП.csv'],
-    ['videos/classification_videos/video_sync/МОС 19-40_cam1_sync.mp4',
-     'videos/classification_videos/video_sync/МОС 19-40_cam2_sync.mp4',
-     'videos/classification_videos/csv/МОС 19-40.csv'],
-    ['videos/classification_videos/video_sync/Ночь 20-11_cam1_sync.mp4',
-     'videos/classification_videos/video_sync/Ночь 20-11_cam2_sync.mp4',
-     'videos/classification_videos/csv/Ночь 20-11.csv'],
-    ['videos/classification_videos/video_sync/05.06.23_cam 1_sync.mp4',
-     'videos/classification_videos/video_sync/05.06.23_cam 2_sync.mp4',
-     'videos/classification_videos/csv/05.06.23.csv'],
-    ['videos/classification_videos/video_sync/05.06.23 вечер_cam 1_sync.mp4',
-     'videos/classification_videos/video_sync/05.06.23 вечер_cam 2_sync.mp4',
-     'videos/classification_videos/csv/05.06.23 вечер.csv'],
-    ['videos/classification_videos/video_sync/19.06 в 13.40_cam 1_sync.mp4',
-     'videos/classification_videos/video_sync/19.06 в 13.40_cam 2_sync.mp4',
-     'videos/classification_videos/csv/19.06.23 в 13.40.csv'],
-    ['videos/classification_videos/video_sync/20.06 в 14.02_cam 1_sync.mp4',
-     'videos/classification_videos/video_sync/20.06 в 14.02_cam 2_sync.mp4',
-     'videos/classification_videos/csv/20.06.23 в 14.02.csv'],
-    ['videos/classification_videos/video_sync/21.06 в 14.40_cam 1_sync.mp4',
-     'videos/classification_videos/video_sync/21.06 в 14.40_cam 2_sync.mp4',
-     'videos/classification_videos/csv/21.06.23 в 14.40.csv'],
-    ['videos/classification_videos/video_sync/21.06 в 16.44_cam 1_sync.mp4',
-     'videos/classification_videos/video_sync/21.06 в 16.44_cam 2_sync.mp4',
-     'videos/classification_videos/csv/21.06.23 в 16.44.csv'],
-    ['videos/classification_videos/video_sync/test 33_cam 1_sync.mp4',
-     'videos/classification_videos/video_sync/test 33_cam 2_sync.mp4',
-     'videos/classification_videos/csv/test 33_27.06 в 15.13.csv'],
-    ['videos/classification_videos/video_sync/test 34_cam 1_sync.mp4',
-     'videos/classification_videos/video_sync/test 34_cam 2_sync.mp4',
-     'videos/classification_videos/csv/test 34_26.06 в 16.48.csv'],
-    ['videos/classification_videos/video_sync/test 35_cam 1_sync.mp4',
-     'videos/classification_videos/video_sync/test 35_cam 2_sync.mp4',
-     'videos/classification_videos/csv/test 35_26.06 в 18.35.csv'],
-    ['videos/classification_videos/video_sync/test 36_cam 1_sync.mp4',
-     'videos/classification_videos/video_sync/test 36_cam 2_sync.mp4',
-     'videos/classification_videos/csv/test 36_27.06 в 13.49.csv'],
-]
+csv_files = os.listdir(os.path.join(ROOT_DIR, 'videos/classification_videos/csv'))
 stat = {}
-for v in vid:
-    csv = os.path.join(ROOT_DIR, v[2])
+for v in csv_files:
+    csv = os.path.join(ROOT_DIR, 'videos/classification_videos/csv', v)
     obj = 0
     data = pd.read_csv(csv)
-    carpet_size = list(data['Размер'])
+    try:
+        carpet_size = list(data['Размер'])
+    except:
+        carpet_size = list(data['размер'])
     # print(carpet_size)
     ccc = dict(Counter(carpet_size))
-    print(v[2], ccc)
+    print(v, ccc)
     for k in ccc.keys():
         if k in stat.keys():
             stat[k] += ccc[k]
@@ -66,7 +25,7 @@ for v in vid:
             stat[k] = ccc[k]
 
 for k, v in stat.items():
-    print(k, v)
+    print(k, '-', v)
 
 # videos/classification_videos/csv/13-05 ВО.csv {'115*200': 57, '85*150': 56, '60*90': 7, '150*300': 33}
 # videos/classification_videos/csv/16-10 ЦП.csv {'85*150': 57, '115*200': 60, '60*90': 8, '150*300': 27, '115*400': 5}

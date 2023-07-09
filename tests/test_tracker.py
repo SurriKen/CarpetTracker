@@ -11,24 +11,18 @@ from torchvision.utils import draw_bounding_boxes
 from parameters import ROOT_DIR, MIN_EMPTY_SEQUENCE, MIN_OBJ_SEQUENCE, SPEED_LIMIT_PERCENT, DEAD_LIMIT_PERCENT
 from utils import load_data, time_converter, get_colors, add_headline_to_cv_image, logger
 
-# imp1 = 'datasets/test 16_cam 1_0s-639s/frames/04424.png'
-# imp2 = 'datasets/test 16_cam 2_0s-691s/frames/04424.png'
-#
-# img1 = Image.open(os.path.join(ROOT_DIR, imp1))
-# img2 = Image.open(os.path.join(ROOT_DIR, imp2))
+# POLY_CAM1_IN = [[110, 0], [410, 650], [725, 415], [545, 0]]
+# POLY_CAM1_OUT = [[0, 0], [330, 690], [540, 705], [810, 630]([775, 525]), [870, 465], [855, 315], [760, 0]]
+# POLY_CAM2_IN = [[140, 0], [140, 150], [260, 185], [260, 0]]
+# POLY_CAM2_OUT = [[100, 0], [100, 140], [105, 195], [160, 255], [250, 250], [310, 200], [310, 0]]
 
-# POLY_CAM1_IN = [[240, 270], [410, 635], [480, 685], [705, 505], [550, 110]]
-# POLY_CAM1_OUT = [[85, 350], [285, 755], [550, 730], [830, 500], [690, 35]]
-# POLY_CAM2_IN = [[140, 0], [140, 200], [230, 235], [260, 185], [260, 0]]
-# POLY_CAM2_OUT = [[80, 0], [80, 220], [240, 290], [330, 195], [330, 0]]
+POLY_CAM1_IN = [[0.0573, 0.0], [0.2135, 0.6019], [0.3776, 0.3843], [0.2839, 0.0]]
+POLY_CAM1_OUT = [[0.0, 0.0], [0.1718, 0.6389], [0.2813, 0.6528], [0.4219, 0.5833], [0.4531, 0.4306],
+                 [0.4453, 0.2917], [0.3958, 0.0]]
+POLY_CAM2_IN = [[0.2187, 0.0], [0.2187, 0.4167], [0.4062, 0.5139], [0.4062, 0.0]]
+POLY_CAM2_OUT = [[0.1563, 0.0], [0.1563, 0.3889], [0.1641, 0.5417], [0.25, 0.7083],
+                 [0.3906, 0.6944], [0.4844, 0.5556], [0.4844, 0.0]]
 
-POLY_CAM1_IN = [[110, 0], [410, 650], [725, 415], [545, 0]]
-POLY_CAM1_OUT = [[0, 0], [0, 120], [270, 750], [540, 735], [775, 525], [855, 315], [760, 0]]
-POLY_CAM2_IN = [[140, 0], [140, 150], [260, 185], [260, 0]]
-POLY_CAM2_OUT = [[80, 0], [80, 140], [120, 190], [260, 235], [335, 200], [335, 0]]
-
-# frame_path = 'datasets/test 16_cam 1_0s-639s/frames'
-# frames = sorted(os.listdir(os.path.join(ROOT_DIR, frame_path)))
 GLOBAL_STEP = 0.1
 
 
@@ -180,12 +174,13 @@ class PolyTracker:
         :return: initial box, ex. [x1, y1, x2, y2] if not match to any dead tracks
                 or empty list if box is in dead track
         """
+        # new_box = [int(x) for x in new_box[:4]]
         drop_keys = []
         find = False
         for k in self.dead_boxes.keys():
             shift_center, shift_top_left, shift_top_right, shift_bottom_left, shift_bottom_right = \
                 self.get_full_distance(box1=self.dead_boxes.get(k).get('coords')[-1], box2=new_box)
-            if frame_id - self.dead_boxes.get(k).get('frame_id')[-1] > MIN_OBJ_SEQUENCE:
+            if frame_id - self.dead_boxes.get(k).get('frame_id')[-1] > MIN_EMPTY_SEQUENCE:
                 drop_keys.append(k)
             elif shift_center < distance_limit or shift_top_left < distance_limit or \
                     shift_top_right < distance_limit or shift_bottom_left < distance_limit or \
@@ -199,8 +194,7 @@ class PolyTracker:
 
         if find:
             return []
-        else:
-            return new_box
+        return new_box
 
     def fill_dead_box_form(self, key, frame_id, box):
         """
@@ -210,6 +204,7 @@ class PolyTracker:
         :param frame_id: int
         :param box: list of coordinates, ex. [x1, y1, x2, y2]
         """
+        # box = [int(x) for x in box[:4]]
         self.dead_boxes[key]['frame_id'].append(frame_id)
         self.dead_boxes[key]['coords'].append(box)
 
@@ -260,76 +255,122 @@ class PolyTracker:
             print(f"-- frame_id={frame_id}, count {count}, last_state={last_state}, new_state={new_state}, "
                   f"last_track_seq={last_track_seq}, new_track_seq={new_track_seq}")
 
+        limit = MIN_EMPTY_SEQUENCE
+        cross_acceptable = 2
         if new_state == [False, False]:
             pass
 
+        # elif last_state == [False, False] and new_state == [True, False]:
         elif (last_state == [False, False] and new_state == [True, False]) or \
                 (last_state == [True, False] and new_state == [True, False]):
             if debug:
                 print(1)
-            last_track_seq['tr1'] = new_track_seq['tr1']
+            last_track_seq['tr1'] = sorted(new_track_seq['tr1'])
             count += 1
 
+        # elif last_state == [True, False] and new_state == [True, False]:
+        #     if debug:
+        #         print(1, 0)
+        #     if min(new_track_seq['tr1']) - max(last_track_seq['tr1']) <= limit and \
+        #             len(list(set(new_track_seq['tr1']) & set(last_track_seq['tr1']))) <= cross_acceptable:
+        #         last_track_seq['tr1'] = sorted(list(set(last_track_seq['tr1'] + new_track_seq['tr1'])))
+        #     else:
+        #         last_track_seq['tr1'] = sorted(new_track_seq['tr1'])
+        #         count += 1
+
+        # elif last_state == [False, False] and new_state == [False, True]:
         elif (last_state == [False, False] and new_state == [False, True]) or \
-                (last_state == [False, True] and new_state == [False, True]):
+                 (last_state == [False, True] and new_state == [False, True]):
             if debug:
                 print(2)
-            last_track_seq['tr2'] = new_track_seq['tr2']
+            last_track_seq['tr2'] = sorted(new_track_seq['tr2'])
             count += 1
+
+        # elif last_state == [False, True] and new_state == [False, True]:
+        #     if debug:
+        #         print(0, 1)
+        #     if min(new_track_seq['tr2']) - max(last_track_seq['tr2']) <= limit and \
+        #             len(list(set(new_track_seq['tr2']) & set(last_track_seq['tr2']))) <= cross_acceptable:
+        #         last_track_seq['tr2'] = sorted(list(set(last_track_seq['tr2'] + new_track_seq['tr2'])))
+        #     else:
+        #         last_track_seq['tr2'] = sorted(new_track_seq['tr2'])
+        #         count += 1
 
         elif last_state == [True, False] and new_state == [False, True]:
-            if min(new_track_seq['tr2']) - max(last_track_seq['tr1']) > MIN_EMPTY_SEQUENCE:
+            if min(new_track_seq['tr2']) - max(last_track_seq['tr1']) > limit:
                 if debug:
-                    print(3, min(new_track_seq['tr2']), max(last_track_seq['tr1']), MIN_EMPTY_SEQUENCE)
+                    print(3, min(new_track_seq['tr2']), max(last_track_seq['tr1']), limit)
                 last_track_seq['tr1'] = []
-                last_track_seq['tr2'] = new_track_seq['tr2']
+                last_track_seq['tr2'] = sorted(new_track_seq['tr2'])
                 count += 1
             else:
                 if debug:
-                    print(4, min(new_track_seq['tr2']), max(last_track_seq['tr1']), MIN_EMPTY_SEQUENCE)
-                last_track_seq['tr2'] = new_track_seq['tr2']
+                    print(4, min(new_track_seq['tr2']), max(last_track_seq['tr1']), limit)
+                last_track_seq['tr2'] = sorted(new_track_seq['tr2'])
 
         elif last_state == [False, True] and new_state == [True, False]:
-            if min(new_track_seq['tr1']) - max(last_track_seq['tr2']) > MIN_EMPTY_SEQUENCE:
+            if min(new_track_seq['tr1']) - max(last_track_seq['tr2']) > limit:
                 if debug:
-                    print(5, min(new_track_seq['tr1']), max(last_track_seq['tr2']), MIN_EMPTY_SEQUENCE)
+                    print(5, min(new_track_seq['tr1']), max(last_track_seq['tr2']), limit)
                 last_track_seq['tr2'] = []
-                last_track_seq['tr1'] = new_track_seq['tr1']
+                last_track_seq['tr1'] = sorted(new_track_seq['tr1'])
                 count += 1
             else:
                 if debug:
-                    print(6, min(new_track_seq['tr1']), max(last_track_seq['tr2']), MIN_EMPTY_SEQUENCE)
-                last_track_seq['tr1'] = new_track_seq['tr1']
+                    print(6, min(new_track_seq['tr1']), max(last_track_seq['tr2']), limit)
+                last_track_seq['tr1'] = sorted(new_track_seq['tr1'])
 
         elif last_state == [True, True] and new_state == [True, False]:
-            # if min(new_track_seq['tr1']) - max(
-            #         [max(last_track_seq['tr1']), max(last_track_seq['tr2'])]) > MIN_EMPTY_SEQUENCE:
             if debug:
                 print(7)
-            last_track_seq['tr2'] = []
-            last_track_seq['tr1'] = new_track_seq['tr1']
-            count += 1
+            # if min(new_track_seq['tr1']) - max(last_track_seq['tr1']) <= limit and \
+            #         len(list(set(new_track_seq['tr1']) & set(last_track_seq['tr1']))) <= cross_acceptable:
+            #     last_track_seq['tr1'] = sorted(list(set(last_track_seq['tr1'] + new_track_seq['tr1'])))
             # else:
-            #     print(8)
-            #     last_track_seq['tr1'] = new_track_seq['tr1']
+            last_track_seq['tr2'] = []
+            last_track_seq['tr1'] = sorted(new_track_seq['tr1'])
+            count += 1
 
         elif last_state == [True, True] and new_state == [False, True]:
-            # if min(new_track_seq['tr2']) - max(
-            #         [max(last_track_seq['tr1']), max(last_track_seq['tr2'])]) > MIN_EMPTY_SEQUENCE:
             if debug:
                 print(9)
-            last_track_seq['tr1'] = []
-            last_track_seq['tr2'] = new_track_seq['tr2']
-            count += 1
+            # if min(new_track_seq['tr2']) - max(last_track_seq['tr2']) <= limit and \
+            #         len(list(set(new_track_seq['tr2']) & set(last_track_seq['tr2']))) <= cross_acceptable:
+            #     last_track_seq['tr2'] = sorted(list(set(last_track_seq['tr2'] + new_track_seq['tr2'])))
             # else:
-            #     print(10)
-            #     last_track_seq['tr2'] = new_track_seq['tr2']
+            last_track_seq['tr1'] = []
+            last_track_seq['tr2'] = sorted(new_track_seq['tr2'])
+            count += 1
+
+        # elif last_state == [False, True] and new_state == [True, True]:
+        #     if debug:
+        #         print(10)
+        #     if min(new_track_seq['tr2']) - max(last_track_seq['tr2']) <= limit and \
+        #             len(list(set(new_track_seq['tr2']) & set(last_track_seq['tr2']))) <= cross_acceptable:
+        #         last_track_seq['tr2'] = sorted(list(set(last_track_seq['tr2'] + new_track_seq['tr2'])))
+        #         last_track_seq['tr1'] = sorted(new_track_seq['tr1'])
+        #     else:
+        #         last_track_seq['tr1'] = sorted(new_track_seq['tr1'])
+        #         last_track_seq['tr2'] = sorted(new_track_seq['tr2'])
+        #         count += 1
+        #
+        # elif last_state == [True, False] and new_state == [True, True]:
+        #     if debug:
+        #         print(11)
+        #     if min(new_track_seq['tr1']) - max(last_track_seq['tr1']) <= limit and \
+        #             len(list(set(new_track_seq['tr1']) & set(last_track_seq['tr1']))) <= cross_acceptable:
+        #         last_track_seq['tr1'] = sorted(list(set(last_track_seq['tr1'] + new_track_seq['tr1'])))
+        #         last_track_seq['tr2'] = sorted(new_track_seq['tr2'])
+        #     else:
+        #         last_track_seq['tr1'] = sorted(new_track_seq['tr1'])
+        #         last_track_seq['tr2'] = sorted(new_track_seq['tr2'])
+        #         count += 1
 
         else:
             if debug:
-                print(11)
-            last_track_seq['tr1'] = new_track_seq['tr1']
-            last_track_seq['tr2'] = new_track_seq['tr2']
+                print(12)
+            last_track_seq['tr1'] = sorted(new_track_seq['tr1'])
+            last_track_seq['tr2'] = sorted(new_track_seq['tr2'])
             count += 1
 
         return count, last_track_seq
@@ -341,19 +382,143 @@ class PolyTracker:
                 return True
         return False
 
-    def update_track_list(self, distance_limit: float, debug: bool = False):
+    def check_closest_track(self, check_id, speed_limit):
+        check_track = self.track_list[check_id]
+        print("check_track", check_track, check_id)
+        last_fr = check_track['frame_id'][-1]
+        closest_id = []
+        for i, track in enumerate(self.track_list):
+            intersection = list(set(track['frame_id']) & set(check_track['frame_id']))
+            if track != check_track and min(track['frame_id']) - max(check_track['frame_id']) < MIN_EMPTY_SEQUENCE \
+                    and not len(intersection):
+                fr_id = 0
+                for fr in track['frame_id']:
+                    if fr > last_fr:
+                        fr_id = track['frame_id'].index(fr)
+                        break
+                distance = self.get_distance(check_track['boxes'][-1], track['boxes'][fr_id]) / (
+                        track['frame_id'][fr_id] - last_fr)
+                closest_id.append((distance, i, fr, last_fr))
+            elif track != check_track and min(track['frame_id']) - max(check_track['frame_id']) < MIN_EMPTY_SEQUENCE \
+                    and 0 < len(intersection) < 3:
+                min_frame = min(intersection)
+                fr_id = 0
+                for fr in check_track['frame_id']:
+                    if fr >= min_frame:
+                        break
+                    fr_id = check_track['frame_id'].index(fr)
+                distance = self.get_distance(check_track['boxes'][fr_id],
+                                             track['boxes'][track['boxes'].index(min_frame)])
+                closest_id.append((distance, i))
+        id = None
+        if closest_id:
+            closest_id = sorted(closest_id)
+            # if closest_id[0][0] < speed_limit:
+            id = closest_id[0][1]
+        # print('closest_id', closest_id, 'id', id)
+        # intersection = list(set(track_list[closest_id]['frames']) & set(check_track['frames']))
+        if id is not None:
+            min_frame = min([min(check_track['frame_id']), min(self.track_list[id]['frame_id'])])
+            max_frame = max([max(check_track['frame_id']), max(self.track_list[id]['frame_id'])])
+            new_track = self.add_track()
+            # new_track['id'] = track_list[closest_id]['id']
+            for fr in range(min_frame, max_frame):
+                if fr in self.track_list[id]['frame_id'] and fr in check_track['frame_id']:
+                    # print(1)
+                    ch_fr_id = check_track['frame_id'].index(fr) - 1 if check_track['frame_id'].index(fr) > 0 else 0
+                    fr_id = self.track_list[id]['frame_id'].index(fr) if check_track['frame_id'].index(fr) > 0 \
+                        else self.track_list[id]['frame_id'].index(fr) + 1
+                    dist1 = self.get_distance(check_track['boxes'][ch_fr_id], self.track_list[id]['boxes'][fr_id])
+                    dist2 = self.get_distance(
+                        self.track_list[id]['boxes'][fr_id - 1], self.track_list[id]['boxes'][fr_id])
+                    if dist1 > dist2:
+                        new_track = self.fill_track(
+                            track=new_track,
+                            id=self.track_list[id]['id'],
+                            frame_id=fr,
+                            box=self.track_list[id]['boxes'][self.track_list[id]['frame_id'].index(fr)],
+                            check_in=self.track_list[id]['check_in'][self.track_list[id]['frame_id'].index(fr)],
+                            check_out=self.track_list[id]['check_out'][self.track_list[id]['frame_id'].index(fr)]
+                        )
+                    else:
+                        new_track = self.fill_track(
+                            track=new_track,
+                            id=self.track_list[id]['id'],
+                            frame_id=fr,
+                            box=check_track['boxes'][check_track['frame_id'].index(fr)],
+                            check_out=check_track['check_out'][check_track['frame_id'].index(fr)],
+                            check_in=check_track['check_in'][check_track['frame_id'].index(fr)],
+                        )
+                elif fr in self.track_list[id]['frame_id']:
+                    # print(2)
+                    new_track = self.fill_track(
+                        track=new_track,
+                        id=self.track_list[id]['id'],
+                        frame_id=fr,
+                        box=self.track_list[id]['boxes'][self.track_list[id]['frame_id'].index(fr)],
+                        check_in=self.track_list[id]['check_in'][self.track_list[id]['frame_id'].index(fr)],
+                        check_out=self.track_list[id]['check_out'][self.track_list[id]['frame_id'].index(fr)]
+                    )
+                elif fr in check_track['frame_id']:
+                    # print(3)
+                    new_track = self.fill_track(
+                        track=new_track,
+                        id=self.track_list[id]['id'],
+                        frame_id=fr,
+                        box=check_track['boxes'][check_track['frame_id'].index(fr)],
+                        check_in=check_track['check_in'][check_track['frame_id'].index(fr)],
+                        check_out=check_track['check_out'][check_track['frame_id'].index(fr)]
+                    )
+
+            print("new_track", new_track)
+            self.track_list[id] = new_track
+            self.track_list.pop(check_id)
+        # return track_list
+
+    def update_track_list(self, distance_limit: float, speed_limit: float, debug: bool = False):
         rel, deleted = [], []
         self.count_frames = []
+        cut_idxs = []
         for i, trck in enumerate(self.track_list):
-            cut = MIN_EMPTY_SEQUENCE - 1
-            if len(trck['shift_center']) > MIN_EMPTY_SEQUENCE and \
+            limiter = MIN_EMPTY_SEQUENCE
+            # cond2 = limiter
+            # if self.frame_id - trck['frame_id'][-1] > limiter and len(trck['shift_center']) > limiter - 1 and \
+            #         (
+            #                 max(trck['shift_center'][-(limiter - 1):]) < distance_limit or
+            #                 max(trck['shift_top_left'][-(limiter - 1):]) < distance_limit or
+            #                 max(trck['shift_bottom_right'][-(limiter - 1):]) < distance_limit or
+            #                 max(trck['shift_top_right'][-(limiter - 1):]) < distance_limit or
+            #                 max(trck['shift_bottom_left'][-(limiter - 1):]) < distance_limit
+            # )
+            # ) \
+            # or (len(trck['shift_center']) > limiter and sum(trck['check_out'][-limiter:]) == 0 and
+            #  (
+            #          max(trck['shift_center'][-limiter:]) < distance_limit or
+            #          max(trck['shift_top_left'][-limiter:]) < distance_limit or
+            #          max(trck['shift_bottom_right'][-limiter:]) < distance_limit or
+            #          max(trck['shift_top_right'][-limiter:]) < distance_limit or
+            #          max(trck['shift_bottom_left'][-limiter:]) < distance_limit
+            #  )
+            # ):
+            if len(trck['shift_center']) > MIN_OBJ_SEQUENCE and \
                     (
-                            max(trck['shift_center'][-MIN_EMPTY_SEQUENCE:]) < distance_limit or
-                            max(trck['shift_top_left'][-MIN_EMPTY_SEQUENCE:]) < distance_limit or
-                            max(trck['shift_bottom_right'][-MIN_EMPTY_SEQUENCE:]) < distance_limit or
-                            max(trck['shift_top_right'][-MIN_EMPTY_SEQUENCE:]) < distance_limit or
-                            max(trck['shift_bottom_left'][-MIN_EMPTY_SEQUENCE:]) < distance_limit
+                            max(trck['shift_center'][-MIN_OBJ_SEQUENCE:]) < distance_limit or
+                            max(trck['shift_top_left'][-MIN_OBJ_SEQUENCE:]) < distance_limit or
+                            max(trck['shift_bottom_right'][-MIN_OBJ_SEQUENCE:]) < distance_limit or
+                            max(trck['shift_top_right'][-MIN_OBJ_SEQUENCE:]) < distance_limit or
+                            max(trck['shift_bottom_left'][-MIN_OBJ_SEQUENCE:]) < distance_limit
                     ):
+                cut = limiter
+                # for j in range(limiter - 1, len(trck['shift_center'])):
+                #     if (
+                #             max(trck['shift_center'][-(limiter - 1 + j):]) >= distance_limit or
+                #             max(trck['shift_top_left'][-(limiter - 1 + j):]) >= distance_limit or
+                #             max(trck['shift_bottom_right'][-(limiter - 1 + j):]) >= distance_limit or
+                #             max(trck['shift_top_right'][-(limiter - 1 + j):]) >= distance_limit or
+                #             max(trck['shift_bottom_left'][-(limiter - 1 + j):]) >= distance_limit
+                #     ):
+                #         cut = MIN_EMPTY_SEQUENCE + j - 1
+                #         break
                 self.move_boxes_from_track_to_dead(
                     frame_idxs=trck['frame_id'][-cut:],
                     boxes=trck['boxes'][-cut:]
@@ -367,7 +532,19 @@ class PolyTracker:
                 trck['shift_bottom_right'] = trck['shift_bottom_right'][:-cut]
                 trck['shift_top_right'] = trck['shift_top_right'][:-cut]
                 trck['shift_bottom_left'] = trck['shift_bottom_left'][:-cut]
+                cut_idxs.append(i)
 
+        if cut_idxs and self.track_list:
+            print("self.track_list", self.track_list, cut_idxs)
+            cut_idxs = sorted(cut_idxs, reverse=True)
+            for cut_id in cut_idxs:
+                if not self.track_list[cut_id]['boxes']:
+                    self.track_list.pop(cut_id)
+                # else:
+                #     self.check_closest_track(check_id=cut_id, speed_limit=speed_limit)
+            print('cut_idxs', cut_idxs, self.track_list)
+
+        for i, trck in enumerate(self.track_list):
             if debug:
                 print('trck', trck)
             if self.frame_id - trck['frame_id'][-1] > MIN_EMPTY_SEQUENCE and \
@@ -375,21 +552,22 @@ class PolyTracker:
                 continue
 
             elif self.frame_id - trck['frame_id'][-1] > MIN_EMPTY_SEQUENCE and \
-                    trck['check_out'][-1] and not self.isin([False, False, False], trck['check_out']):  # or trck['check_out'][-1]):
+                    trck['check_out'][-1] and not self.isin([False, False, False],
+                                                            trck['check_out']):  # or trck['check_out'][-1]):
                 continue
 
             elif (self.frame_id - trck['frame_id'][-1]) > MIN_EMPTY_SEQUENCE and not trck['check_out'][-1]:
                 if debug:
-                    print(f"Check {self.name}", -(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1),
-                              sum(trck['check_out'][:-(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1)]))
+                    print(f"Check {self.name}", -(MIN_EMPTY_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1),
+                          sum(trck['check_out'][:-(MIN_EMPTY_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1)]))
                 deleted.append(i)
                 self.count += 1
 
             elif (self.frame_id - trck['frame_id'][-1]) > MIN_EMPTY_SEQUENCE and \
                     self.isin([False, False, False], trck['check_out']):
                 if debug:
-                    print(f"Check {self.name}", -(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1),
-                              sum(trck['check_out'][:-(MIN_OBJ_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1)]))
+                    print(f"Check {self.name}", -(MIN_EMPTY_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1),
+                          sum(trck['check_out'][:-(MIN_EMPTY_SEQUENCE - self.frame_id + trck['frame_id'][-1] - 1)]))
                 deleted.append(i)
                 self.count += 1
 
@@ -406,18 +584,19 @@ class PolyTracker:
         self.current_boxes = []
         self.frame_id = frame_id
         diagonal = ((img_shape[0]) ** 2 + (img_shape[1]) ** 2) ** 0.5
-        # speed_limit = speed_limit_percent * diagonal
+        speed_limit = speed_limit_percent * diagonal * 0.8
         dist_limit = DEAD_LIMIT_PERCENT * diagonal
         step = GLOBAL_STEP * diagonal
-        limit_in = self.expand_poly(self.polygon_in, -1 * step * 0.5)
-        limit_out = self.expand_poly(self.polygon_out, step)
+        limit_in = self.expand_poly(self.polygon_in, -1 * diagonal * 0.1)
+        limit_out = self.expand_poly(self.polygon_out, diagonal * 0.2)
         if debug:
             print("================================")
         for box in boxes:
+            box = [int(x) for x in box[:4]]
             center = self.get_center(box)
             # print(self.point_in_polygon(center, limit_in), self.point_in_polygon(center, limit_out))
             if not self.point_in_polygon(center, limit_in) and self.point_in_polygon(center, limit_out):
-                check_in = self.point_in_polygon(center, self.polygon_in)
+                check_in = self.point_in_polygon(center, limit_in)
                 check_out = self.point_in_polygon(center, self.polygon_out)
 
                 # Check in dead boxes list and update it
@@ -426,10 +605,7 @@ class PolyTracker:
 
                 if box:
                     self.current_boxes.append([box, check_in, check_out])
-
-        # if debug:
-        #     print("track", frame_id, [[int(c) for c in b[0][:4]] for b in self.current_boxes])
-
+        # print("self.current_boxes", self.current_boxes)
         # If no track in list - write new track
         if not self.track_list:
             for box in self.current_boxes:
@@ -447,8 +623,6 @@ class PolyTracker:
                     self.max_id += 1
                     self.track_list.append(track)
                 elif not box[-1]:
-                    # key = 0 if not self.dead_boxes else max(list(self.dead_boxes.keys()))
-                    # self.dead_boxes[key] = dict(frame_id=[], coords=[])
                     self.move_boxes_from_track_to_dead(frame_idxs=[frame_id], boxes=[box[0]])
 
         # if track exist - update track
@@ -460,33 +634,53 @@ class PolyTracker:
             for i in tr_idxs:
                 for b in box_idxs:
                     # distance = self.get_distance(self.track_list[i].boxes[-1], self.current_boxes[b])
-                    c1 = self.track_list[i]['boxes'][-1]
-                    c2 = self.current_boxes[b][0]
-                    distance = PolyTracker.get_distance(c1, c2)
+                    c1 = self.get_center(self.track_list[i]['boxes'][-1])
+                    c2 = self.get_center(self.current_boxes[b][0])
+                    distance = self.get_distance(self.track_list[i]['boxes'][-1], self.current_boxes[b][0])
+                    module_x1 = (c2[0] - c1[0]) / abs(c2[0] - c1[0]) if c2[0] - c1[0] else 0
+                    module_y1 = (c2[1] - c1[1]) / abs(c2[1] - c1[1]) if c2[1] - c1[1] else 0
+                    vector1 = ((c2[0] - c1[0]) ** 2 + (c2[1] - c1[1]) ** 2) ** 0.5
+                    if len(self.track_list[i]['boxes']) > 1:
+                        c3 = self.get_center(self.track_list[i]['boxes'][-2])
+                        module_x2 = (c1[0] - c3[0]) / abs(c1[0] - c3[0]) if c1[0] - c3[0] else 0
+                        module_y2 = (c1[1] - c3[1]) / abs(c1[1] - c3[1]) if c1[1] - c3[1] else 0
+                        vector2 = ((c1[0] - c3[0]) ** 2 + (c1[1] - c3[1]) ** 2) ** 0.5
+                        # vector = (self.get_center(c1)[0] - self.get_center(c3)[0],
+                        #            self.get_center(c1)[0] - self.get_center(self.track_list[i]['boxes'][-2])[0])
+                    else:
+                        module_x2, module_y2, vector2 = 0, 0, 0
+                        # xvector = (self.get_center(c2)[0] - self.get_center(c1)[0], 0)
                     # speed = PolyTracker.get_distance(c1, c2) / (frame_id - self.track_list[i]['frame_id'][-1])
-                    if (i, b) not in pair or (b, i) not in pair:
+                    vector = ((vector1, module_x1, module_y1), (vector2, module_x2, module_y2))
+                    # frame_step = frame_id - self.track_list[i]['frame_id'][-1]
+                    if (i, b) not in pair or (b, i) not in pair:  # and distance <= dist_limit:
                         # if distance <= 0.05 * diagonal:
-                        dist.append((distance, i, b))
+                        dist.append((distance, i, b, vector))
                         pair.append((i, b))
             dist = sorted(dist)
-            # if debug:
-            #     print('dist =', dist,
-            #           # '\nspeed_limit =', speed_limit,
-            #           '\ndist_limit =', dist_limit)
+            if debug:
+                print('current boxes', self.current_boxes)
+            print('dist =', dist, 'speed_limit =', speed_limit, 'dist_limit =', dist_limit)
             for d in dist:
                 if not self.track_list[d[1]]['check_out'][-1] and self.current_boxes[d[2]][1]:
                     continue
-                elif tr_idxs and d[1] in tr_idxs and d[2] in box_idxs: # and d[0] < speed_limit:
-                    self.track_list[d[1]] = self.fill_track(
-                        track=self.track_list[d[1]],
-                        id=self.track_list[d[1]]['id'],
-                        frame_id=frame_id,
-                        box=[int(c) for c in self.current_boxes[d[2]][0][:4]],
-                        check_in=self.current_boxes[d[2]][1],
-                        check_out=self.current_boxes[d[2]][2]
-                    )
-                    tr_idxs.pop(tr_idxs.index(d[1]))
-                    box_idxs.pop(box_idxs.index(d[2]))
+                elif tr_idxs and d[1] in tr_idxs and d[2] in box_idxs:
+                    # if d[3][0] * d[3][1] >= 0 or (d[3][0] * d[3][1] < 0 and abs(d[3][1] - d[3][0]) < speed_limit):
+                    if (d[3][0][1] * d[3][1][1] > 0 and d[3][0][2] * d[3][1][2] > 0) or \
+                        ((d[3][0][1] * d[3][1][1] <= 0 or d[3][0][2] * d[3][1][2] <= 0) and
+                         d[3][0][0] + d[3][1][0] < speed_limit):
+                        print('xvector', d, d[3][0][1] * d[3][1][1], d[3][0][2] * d[3][1][2], d[3][0][0] + d[3][1][0], speed_limit)
+                        self.track_list[d[1]] = self.fill_track(
+                            track=self.track_list[d[1]],
+                            id=self.track_list[d[1]]['id'],
+                            frame_id=frame_id,
+                            box=[int(c) for c in self.current_boxes[d[2]][0][:4]],
+                            check_in=self.current_boxes[d[2]][1],
+                            check_out=self.current_boxes[d[2]][2]
+                        )
+                        tr_idxs.pop(tr_idxs.index(d[1]))
+                        box_idxs.pop(box_idxs.index(d[2]))
+            # print("box_idxs", box_idxs)
             if box_idxs:
                 for b in box_idxs:
                     # add track if its first point is inside out-polygon
@@ -523,129 +717,149 @@ class PolyTracker:
                 f"{[i['boxes'] for i in self.track_list]}\n"
                 f"{[i['check_out'] for i in self.track_list]}\n"
             )
-        self.update_track_list(distance_limit=dist_limit, debug=debug)
+        self.update_track_list(distance_limit=dist_limit, speed_limit=speed_limit, debug=debug)
         if debug:
             # print("track x2", self.count, [i['boxes'] for i in self.track_list], [i['check_out'] for i in self.track_list])
             print('self.dead_boxes', self.dead_boxes)
 
 
-
-
 if __name__ == '__main__':
 
-    # Problem test 21 - Acc=%, Sen=%, F=%
-    vid_1 = 'videos/sync_test/test 22_cam 1_sync.mp4'
-    vid_2 = 'videos/sync_test/test 22_cam 2_sync.mp4'
-    true_bb_1 = load_data(
-        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_1_test 22 (mix+ 100ep, F% Acc% Sen%).dict'))
-    print('true_bb_1', len(true_bb_1))
-    true_bb_2 = load_data(
-        pickle_path=os.path.join(ROOT_DIR, 'tests/boxes/true_bb_2_test 22 (mix+ 100ep, F% Acc% Sen%).dict'))
-    print('true_bb_2', len(true_bb_2))
-    start, finish = (0 * 60 + 9) * 25, (0 * 60 + 13) * 25
+    # Problem test 21
+    for vvv in [14, 15, 16, 17, 18, 19, 20, 22, 24, 25, 26, 27, 28, 29, 30]:
+        test_vid = vvv
+        model_id = 'mix+++ 200ep'
 
-    tracker_1 = PolyTracker(polygon_in=POLY_CAM1_IN, polygon_out=POLY_CAM1_OUT, name='camera 1')
-    tracker_2 = PolyTracker(polygon_in=POLY_CAM2_IN, polygon_out=POLY_CAM2_OUT, name='camera 2')
-    names = ['carpet']
-    colors = get_colors(names)
-    out_size = (640, 360)
-    # out = cv2.VideoWriter(os.path.join(ROOT_DIR, 'temp/test.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), 25,
-    #                       (out_size[0], out_size[1] * 2))
-    vc1 = cv2.VideoCapture()
-    vc1.open(os.path.join(ROOT_DIR, vid_1))
-    f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
-    fps1 = vc1.get(cv2.CAP_PROP_FPS)
-    vc2 = cv2.VideoCapture()
-    vc2.open(os.path.join(ROOT_DIR, vid_2))
-    f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
-    fps2 = vc2.get(cv2.CAP_PROP_FPS)
-    print('fps 1 =', vc1.get(cv2.CAP_PROP_FPS), '\nfps 2 =', vc2.get(cv2.CAP_PROP_FPS))
+        vid_1 = f'videos/sync_test/test {test_vid}_cam 1_sync.mp4'
+        vid_2 = f'videos/sync_test/test {test_vid}_cam 2_sync.mp4'
+        true_bb_1 = load_data(
+            pickle_path=os.path.join(ROOT_DIR, f'tests/boxes/true_bb_1_test {test_vid} ({model_id}, F% Acc% Sen%).dict'))
+        print('true_bb_1', len(true_bb_1))
+        true_bb_2 = load_data(
+            pickle_path=os.path.join(ROOT_DIR, f'tests/boxes/true_bb_2_test {test_vid} ({model_id}, F% Acc% Sen%).dict'))
+        print('true_bb_2', len(true_bb_2))
+        # start, finish = (0 * 60 + 20) * 25, (0 * 60 + 34) * 25
+        start, finish = 0, min([len(true_bb_1), len(true_bb_2)])
 
-    step = min([fps1, fps2])
-    range_1 = [(i, round(i * 1000 / fps1, 1)) for i in range(int(f1))]
-    range_2 = [(i, round(i * 1000 / fps2, 1)) for i in range(int(f2))]
-    (min_range, max_range) = (range_1, range_2) if step == fps1 else (range_2, range_1)
-    (min_vc, max_vc) = (vc1, vc2) if step == fps1 else (vc2, vc1)
+        names = ['carpet']
+        colors = get_colors(names)
+        out_size = (640, 360)
+        out = cv2.VideoWriter(os.path.join(ROOT_DIR, f'temp/test {test_vid}.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), 25,
+                              (out_size[0], out_size[1] * 2))
+        vc1 = cv2.VideoCapture()
+        vc1.open(os.path.join(ROOT_DIR, vid_1))
+        f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
+        fps1 = vc1.get(cv2.CAP_PROP_FPS)
+        w1 = int(vc1.get(cv2.CAP_PROP_FRAME_WIDTH))
+        h1 = int(vc1.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-    def get_closest_id(x: float, data: list[tuple, ...]) -> int:
-        dist = [(abs(data[i][1] - x), i) for i in range(len(data))]
-        dist = sorted(dist)
-        # print("Dist", dist)
-        return dist[0][1]
+        vc2 = cv2.VideoCapture()
+        vc2.open(os.path.join(ROOT_DIR, vid_2))
+        f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
+        fps2 = vc2.get(cv2.CAP_PROP_FPS)
+        w2 = int(vc2.get(cv2.CAP_PROP_FRAME_WIDTH))
+        h2 = int(vc2.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        print('fps 1 =', vc1.get(cv2.CAP_PROP_FPS), '\nfps 2 =', vc2.get(cv2.CAP_PROP_FPS))
 
-    count = 0
-    last_track_seq = {'tr1': [], 'tr2': []}
-    for i in range(0, finish):
-        # itt = time.time()
-        # _, img1 = vc1.read()
-        # _, img2 = vc2.read()
-        _, img1 = min_vc.read()
+        step = min([fps1, fps2])
+        range_1 = [(i, round(i * 1000 / fps1, 1)) for i in range(int(f1))]
+        range_2 = [(i, round(i * 1000 / fps2, 1)) for i in range(int(f2))]
+        (min_range, max_range) = (range_1, range_2) if step == fps1 else (range_2, range_1)
+        (min_vc, max_vc) = (vc1, vc2) if step == fps1 else (vc2, vc1)
 
-        closest_id = get_closest_id(min_range[0][1], max_range[:10])
-        min_range.pop(0)
-        ids = list(range(closest_id)) if closest_id else [0]
-        ids = sorted(ids, reverse=True)
-        for id in ids:
-            max_range.pop(id)
-            _, img2 = max_vc.read()
+        polygon_in_1 = [[int(p[0] * w1), int(p[1] * h1)] for p in POLY_CAM1_IN]
+        polygon_out_1 = [[int(p[0] * w1), int(p[1] * h1)] for p in POLY_CAM1_OUT]
+        tracker_1 = PolyTracker(polygon_in=polygon_in_1, polygon_out=polygon_out_1, name='camera 1')
+        polygon_in_2 = [[int(p[0] * w2), int(p[1] * h2)] for p in POLY_CAM2_IN]
+        polygon_out_2 = [[int(p[0] * w2), int(p[1] * h2)] for p in POLY_CAM2_OUT]
+        tracker_2 = PolyTracker(polygon_in=polygon_in_2, polygon_out=polygon_out_2, name='camera 2')
 
-        if i >= start:
-            boxes_1 = true_bb_1[i]
-            tracker_1.process(frame_id=i, boxes=boxes_1, img_shape=img1.shape[:2], debug=False)
-            boxes_2 = true_bb_2[i]
-            tracker_2.process(frame_id=i, boxes=boxes_2, img_shape=img2.shape[:2], debug=False)
-            print('================================================================')
-            print('tracker_1.current_boxes', tracker_1.current_boxes)
-            # print(f" - frame={i}, count={count}, boxes_1={[[int(c) for c in box[:4]] for box in boxes_1]},"
-            #       f" boxes_2={[[int(c) for c in box[:4]] for box in boxes_2]}")
 
-            count, last_track_seq = PolyTracker.combine_count(
-                count=count,
-                last_track_seq=last_track_seq,
-                tracker_1_count_frames=copy.deepcopy(tracker_1.count_frames),
-                tracker_2_count_frames=copy.deepcopy(tracker_2.count_frames),
-                frame_id=i,
-                debug=True
-            )
+        def get_closest_id(x: float, data: list[tuple, ...]) -> int:
+            dist = [(abs(data[i][1] - x), i) for i in range(len(data))]
+            dist = sorted(dist)
+            # print("Dist", dist)
+            return dist[0][1]
 
-            # Draw all figures on image
-            img1 = PolyTracker.prepare_image(
-                image=img1,
-                colors=colors,
-                tracker_current_boxes=tracker_1.current_boxes,
-                polygon_in=POLY_CAM1_IN,
-                polygon_out=POLY_CAM1_OUT,
-                poly_width=5,
-                # reshape=(img1.shape[1], img1.shape[0])
-                reshape=out_size
-            )
-            # cv2.imshow('image', img1)
-            # cv2.waitKey(0)
-            img2 = PolyTracker.prepare_image(
-                image=img2,
-                colors=colors,
-                tracker_current_boxes=tracker_2.current_boxes,
-                polygon_in=POLY_CAM2_IN,
-                polygon_out=POLY_CAM2_OUT,
-                poly_width=2,
-                reshape=out_size
-            )
-            # cv2.imshow('image', img2)
-            # cv2.waitKey(0)
 
-            img = np.concatenate((img1, img2), axis=0)
-            headline = f"Обнаружено ковров: {count}\nТрекер 1: {tracker_1.count}\nТрекер 2: {tracker_2.count}"
-            img = add_headline_to_cv_image(
-                image=img,
-                headline=headline
-            )
-            # cv_img = cv2.cvtColor(img)
-            cv2.imshow('image', img)
-            cv2.waitKey(1)
+        count = 0
+        last_track_seq = {'tr1': [], 'tr2': []}
+        for i in range(0, finish):
+            _, img1 = min_vc.read()
 
-            if (i + 1) % 100 == 0:
-                logger.info(f"Frames {i + 1} / {finish} was processed. Current count: {count}")
-            # out.write(img)
-            # break
-    logger.info(f"\nFinal count={count}")
-    # out.release()
+            closest_id = get_closest_id(min_range[0][1], max_range[:10])
+            min_range.pop(0)
+            ids = list(range(closest_id)) if closest_id else [0]
+            ids = sorted(ids, reverse=True)
+            for id in ids:
+                max_range.pop(id)
+                _, img2 = max_vc.read()
+
+            if i >= start:
+                boxes_1 = true_bb_1[i]
+                tracker_1.process(frame_id=i, boxes=boxes_1, img_shape=img1.shape[:2], debug=False)
+                boxes_2 = true_bb_2[i]
+                tracker_2.process(frame_id=i, boxes=boxes_2, img_shape=img2.shape[:2], debug=False)
+                print('================================================================')
+                print(f"Current_frame = {i}, current count = {count}")
+                print(f"Input boses, tracker 1 = {boxes_1}, tracker 2 = {boxes_2}")
+                print(f'tracker_1.track_list. Track num = {len(tracker_1.track_list)}')
+                for tr in tracker_1.track_list:
+                    print(f"--ID={tr['id']}, frames={tr['frame_id']}, check_out={tr['check_out']}, "
+                          f"check_in={tr['check_in']}, boxes={tr['boxes']}")
+                print('tracker_1.dead_boxes', tracker_1.dead_boxes)
+                print(f'tracker_2.track_list. Track num = {len(tracker_2.track_list)}')
+                for tr in tracker_2.track_list:
+                    print(f"--ID={tr['id']}, frames={tr['frame_id']}, check_out={tr['check_out']}, "
+                          f"check_in={tr['check_in']}, boxes={tr['boxes']}")
+                print('tracker_2.dead_boxes', tracker_2.dead_boxes)
+
+                count, last_track_seq = PolyTracker.combine_count(
+                    count=count,
+                    last_track_seq=last_track_seq,
+                    tracker_1_count_frames=copy.deepcopy(tracker_1.count_frames),
+                    tracker_2_count_frames=copy.deepcopy(tracker_2.count_frames),
+                    frame_id=i,
+                    debug=True
+                )
+                print('================================================================')
+                # Draw all figures on image
+                img1 = PolyTracker.prepare_image(
+                    image=img1,
+                    colors=colors,
+                    tracker_current_boxes=tracker_1.current_boxes,
+                    polygon_in=tracker_1.polygon_in,
+                    polygon_out=tracker_1.polygon_out,
+                    poly_width=5,
+                    reshape=out_size
+                )
+                # cv2.imshow('image', img1)
+                # cv2.waitKey(0)
+                img2 = PolyTracker.prepare_image(
+                    image=img2,
+                    colors=colors,
+                    tracker_current_boxes=tracker_2.current_boxes,
+                    polygon_in=tracker_2.polygon_in,
+                    polygon_out=tracker_2.polygon_out,
+                    poly_width=2,
+                    reshape=out_size
+                )
+                # cv2.imshow('image', img2)
+                # cv2.waitKey(0)
+
+                img = np.concatenate((img1, img2), axis=0)
+                headline = f"Обнаружено ковров: {count}\nТрекер 1: {tracker_1.count}\nТрекер 2: {tracker_2.count}"
+                img = add_headline_to_cv_image(
+                    image=img,
+                    headline=headline
+                )
+                # cv_img = cv2.cvtColor(img)
+                cv2.imshow('image', img)
+                cv2.waitKey(1)
+
+                if (i + 1) % 100 == 0:
+                    logger.info(f"Frames {i + 1} / {finish} was processed. Current count: {count}")
+                out.write(img)
+                # break
+        logger.info(f"\nFinal count={count}")
+        out.release()

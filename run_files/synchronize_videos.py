@@ -71,47 +71,35 @@ sync_data = {
     # 'videos/init/test 33_cam 2.mp4': [531, ''],
     # 'videos/classification_videos/video/test 36_cam 1.mp4': [11, ''],
     # 'videos/classification_videos/video/test 36_cam 2.mp4': [75, ''],
-    'videos/classification_videos/video/test 37_cam 1.mp4': [120, ''],
-    'videos/classification_videos/video/test 37_cam 2.mp4': [54, ''],
-    'videos/classification_videos/video/test 38_cam 1.mp4': [80, ''],
-    'videos/classification_videos/video/test 38_cam 2.mp4': [169, ''],
-    'videos/classification_videos/video/test 39_cam 1.mp4': [92, ''],
-    'videos/classification_videos/video/test 39_cam 2.mp4': [165, ''],
-    'videos/classification_videos/video/test 40_cam 1.mp4': [55, ''],
-    'videos/classification_videos/video/test 40_cam 2.mp4': [156, ''],
-    'videos/classification_videos/video/test 41_cam 1.mp4': [97, ''],
-    'videos/classification_videos/video/test 41_cam 2.mp4': [305, ''],
-    'videos/classification_videos/video/test 42_cam 1.mp4': [178, ''],
-    'videos/classification_videos/video/test 42_cam 2.mp4': [460, ''],
-    'videos/classification_videos/video/test 43_cam 1.mp4': [26, ''],
-    'videos/classification_videos/video/test 43_cam 2.mp4': [335, ''],
-    'videos/classification_videos/video/test 44_cam 1.mp4': [164, ''],
-    'videos/classification_videos/video/test 44_cam 2.mp4': [111, ''],
-    'videos/classification_videos/video/test 45_cam 1.mp4': [35, ''],
-    'videos/classification_videos/video/test 45_cam 2.mp4': [482, ''],
 }
 
 # List of dicts, each dict in formate {'camera 1': 'link to video from camera 1', 'camera 2': 'link to video from camera 2'}
 # all videos must g=have fps=25
 sync_videos = [
-    {'camera 1': 'videos/classification_videos/video/test 37_cam 1.mp4',
-     'camera 2': 'videos/classification_videos/video/test 37_cam 2.mp4'},
-    {'camera 1': 'videos/classification_videos/video/test 38_cam 1.mp4',
-     'camera 2': 'videos/classification_videos/video/test 38_cam 2.mp4'},
-    {'camera 1': 'videos/classification_videos/video/test 39_cam 1.mp4',
-     'camera 2': 'videos/classification_videos/video/test 39_cam 2.mp4'},
-    {'camera 1': 'videos/classification_videos/video/test 40_cam 1.mp4',
-     'camera 2': 'videos/classification_videos/video/test 40_cam 2.mp4'},
-    {'camera 1': 'videos/classification_videos/video/test 41_cam 1.mp4',
-     'camera 2': 'videos/classification_videos/video/test 41_cam 2.mp4'},
-    {'camera 1': 'videos/classification_videos/video/test 42_cam 1.mp4',
-     'camera 2': 'videos/classification_videos/video/test 42_cam 2.mp4'},
-    {'camera 1': 'videos/classification_videos/video/test 43_cam 1.mp4',
-     'camera 2': 'videos/classification_videos/video/test 43_cam 2.mp4'},
-    {'camera 1': 'videos/classification_videos/video/test 44_cam 1.mp4',
-     'camera 2': 'videos/classification_videos/video/test 44_cam 2.mp4'},
-    {'camera 1': 'videos/classification_videos/video/test 45_cam 1.mp4',
-     'camera 2': 'videos/classification_videos/video/test 45_cam 2.mp4'},
+    # {'camera 1': ['videos/classification_videos/video/test 37_cam 1.mp4', 120],
+    #  'camera 2': ['videos/classification_videos/video/test 37_cam 2.mp4', 54]},
+    # {'camera 1': ['videos/classification_videos/video/test 38_cam 1.mp4', 80],
+    #  'camera 2': ['videos/classification_videos/video/test 38_cam 2.mp4', 169]},
+    # {'camera 1': ['videos/classification_videos/video/test 39_cam 1.mp4', 92],
+    #  'camera 2': ['videos/classification_videos/video/test 39_cam 2.mp4', 165]},
+    # {'camera 1': ['videos/classification_videos/video/test 40_cam 1.mp4', 55],
+    #  'camera 2': ['videos/classification_videos/video/test 40_cam 2.mp4', 156]},
+    # {'camera 1': ['videos/classification_videos/video/test 41_cam 1.mp4', 97],
+    #  'camera 2': ['videos/classification_videos/video/test 41_cam 2.mp4', 305]},
+    # {'camera 1': ['videos/classification_videos/video/test 42_cam 1.mp4', 178],
+    #  'camera 2': ['videos/classification_videos/video/test 42_cam 2.mp4', 460]},
+    # {'camera 1': ['videos/classification_videos/video/test 43_cam 1.mp4', 26],
+    #  'camera 2': ['videos/classification_videos/video/test 43_cam 2.mp4', 335]},
+    # {'camera 1': ['videos/classification_videos/video/test 44_cam 1.mp4', 164],
+    #  'camera 2': ['videos/classification_videos/video/test 44_cam 2.mp4', 111]},
+    # {'camera 1': ['videos/classification_videos/video/test 45_cam 1.mp4', 35],
+    #  'camera 2': ['videos/classification_videos/video/test 45_cam 2.mp4', 482]},
+    {'camera 1': ['videos/classification_videos/video/test 46_cam 1.mp4', 112],
+     'camera 2': ['videos/classification_videos/video/test 46_cam 2.mp4', 2240]},
+    {'camera 1': ['videos/classification_videos/video/test 47_cam 1.mp4', 1380],
+     'camera 2': ['videos/classification_videos/video/test 47_cam 2.mp4', 573]},
+    {'camera 1': ['videos/classification_videos/video/test 48_cam 1.mp4', 2705],
+     'camera 2': ['videos/classification_videos/video/test 48_cam 2.mp4', 482]},
 ]
 save_folder = 'videos/classification_videos/video_sync'
 
@@ -124,9 +112,9 @@ for pair in sync_videos:
     save_name_1 = f"{save_name_1[1:]}_sync.mp4"
     print(save_name_1)
     DatasetProcessing.synchronize_video(
-        video_path=os.path.join(ROOT_DIR, pair.get('camera 1')),
+        video_path=os.path.join(ROOT_DIR, pair.get('camera 1')[0]),
         save_path=os.path.join(ROOT_DIR, f"{save_folder}/{save_name_1}"),
-        from_frame=sync_data.get(pair.get('camera 1'))[0]
+        from_frame=os.path.join(ROOT_DIR, pair.get('camera 1')[1])
     )
     vn = pair.get('camera 2').split('/')[-1].split('.')[:-1]
     save_name_2 = ''
@@ -135,7 +123,7 @@ for pair in sync_videos:
     save_name_2 = f"{save_name_2[1:]}_sync.mp4"
     print(save_name_2)
     DatasetProcessing.synchronize_video(
-        video_path=os.path.join(ROOT_DIR, pair.get('camera 2')),
+        video_path=os.path.join(ROOT_DIR, pair.get('camera 2')[0]),
         save_path=os.path.join(ROOT_DIR, f"{save_folder}/{save_name_2}"),
-        from_frame=sync_data.get(pair.get('camera 2'))[0]
+        from_frame=os.path.join(ROOT_DIR, pair.get('camera 2')[1])
     )

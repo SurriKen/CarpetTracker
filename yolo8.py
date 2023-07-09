@@ -201,9 +201,6 @@ def detect_synchro_video_polygon(
     names = ['carpet']
     colors = get_colors(names)
 
-    tracker_1 = PolyTracker(polygon_in=POLY_CAM1_IN, polygon_out=POLY_CAM1_OUT, name='camera 1')
-    tracker_2 = PolyTracker(polygon_in=POLY_CAM2_IN, polygon_out=POLY_CAM2_OUT, name='camera 2')
-
     vc1 = cv2.VideoCapture()
     vc1.open(video_paths.get("model_1"))
     f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
@@ -227,6 +224,13 @@ def detect_synchro_video_polygon(
     range_2 = [(i, round(i * 1000 / fps2, 1)) for i in range(int(f2))]
     (min_range, max_range) = (range_1, range_2) if step == fps1 else (range_2, range_1)
     (min_vc, max_vc) = (vc1, vc2) if step == fps1 else (vc2, vc1)
+
+    polygon_in_1 = [[int(p[0] * w1), int(p[1] * h1)] for p in POLY_CAM1_IN]
+    polygon_out_1 = [[int(p[0] * w1), int(p[1] * h1)] for p in POLY_CAM1_OUT]
+    tracker_1 = PolyTracker(polygon_in=polygon_in_1, polygon_out=polygon_out_1, name='camera 1')
+    polygon_in_2 = [[int(p[0] * w2), int(p[1] * h2)] for p in POLY_CAM2_IN]
+    polygon_out_2 = [[int(p[0] * w2), int(p[1] * h2)] for p in POLY_CAM2_OUT]
+    tracker_2 = PolyTracker(polygon_in=polygon_in_2, polygon_out=polygon_out_2, name='camera 2')
 
     def get_closest_id(x: float, data: list[tuple, ...]) -> int:
         dist = [(abs(data[i][1] - x), i) for i in range(len(data))]
@@ -290,8 +294,8 @@ def detect_synchro_video_polygon(
                     image=frame1,
                     colors=colors,
                     tracker_current_boxes=tracker_1.current_boxes,
-                    polygon_in=POLY_CAM1_IN,
-                    polygon_out=POLY_CAM1_OUT,
+                    polygon_in=tracker_1.polygon_in,
+                    polygon_out=tracker_1.polygon_out,
                     poly_width=5,
                     reshape=(w, h)
                 )
@@ -301,8 +305,8 @@ def detect_synchro_video_polygon(
                     image=frame2,
                     colors=colors,
                     tracker_current_boxes=tracker_2.current_boxes,
-                    polygon_in=POLY_CAM2_IN,
-                    polygon_out=POLY_CAM2_OUT,
+                    polygon_in=tracker_2.polygon_in,
+                    polygon_out=tracker_2.polygon_out,
                     poly_width=2,
                     reshape=(w, h)
                 )
