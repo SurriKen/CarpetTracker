@@ -93,21 +93,21 @@ def detect_mono_video_polygon(
     # Get names and colors
     names = ['carpet']
     colors = get_colors(names)
-
-    if camera == 1:
-        polygon_in = POLY_CAM1_IN
-        polygon_out = POLY_CAM1_OUT
-    if camera == 2:
-        polygon_in = POLY_CAM2_IN
-        polygon_out = POLY_CAM2_OUT
-    tracker = PolyTracker(polygon_in=polygon_in, polygon_out=polygon_out, name='mono camera')
-    # model = YOLO(model_path)
     vc = cv2.VideoCapture()
     vc.open(video_path)
     f = vc.get(cv2.CAP_PROP_FRAME_COUNT)
     fps = vc.get(cv2.CAP_PROP_FPS)
     w = int(vc.get(cv2.CAP_PROP_FRAME_WIDTH))
     h = int(vc.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    if camera == 1:
+        polygon_in = [[int(p[0] * w), int(p[1] * h)] for p in POLY_CAM1_IN]
+        polygon_out = [[int(p[0] * w), int(p[1] * h)] for p in POLY_CAM1_OUT]
+    if camera == 2:
+        polygon_in = [[int(p[0] * w), int(p[1] * h)] for p in POLY_CAM2_IN]
+        polygon_out = [[int(p[0] * w), int(p[1] * h)] for p in POLY_CAM2_OUT]
+    tracker = PolyTracker(polygon_in=polygon_in, polygon_out=polygon_out, name='mono camera')
+    # model = YOLO(model_path)
+
     if debug:
         print(f"Video data: frames={f}, fps={fps}, width={w}, height={h}")
     if save_path:
