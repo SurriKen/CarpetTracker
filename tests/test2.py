@@ -7,33 +7,33 @@ import numpy as np
 
 from parameters import ROOT_DIR
 
-data = os.path.join(ROOT_DIR, 'datasets/class_videos_26')
-classes = ['60x90', '115x400']
+# data = os.path.join(ROOT_DIR, 'datasets/class_videos_26')
+# classes = ['60x90', '115x400']
+#
+# cl_files = {}
+# av_f = []
+# for cl in classes:
+#     cl_files[cl] = 0
+#     for cam in os.listdir(os.path.join(data, cl)):
+#         files = os.listdir(os.path.join(data, cl, cam))
+#         for f in files:
+#             vc1 = cv2.VideoCapture()
+#             vc1.open(os.path.join(data, cl, cam, f))
+#             f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
+#             cl_files[cl] += f1
+#             av_f.append(f1)
+#
+# print(cl_files)
+#
+# print(av_f)
+# print(f"Len={len(av_f)}, average={np.mean(av_f)}, max={np.max(av_f)}, min={np.min(av_f)}")
 
-cl_files = {}
-av_f = []
-for cl in classes:
-    cl_files[cl] = 0
-    for cam in os.listdir(os.path.join(data, cl)):
-        files = os.listdir(os.path.join(data, cl, cam))
-        for f in files:
-            vc1 = cv2.VideoCapture()
-            vc1.open(os.path.join(data, cl, cam, f))
-            f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
-            cl_files[cl] += f1
-            av_f.append(f1)
-
-print(cl_files)
-
-print(av_f)
-print(f"Len={len(av_f)}, average={np.mean(av_f)}, max={np.max(av_f)}, min={np.min(av_f)}")
 import os
 
 import numpy as np
 
 from dataset_processing import VideoClass
 from parameters import ROOT_DIR
-from tests.test_train_class import VideoClassifier
 from utils import save_data, load_data, get_name_from_link
 
 
@@ -115,7 +115,7 @@ dataset = create_box_video_dataset(
     box_path=os.path.join(ROOT_DIR, 'tests/class_boxes_26_model3_full.dict'),
     val_split=0.1, test_split=0.1, frame_size=(128, 128),
 )
-
+print(dataset.x_train[0][0].shape)
 
 def save_dataset(dataset: VideoClass, save_folder) -> None:
     name = get_name_from_link(dataset.params['box_path'])
@@ -160,7 +160,7 @@ def load_dataset(dataset_info: str) -> VideoClass:
     return vc
 
 
-save_dataset(dataset, save_folder=os.path.join(ROOT_DIR, 'tests'))
+# save_dataset(dataset, save_folder=os.path.join(ROOT_DIR, 'tests'))
 
 # new = load_dataset(dataset_info=os.path.join(ROOT_DIR, 'tests/'))
 # new = load(new, os.path.join(ROOT_DIR, 'tests'))
