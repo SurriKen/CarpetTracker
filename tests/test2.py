@@ -38,19 +38,17 @@ from utils import save_data, load_data, get_name_from_link
 
 
 def create_box_video_dataset(
-        box_path: str, val_split: float, test_split: float, frame_size: tuple = (128, 128)
+        dataset_path: str, val_split: float, test_split: float, frame_size: tuple = (128, 128)
 ) -> VideoClass:
     vc = VideoClass()
     vc.params['val_split'] = val_split
     vc.params['test_split'] = test_split
-    vc.params['box_path'] = box_path
+    vc.params['box_path'] = dataset_path
     vc.params['frame_size'] = frame_size
-    dataset = load_data(box_path)
-    vc.params['dataset'] = dataset
+    dataset = load_data(dataset_path)
+    vc.dataset = dataset
     vc.params['classes'] = sorted(list(dataset.keys()))
     data = []
-    id_list = []
-    id = 0
     for class_ in dataset.keys():
         cl_id = vc.params['classes'].index(class_)
         for vid in dataset[class_].keys():
@@ -58,7 +56,6 @@ def create_box_video_dataset(
             cameras = sorted(list(dataset[class_][vid].keys()))
             if dataset[class_][vid] != {camera: [] for camera in cameras} and len(
                     dataset[class_][vid][cameras[0]]) > 2:
-                id_list.append((class_, vid, id))
                 sequence = list(range(len(dataset[class_][vid][cameras[0]]))) if len(
                     dataset[class_][vid][cameras[0]]) \
                     else list(range(len(dataset[class_][vid][cameras[1]])))
@@ -82,9 +79,8 @@ def create_box_video_dataset(
 
                 seq_frame_1 = np.array(seq_frame_1)
                 seq_frame_2 = np.array(seq_frame_2)
-                batch = [[seq_frame_1, seq_frame_2], cl_id, id]
+                batch = [[seq_frame_1, seq_frame_2], cl_id, (class_, vid)]
                 data.append(batch)
-                id += 1
 
     random.shuffle(data)
     x, y, idxs = list(zip(*data))
@@ -112,25 +108,29 @@ def create_box_video_dataset(
 
 
 dataset = create_box_video_dataset(
-    box_path=os.path.join(ROOT_DIR, 'tests/class_boxes_26_model3_full.dict'),
+    dataset_path=os.path.join(ROOT_DIR, 'tests/class_boxes_26_model3_full.dict'),
     val_split=0.1, test_split=0.1, frame_size=(128, 128),
 )
 print(dataset.x_train[0][0].shape)
 
-def save_dataset(dataset: VideoClass, save_folder) -> None:
+
+def save_dataset(dataset: VideoClass, save_folder: str) -> None:
     name = get_name_from_link(dataset.params['box_path'])
     save_data(dataset.params, save_folder, f"{name}_info")
+    save_data(dataset.dataset, save_folder, f"{name}")
 
 
-def load_dataset(dataset_info: str) -> VideoClass:
+def load_dataset(dataset_path: str, dataset_info: str) -> VideoClass:
     vc = VideoClass()
+    dataset = load_data(dataset_path)
     vc.params.update(load_data(dataset_info))
-    dataset = vc.params['dataset']
+    vc.dataset = dataset
 
     for data_type in ['train', 'val', 'test']:
         data = []
+        print(vc.params[f"{data_type}_idxs"])
         for info in vc.params[f"{data_type}_idxs"]:
-            class_, vid, _ = info
+            class_, vid = info
             seq_frame_1, seq_frame_2 = [], []
             cameras = sorted(list(dataset[class_][vid].keys()))
             sequence = list(range(len(dataset[class_][vid][cameras[0]]))) if len(
@@ -160,9 +160,10 @@ def load_dataset(dataset_info: str) -> VideoClass:
     return vc
 
 
-# save_dataset(dataset, save_folder=os.path.join(ROOT_DIR, 'tests'))
-
-# new = load_dataset(dataset_info=os.path.join(ROOT_DIR, 'tests/'))
-# new = load(new, os.path.join(ROOT_DIR, 'tests'))
-# print(new.classes)
-# print(new.x_train[0][0].shape)
+save_dataset(dataset, save_folder=os.path.join(ROOT_DIR, 'temp'))
+# (40, 128, 128, 1)
+new = load_dataset(dataset_path=os.path.join(ROOT_DIR, 'temp/class_boxes_26_model3_full.dict'),
+                   dataset_info=os.path.join(ROOT_DIR, 'temp/class_boxes_26_model3_full_info.dict'))
+# new = load_dataset(new, os.path.join(ROOT_DIR, 'tests'))
+print(new.params['classes'])
+print(new.x_train[0][0].shape)
