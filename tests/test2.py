@@ -1,4 +1,6 @@
 import os
+import random
+from collections import Counter
 
 import cv2
 import numpy as np
@@ -32,54 +34,135 @@ import numpy as np
 from dataset_processing import VideoClass
 from parameters import ROOT_DIR
 from tests.test_train_class import VideoClassifier
-from utils import save_data, load_data
+from utils import save_data, load_data, get_name_from_link
 
-dataset = VideoClassifier.create_box_video_dataset(
+
+def create_box_video_dataset(
+        box_path: str, val_split: float, test_split: float, frame_size: tuple = (128, 128)
+) -> VideoClass:
+    vc = VideoClass()
+    vc.params['val_split'] = val_split
+    vc.params['test_split'] = test_split
+    vc.params['box_path'] = box_path
+    vc.params['frame_size'] = frame_size
+    dataset = load_data(box_path)
+    vc.params['dataset'] = dataset
+    vc.params['classes'] = sorted(list(dataset.keys()))
+    data = []
+    id_list = []
+    id = 0
+    for class_ in dataset.keys():
+        cl_id = vc.params['classes'].index(class_)
+        for vid in dataset[class_].keys():
+            seq_frame_1, seq_frame_2 = [], []
+            cameras = sorted(list(dataset[class_][vid].keys()))
+            if dataset[class_][vid] != {camera: [] for camera in cameras} and len(
+                    dataset[class_][vid][cameras[0]]) > 2:
+                id_list.append((class_, vid, id))
+                sequence = list(range(len(dataset[class_][vid][cameras[0]]))) if len(
+                    dataset[class_][vid][cameras[0]]) \
+                    else list(range(len(dataset[class_][vid][cameras[1]])))
+                for fr in range(len(sequence)):
+                    fr1 = np.zeros(frame_size)
+                    fr2 = np.zeros(frame_size)
+
+                    if dataset[class_][vid][cameras[0]][fr]:
+                        box1 = [int(bb * frame_size[i % 2]) for i, bb in
+                                enumerate(dataset[class_][vid][cameras[0]][fr])]
+                        fr1[box1[1]:box1[3], box1[0]:box1[2]] = 1.
+                    fr1 = np.expand_dims(fr1, axis=-1)
+                    seq_frame_1.append(fr1)
+
+                    if dataset[class_][vid][cameras[1]][fr]:
+                        box2 = [int(bb * frame_size[i % 2]) for i, bb in
+                                enumerate(dataset[class_][vid][cameras[1]][fr])]
+                        fr2[box2[1]:box2[3], box2[0]:box2[2]] = 1.
+                    fr2 = np.expand_dims(fr2, axis=-1)
+                    seq_frame_2.append(fr2)
+
+                seq_frame_1 = np.array(seq_frame_1)
+                seq_frame_2 = np.array(seq_frame_2)
+                batch = [[seq_frame_1, seq_frame_2], cl_id, id]
+                data.append(batch)
+                id += 1
+
+    random.shuffle(data)
+    x, y, idxs = list(zip(*data))
+    # x = np.array(x)
+    y = np.array(y)
+
+    train_range = int(1 - (vc.params['val_split'] + vc.params['test_split']) * len(x))
+    test_range = int(vc.params['test_split'] * len(x)) if vc.params['test_split'] else 1
+
+    vc.x_train = x[:train_range]
+    vc.y_train = y[:train_range]
+    vc.params['train_idxs'] = idxs[:train_range]
+    vc.params['train_stat'] = dict(Counter(vc.y_train))
+
+    vc.x_val = x[train_range:-test_range]
+    vc.y_val = y[train_range:-test_range]
+    vc.params['val_idxs'] = idxs[train_range:-test_range]
+    vc.params['val_stat'] = dict(Counter(vc.y_val))
+
+    vc.x_test = x[-test_range:]
+    vc.y_test = y[-test_range:]
+    vc.params['test_idxs'] = idxs[-test_range:]
+    vc.params['test_stat'] = dict(Counter(vc.y_val))
+    return vc
+
+
+dataset = create_box_video_dataset(
     box_path=os.path.join(ROOT_DIR, 'tests/class_boxes_26_model3_full.dict'),
-    split=0.9,
-    frame_size=(128, 128),
+    val_split=0.1, test_split=0.1, frame_size=(128, 128),
 )
 
-keys = list(dataset.__dict__.keys())
-for k in keys:
-    x = getattr(dataset, k)
-    print(k, type(x), type(x) == np.ndarray)
 
-print(os.path.isfile('tests/x_train.npy'))
+def save_dataset(dataset: VideoClass, save_folder) -> None:
+    name = get_name_from_link(dataset.params['box_path'])
+    save_data(dataset.params, save_folder, f"{name}_info")
 
 
-def save(dataset: VideoClass, save_path: str):
-    keys = list(dataset.__dict__.keys())
-    array_keys = ['x_train', 'y_train', 'x_val', 'y_val']
-    for k in keys:
-        if k not in array_keys and type(getattr(dataset, k)) == np.ndarray:
-            array_keys.append(k)
-    for k in array_keys:
-        arr = np.array(getattr(dataset, k))
-        np.save(os.path.join(save_path, f'{k}.npy'), arr, allow_pickle=True)
-    dict_ = {}
-    for k in keys:
-        if k not in array_keys:
-            dict_[k] = getattr(dataset, k)
-    save_data(dict_, save_path, 'dataset_data')
+def load_dataset(dataset_info: str) -> VideoClass:
+    vc = VideoClass()
+    vc.params.update(load_data(dataset_info))
+    dataset = vc.params['dataset']
+
+    for data_type in ['train', 'val', 'test']:
+        data = []
+        for info in vc.params[f"{data_type}_idxs"]:
+            class_, vid, _ = info
+            seq_frame_1, seq_frame_2 = [], []
+            cameras = sorted(list(dataset[class_][vid].keys()))
+            sequence = list(range(len(dataset[class_][vid][cameras[0]]))) if len(
+                dataset[class_][vid][cameras[0]]) else list(range(len(dataset[class_][vid][cameras[1]])))
+            for fr in range(len(sequence)):
+                fr1 = np.zeros(vc.params['frame_size'])
+                fr2 = np.zeros(vc.params['frame_size'])
+
+                if dataset[class_][vid][cameras[0]][fr]:
+                    box1 = [int(bb * vc.params['frame_size'][i % 2]) for i, bb in
+                            enumerate(dataset[class_][vid][cameras[0]][fr])]
+                    fr1[box1[1]:box1[3], box1[0]:box1[2]] = 1.
+                fr1 = np.expand_dims(fr1, axis=-1)
+                seq_frame_1.append(fr1)
+
+                if dataset[class_][vid][cameras[1]][fr]:
+                    box2 = [int(bb * vc.params['frame_size'][i % 2]) for i, bb in
+                            enumerate(dataset[class_][vid][cameras[1]][fr])]
+                    fr2[box2[1]:box2[3], box2[0]:box2[2]] = 1.
+                fr2 = np.expand_dims(fr2, axis=-1)
+                seq_frame_2.append(fr2)
+            data.append((np.array([seq_frame_1, seq_frame_2]), vc.params['classes'].index(class_)))
+        random.shuffle(data)
+        x, y = list(zip(*data))
+        setattr(vc, f"x_{data_type}", x)
+        setattr(vc, f"y_{data_type}", np.array(y))
+    return vc
 
 
-def load(dataset: VideoClass, folder_path: str) -> VideoClass:
-    array_keys = ['x_train', 'y_train', 'x_val', 'y_val']
-    for k in array_keys:
-        if os.path.isfile(os.path.join(folder_path, f"{k}.npy")):
-            arr = np.load(os.path.join(folder_path, f"{k}.npy"), allow_pickle=True)
-            setattr(dataset, k, arr)
-    if os.path.isfile(os.path.join(folder_path, f"dataset_data.dict")):
-        dict_ = load_data(os.path.join(folder_path, f"dataset_data.dict"))
-        for k, v in dict_.items():
-            setattr(dataset, k, v)
-    return dataset
+save_dataset(dataset, save_folder=os.path.join(ROOT_DIR, 'tests'))
 
-
-save(dataset, save_path=os.path.join(ROOT_DIR, 'tests'))
-
-new = VideoClass()
-new = load(new, os.path.join(ROOT_DIR, 'tests'))
-print(new.classes)
-print(new.x_train[0][0].shape)
+# new = load_dataset(dataset_info=os.path.join(ROOT_DIR, 'tests/'))
+# new = load(new, os.path.join(ROOT_DIR, 'tests'))
+# print(new.classes)
+# print(new.x_train[0][0].shape)

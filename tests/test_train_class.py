@@ -2,8 +2,6 @@ import inspect
 import os.path
 import random
 from collections import Counter
-
-import cv2
 import numpy as np
 import torch
 import torch.nn as nn
@@ -12,7 +10,7 @@ from matplotlib import pyplot as plt
 from dataset_processing import DatasetProcessing, VideoClass
 import time
 from parameters import ROOT_DIR
-from utils import logger, time_converter, plot_and_save_gragh, save_dict_to_table_txt, load_data, save_data
+from utils import logger, time_converter, plot_and_save_gragh, save_dict_to_table_txt, load_data, save_data, save_txt
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 
 logger.info("\n    --- Running classif_models.py ---    \n")
@@ -22,44 +20,25 @@ class Net(nn.Module):
     def __init__(self, device='cpu', num_classes: int = 5, input_size=(12, 256, 256, 3)):
         super(Net, self).__init__()
         self.input_size = input_size
-        self.conv3d_1 = nn.Conv3d(in_channels=input_size[-1], out_channels=32, kernel_size=3, padding='same',
-                                  device=device)
-        self.bn_1 = nn.BatchNorm3d(32, device=device)
+        self.conv3d_1 = nn.Conv3d(
+            in_channels=input_size[-1], out_channels=32, kernel_size=3, padding='same', device=device)
         self.conv3d_2 = nn.Conv3d(in_channels=32, out_channels=64, kernel_size=3, padding='same', device=device)
-        self.bn_2 = nn.BatchNorm3d(64, device=device)
         self.conv3d_3 = nn.Conv3d(in_channels=64, out_channels=128, kernel_size=3, padding='same', device=device)
-        self.bn_3 = nn.BatchNorm3d(128, device=device)
         self.conv3d_4 = nn.Conv3d(in_channels=128, out_channels=256, kernel_size=3, padding='same', device=device)
-        self.bn_4 = nn.BatchNorm3d(256, device=device)
-        self.conv3d_4 = nn.Conv3d(in_channels=256, out_channels=541, kernel_size=3, padding='same', device=device)
-        # self.conv3d_3 = nn.Conv3d(in_channels=16, out_channels=32, kernel_size=5, padding='same', device=device)
-        self.dense_3d = nn.Linear(512 * int(input_size[1] / 32) * int(input_size[2] / 32) * input_size[0],
-                                  256, device=device)
-        # self.dense_3d_2 = nn.Linear(256, 64, device=device)
-        self.bn_d1 = nn.BatchNorm1d(256, device=device)
-        self.dense_3d_3 = nn.Linear(256, num_classes, device=device)
+        self.dense_3d = nn.Linear(in_features=128 * int(input_size[1] / 16) * int(input_size[2] / 16) * input_size[0],
+                                  out_features=256, device=device)
+        self.dense_3d_3 = nn.Linear(in_features=256, out_features=num_classes, device=device)
         self.post = nn.Softmax(dim=1)
 
     def forward(self, x):
-        print('input', x.size())
         x = x.permute(0, 4, 1, 2, 3)
         x = F.max_pool3d(F.relu(F.normalize(self.conv3d_1(x))), (1, 2, 2))
         x = F.max_pool3d(F.relu(F.normalize(self.conv3d_2(x))), (1, 2, 2))
         x = F.max_pool3d(F.relu(F.normalize(self.conv3d_3(x))), (1, 2, 2))
         x = F.max_pool3d(F.relu(F.normalize(self.conv3d_4(x))), (1, 2, 2))
-        x = F.max_pool3d(F.relu(F.normalize(self.conv3d_4(x))), (1, 2, 2))
-        # x = F.max_pool3d(F.relu(self.bn_1(self.conv3d_1(x))), (1, 2, 2))
-        # x = F.max_pool3d(F.relu(self.bn_2(self.conv3d_2(x))), (1, 2, 2))
-        # x = F.max_pool3d(F.relu(self.bn_3(self.conv3d_3(x))), (1, 2, 2))
-        # x = F.max_pool3d(F.relu(self.bn_4(self.conv3d_4(x))), (1, 2, 2))
-        print('conv', x.size())
         x = x.reshape(x.size(0), -1)
-        # print('reshape', x.size())
-        x = self.dense_3d(x)
-        print('dense_3d', x.size())
-        x = F.relu(F.normalize(x))
-        x = self.post(self.dense_3d_3(x))
-        print('dense', x.size())
+        x = F.normalize(self.dense_3d(x))
+        x = self.post(F.normalize(self.dense_3d_3(x)))
         return x
 
 
@@ -91,7 +70,6 @@ class VideoClassifier:
         model_scripted = torch.jit.script(self.model)  # Export to TorchScript
         model_scripted.save(os.path.join(ROOT_DIR, 'video_class_train', name, f"{mode}.pt"))  # Save
 
-
     @staticmethod
     def save_dataset(dataset: VideoClass, save_path: str):
         keys = list(dataset.__dict__.keys())
@@ -103,7 +81,7 @@ class VideoClassifier:
         for k in array_keys:
             arr = np.array(getattr(dataset, k))
             print(arr.shape)
-            np.save(os.path.join(save_path, f'{k}.npy'), arr, allow_pickle=True)
+            np.save(os.path.join(save_path, f'{k}.npy'), arr)
             print(os.path.join(save_path, f'{k}.npy'))
         dict_ = {}
         for k in keys:
@@ -125,7 +103,6 @@ class VideoClassifier:
             for k, v in dict_.items():
                 setattr(dataset, k, v)
         return dataset
-
 
     def get_x_batch(self, x_train: list, num_frames: int = None, concat_axis: int = None) -> torch.Tensor:
         if num_frames and 3 < num_frames:
@@ -427,15 +404,16 @@ class VideoClassifier:
         for i in range(10):
             logger_batch_markers.append(int(num_train_batches * (i + 1) / 10))
 
-        logger.info(f"training parameters:\n"
-                    f"- name: {name},\n"
-                    f"- save path: {os.path.join(ROOT_DIR, 'video_class_train', name)}\n"
-                    f"- optimizer: {optimizer.__dict__.get('_zero_grad_profile_name')}\n"
-                    f"- optimizr params: {optimizer.state_dict().get('param_groups')[0]}\n"
-                    f"\n- Model structure:\n"
-                    f"{inspect.getsource(self.model.__init__) if not weights and not self.weights else ''}\n"
-                    f"{inspect.getsource(self.model.forward) if not weights and not self.weights else ''}\n"
-                    )
+        txt = f"training parameters:\n" \
+              f"- name: {name},\n" \
+              f"- save path: {os.path.join(ROOT_DIR, 'video_class_train', name)}\n" \
+              f"- optimizer: {optimizer.__dict__.get('_zero_grad_profile_name')}\n" \
+              f"- optimizr params: {optimizer.state_dict().get('param_groups')[0]}\n" \
+              f"\n- Model structure:\n" \
+              f"{inspect.getsource(self.model.__init__) if not weights and not self.weights else ''}\n" \
+              f"{inspect.getsource(self.model.forward) if not weights and not self.weights else ''}\n"
+        logger.info(txt)
+        save_txt(txt, os.path.join(ROOT_DIR, 'video_class_train', name, f"model_info.txt"))
 
         train_loss_hist, val_loss_hist, train_acc_hist, val_acc_hist = [], [], [], []
         self.fill_history(status='create')
@@ -572,9 +550,11 @@ if __name__ == "__main__":
     print("Training is started")
     vc.train(
         dataset=dataset,
-        epochs=50,
+        epochs=100,
         batch_size=4,
-        lr=0.00005,
+        lr=0.00002,
         num_frames=num_frames,
-        concat_axis=concat_axis
+        concat_axis=concat_axis,
+        save_dataset=False,
+        load_dataset_path=''
     )
