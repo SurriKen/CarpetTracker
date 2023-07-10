@@ -373,38 +373,39 @@ class Clusterizator:
 
 
 if __name__ == "__main__":
-    pr_dir = [
-        'datasets/Train_0_0s-300s',
-        'datasets/Train_1_0s-300s',
-        'datasets/Train_2_0s-300s',
-        'datasets/Train_3_0s-300s',
-        'datasets/Train_4_0s-300s',
-    ]
-    kmean_dataset = 'datasets/kmean_lbl'
-    # save_path = "datasets"
-    # max_count = Clusterizator.prepare_kmean_data(
-    #     pr_dir=pr_dir,
-    #     save_path='datasets/kmean_lbl',
-    #     total_length=7500,
+    # pr_dir = [
+    #     'datasets/Train_0_0s-300s',
+    #     'datasets/Train_1_0s-300s',
+    #     'datasets/Train_2_0s-300s',
+    #     'datasets/Train_3_0s-300s',
+    #     'datasets/Train_4_0s-300s',
+    # ]
+    # kmean_dataset = 'datasets/kmean_lbl'
+    # # save_path = "datasets"
+    # # max_count = Clusterizator.prepare_kmean_data(
+    # #     pr_dir=pr_dir,
+    # #     save_path='datasets/kmean_lbl',
+    # #     total_length=7500,
+    # # )
+    # # print(max_count)
+    # max_count = 37522
+    # _, _, coord = Clusterizator.counter(
+    #     box_folder=kmean_dataset,
+    #     total_length=max_count
     # )
-    # print(max_count)
-    max_count = 37522
-    _, _, coord = Clusterizator.counter(
-        box_folder=kmean_dataset,
-        total_length=max_count
-    )
     # print(coord)
-    vec = Clusterizator.distribute_coords(coord)
-    kmeans, stat2 = Clusterizator.train_kmeans(
-        array=vec,
-        num_clusters=NUM_CLUSTERS,
-        save_path='kmean_model',
-        name=KMEANS_MODEL_NAME,
-    )
-    print(stat2)
+    # vec = Clusterizator.distribute_coords(coord)
+    # kmeans, stat2 = Clusterizator.train_kmeans(
+    #     array=vec,
+    #     num_clusters=NUM_CLUSTERS,
+    #     save_path='kmean_model',
+    #     name=KMEANS_MODEL_NAME,
+    # )
+    # print(stat2)
     # train_kmeans on total 476 objects
     # 0 (0.046138166745805634, 3) 52
     # 1 (0.033061156639071984, 1) 118
     # 2 (0.021411180403265107, 2) 152
     # 3 (0.011910517626663461, 0) 154
+    print([6, *[1, 2, 3]])
 

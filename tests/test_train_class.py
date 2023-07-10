@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 from dataset_processing import DatasetProcessing, VideoClass
 import time
 from parameters import ROOT_DIR
-from utils import logger, time_converter, plot_and_save_gragh, save_dict_to_table_txt, load_data
+from utils import logger, time_converter, plot_and_save_gragh, save_dict_to_table_txt, load_data, save_data
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 
 logger.info("\n    --- Running classif_models.py ---    \n")
@@ -93,6 +93,38 @@ class VideoClassifier:
     def save_model(self, name, mode: str = 'last'):
         model_scripted = torch.jit.script(self.model)  # Export to TorchScript
         model_scripted.save(os.path.join(ROOT_DIR, 'video_class_train', name, f"{mode}.pt"))  # Save
+
+
+    @staticmethod
+    def save_dataset(dataset: VideoClass, save_path: str):
+        keys = list(dataset.__dict__.keys())
+        array_keys = ['x_train', 'y_train', 'x_val', 'y_val']
+        for k in keys:
+            if k not in array_keys and type(getattr(dataset, k)) == np.ndarray:
+                array_keys.append(k)
+        for k in array_keys:
+            arr = np.array(getattr(dataset, k))
+            np.save(os.path.join(save_path, f'{k}.npy'), arr, allow_pickle=True)
+        dict_ = {}
+        for k in keys:
+            if k not in array_keys:
+                dict_[k] = getattr(dataset, k)
+        save_data(dict_, save_path, 'dataset_data')
+
+    @staticmethod
+    def load_dataset(folder_path: str) -> VideoClass:
+        dataset = VideoClass()
+        array_keys = ['x_train', 'y_train', 'x_val', 'y_val']
+        for k in array_keys:
+            if os.path.isfile(os.path.join(folder_path, f"{k}.npy")):
+                arr = np.load(os.path.join(folder_path, f"{k}.npy"), allow_pickle=True)
+                setattr(dataset, k, arr)
+        if os.path.isfile(os.path.join(folder_path, f"dataset_data.dict")):
+            dict_ = load_data(os.path.join(folder_path, f"dataset_data.dict"))
+            for k, v in dict_.items():
+                setattr(dataset, k, v)
+        return dataset
+
 
     def get_x_batch(self, x_train: list, num_frames: int = None, concat_axis: int = None) -> torch.Tensor:
         if num_frames and 3 < num_frames:
@@ -285,8 +317,75 @@ class VideoClassifier:
         vc.val_stat = v_stat
         return vc
 
+    @staticmethod
+    def create_box_array_dataset(
+            box_path: str, split: float, num_frames: int = 6, frame_size: tuple = (128, 128)) -> VideoClass:
+        vc = VideoClass()
+        vc.params['split'] = split
+        vc.params['box_path'] = box_path
+        dataset = load_data(box_path)
+        vc.classes = sorted(list(dataset.keys()))
+
+        data = []
+        for class_ in dataset.keys():
+            cl_id = vc.classes.index(class_)
+            for vid in dataset[class_].keys():
+                seq_frame_1, seq_frame_2 = [], []
+                cameras = list(dataset[class_][vid].keys())
+                if dataset[class_][vid] != {camera: [] for camera in cameras} and len(
+                        dataset[class_][vid][cameras[0]]) > 2:
+                    sequence = list(range(len(dataset[class_][vid][cameras[0]]))) if len(
+                        dataset[class_][vid][cameras[0]]) \
+                        else list(range(len(dataset[class_][vid][cameras[1]])))
+                    # idx = VideoClassifier.resize_list(sequence, num_frames)
+                    for fr in range(len(sequence)):
+                        fr1 = np.zeros(frame_size)
+                        fr2 = np.zeros(frame_size)
+
+                        if dataset[class_][vid][cameras[0]][fr]:
+                            box1 = [int(bb * frame_size[i % 2]) for i, bb in
+                                    enumerate(dataset[class_][vid][cameras[0]][fr])]
+                            fr1[box1[1]:box1[3], box1[0]:box1[2]] = 1.
+                        fr1 = np.expand_dims(fr1, axis=-1)
+                        seq_frame_1.append(fr1)
+
+                        if dataset[class_][vid][cameras[1]][fr]:
+                            box2 = [int(bb * frame_size[i % 2]) for i, bb in
+                                    enumerate(dataset[class_][vid][cameras[1]][fr])]
+                            fr2[box2[1]:box2[3], box2[0]:box2[2]] = 1.
+                        fr2 = np.expand_dims(fr2, axis=-1)
+                        seq_frame_2.append(fr2)
+
+                    # seq_frame_1 = np.array(seq_frame_1)[idx]
+                    # seq_frame_2 = np.array(seq_frame_2)[idx]
+                    seq_frame_1 = np.array(seq_frame_1)
+                    seq_frame_2 = np.array(seq_frame_2)
+                    batch = [[seq_frame_1, seq_frame_2], cl_id]
+                    # if concat_axis in [0, 1, 2, -1]:
+                    #     batch = [np.concatenate([seq_frame_1, seq_frame_2], axis=concat_axis), cl_id]
+                    # else:
+                    #     print("Concat_axis is our of range. Choose from None, 0, 1, 2 or -1. "
+                    #           "Used default value concat_axis=None")
+                    data.append(batch)
+
+        random.shuffle(data)
+        x, y = list(zip(*data))
+        # x = np.array(x)
+        y = np.array(y)
+
+        vc.x_train = x[:int(vc.params['split'] * len(x))]
+        vc.y_train = y[:int(vc.params['split'] * len(y))]
+        tr_stat = dict(Counter(vc.y_train))
+        vc.train_stat = tr_stat
+        vc.x_val = x[int(vc.params['split'] * len(x)):]
+        vc.y_val = y[int(vc.params['split'] * len(y)):]
+        v_stat = dict(Counter(vc.y_val))
+        vc.val_stat = v_stat
+        return vc
+
     def train(self, dataset: VideoClass, epochs: int, batch_size: int = 1, weights: str = '',
-              lr: float = 0.005, num_frames: int = 6, concat_axis: int = 2) -> None:
+              lr: float = 0.005, num_frames: int = 6, concat_axis: int = 2, save_dataset: bool = True,
+              load_dataset_path: str = '') -> None:
         # try:
         if weights:
             self.load_model(weights)
@@ -305,6 +404,12 @@ class VideoClassifier:
             else:
                 os.mkdir(os.path.join(ROOT_DIR, 'video_class_train', name))
                 stop = True
+
+        if load_dataset_path:
+            dataset = self.load_dataset(load_dataset_path)
+
+        if save_dataset:
+            self.save_dataset(dataset, os.path.join(ROOT_DIR, 'video_class_train', name))
 
         st = time.time()
         logger.info("Training is started\n")
@@ -444,50 +549,48 @@ if __name__ == "__main__":
     classes = ['115x200', '115x400', '150x300', '60x90', '85x150']
     st = time.time()
     device = 'cuda:0'
+    # device = 'cpu'
     num_frames = 6
     concat_axis = 1
     name = 'video data'
-    # device = 'cpu'
-    dataset = VideoClassifier.create_box_video_dataset(
-        box_path=os.path.join(ROOT_DIR, 'tests/class_boxes_10_model3_full.dict'),
-        split=0.9,
-        frame_size=(128, 128),
-    )
-    # dataset = VideoClassifier.create_class_dataset(
-    #     x_path=os.path.join(ROOT_DIR, 'tests/x_train_max.npy'),
-    #     y_path=os.path.join(ROOT_DIR, 'tests/y_train_max.npy'),
-    #     split=0.9,
-    #     classes=classes,
-    #     remove_coords=False,
-    #     shuffle=True
-    # )
+    dataset_path = ''
+
+    if dataset_path:
+        dataset = VideoClassifier.load_dataset(os.path.join(ROOT_DIR, dataset_path))
+    else:
+        dataset = VideoClassifier.create_box_video_dataset(
+            box_path=os.path.join(ROOT_DIR, 'tests/class_boxes_10_model3_full.dict'),
+            split=0.9,
+            frame_size=(128, 128),
+        )
+
 
     logger.info(f'Dataset generator was formed\nclasses {dataset.classes}\ntrain_stat {dataset.train_stat}\n'
                 f'val_stat {dataset.val_stat}\nparameters: {dataset.params}\n')
-    print(dataset.x_train[0][0].shape)
-    print(dataset.x_train[0][1].shape)
+    # print(dataset.x_train[0][0].shape)
+    # print(dataset.x_train[0][1].shape)
+    #
+    # out = cv2.VideoWriter(os.path.join(ROOT_DIR, 'temp/test.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), 25, (256, 128))
+    # for i in range(len(dataset.x_train[0][0])):
+    #     img = np.concatenate([dataset.x_train[0][0][i], dataset.x_train[0][1][i]], axis=1)
+    #     img = np.concatenate([img, img, img], axis=-1) * 255
+    #     img = img.astype(np.uint8)
+    #     print(i, img.shape, img.max())
+    #     # cv2.imshow('image', img)
+    #     cv2.waitKey(500)
+    #     for _ in range(10):
+    #         out.write(img)
+    # out.release()
 
-    out = cv2.VideoWriter(os.path.join(ROOT_DIR, 'temp/test.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), 25, (256, 128))
-    for i in range(len(dataset.x_train[0][0])):
-        img = np.concatenate([dataset.x_train[0][0][i], dataset.x_train[0][1][i]], axis=1)
-        img = np.concatenate([img, img, img], axis=-1) * 255
-        img = img.astype(np.uint8)
-        print(i, img.shape, img.max())
-        # cv2.imshow('image', img)
-        cv2.waitKey(500)
-        for _ in range(10):
-            out.write(img)
-    out.release()
-
-    # inp = [num_frames, *dataset.x_val[0][0][0].shape]
-    # inp[concat_axis - 1] = inp[concat_axis - 1] * 2
-    # vc = VideoClassifier(num_classes=len(dataset.classes), weights='',
-    #                      input_size=tuple(inp), name=name, device=device)
-    # vc.train(
-    #     dataset=dataset,
-    #     epochs=1,
-    #     batch_size=32,
-    #     lr=0.00005,
-    #     num_frames=num_frames,
-    #     concat_axis=2
-    # )
+    inp = [1, num_frames, *dataset.x_val[0][0][0].shape]
+    inp[concat_axis] = inp[concat_axis] * 2
+    vc = VideoClassifier(num_classes=len(dataset.classes), weights='',
+                         input_size=tuple(inp[1:]), name=name, device=device)
+    vc.train(
+        dataset=dataset,
+        epochs=1,
+        batch_size=32,
+        lr=0.00005,
+        num_frames=num_frames,
+        concat_axis=2
+    )
