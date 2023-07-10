@@ -1,23 +1,31 @@
-from parameters import SPEED_LIMIT_PERCENT, MIN_EMPTY_SEQUENCE, DEAD_LIMIT_PERCENT
-from tests.test_tracker import PolyTracker
-from utils import get_distance
+import os
 
-x, y = [133, 122, 150, 157], [76, 153, 123, 216]
+import numpy as np
 
-c1 = ((x[0] + x[2]) / 2, (x[1] + x[3]) / 2)
-c2 = ((y[0] + y[2]) / 2, (y[1] + y[3]) / 2)
-# c1 = (x[0], x[1])
-# c2 = (y[0], y[1])
-d = ((c1[0] - c2[0]) ** 2 + (c1[1] - c2[1]) ** 2) ** 0.5
-print(d)
-speed_limit = get_distance([640, 0], [0, 360]) * SPEED_LIMIT_PERCENT
-print('speed_limit', speed_limit)
+from parameters import ROOT_DIR
+from tests.test_train_class import VideoClassifier
 
-#
-# xxx = [7953, 7954, 7955, 7956]
-# xxx2 = [7936, 7937, 7938, 7939, 7940, 7941, 7942, 7943, 7944, 7945, 7946, 7947, 7948, 7949]
-# print(list(set(xxx) & set(xxx2)))
-# print(list(set(xxx + xxx2)))
-#
-# d = [True, False] * 5
-# print(sum(d))
+
+classes = ['115x200', '115x400', '150x300', '60x90', '85x150']
+dataset = VideoClassifier.create_box_video_dataset(
+        box_path=os.path.join(ROOT_DIR, 'tests/class_boxes_26_model3_full.dict'),
+        split=0.9,
+        frame_size=(128, 128),
+)
+# x = dataset.asdict()
+# x = np.array(dataset.x_train)
+# print(len(x))
+# print(x[0][0].shape, x[0][1].shape)
+# print(dataset.y_val)
+
+# av = {}
+# for cl in classes:
+#     av[cl] = []
+# for i in range(len(x)):
+#     av[classes[dataset.y_train[i]]].append(len(x[i][0]))
+# x = np.array(dataset.x_val)
+# for i in range(len(x)):
+#     av[classes[dataset.y_val[i]]].append(len(x[i][0]))
+# print(av)
+# for k, v in av.items():
+#     print(f"{k} - Len={len(v)}, average={int(np.mean(v))}, max={np.max(v)}, min={np.min(v)}")

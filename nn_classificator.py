@@ -8,7 +8,7 @@ import time
 from utils import logger
 
 # st = time.time()
-vid_ex = 'datasets/class_videos/60x90/7.mp4'
+vid_ex = 'datasets/class_videos_26/60x90/camera_1/7.mp4'
 
 arr = DatasetProcessing.video_to_array(vid_ex)
 arr = np.expand_dims(arr, 0) / 255
@@ -36,8 +36,12 @@ class Net(nn.Module):
     def forward(self, x):
         x = F.relu(F.normalize(self.dense_1(x)))
         x = F.relu(F.normalize(self.dense_2(x)))
-        x = x.reshape(x.size(0), -1)
-        x = self.post(self.dense(x))
+        # x = x.reshape(x.size(0), -1)
+        x, _ = torch.max(x, -1)
+        x, _ = torch.max(x, -1)
+        x, _ = torch.max(x, -1)
+        print(x.size())
+        x = self.post(self.dense_3(x))
         return x
 
 

@@ -19,50 +19,47 @@ logger.info("\n    --- Running classif_models.py ---    \n")
 
 
 class Net(nn.Module):
-    def __init__(self, device='cpu', num_classes: int = 5, input_size=(256, 256)):
+    def __init__(self, device='cpu', num_classes: int = 5, input_size=(12, 256, 256, 3)):
         super(Net, self).__init__()
         self.input_size = input_size
-        # if len(input_size) < 3 or len(input_size) > 4:
-        self.dense_1 = nn.Linear(input_size[-1], 32, device=device)
-        self.dense_2 = nn.Linear(32, 64, device=device)
-        self.dense_5 = nn.Linear(64 * input_size[0], num_classes, device=device)
-        # elif len(input_size) == 3:
-        self.conv2d_1 = nn.Conv2d(in_channels=input_size[-1], out_channels=8, kernel_size=3, padding='same',
+        self.conv3d_1 = nn.Conv3d(in_channels=input_size[-1], out_channels=32, kernel_size=3, padding='same',
                                   device=device)
-        self.conv2d_2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=3, padding='same', device=device)
+        self.bn_1 = nn.BatchNorm3d(32, device=device)
+        self.conv3d_2 = nn.Conv3d(in_channels=32, out_channels=64, kernel_size=3, padding='same', device=device)
+        self.bn_2 = nn.BatchNorm3d(64, device=device)
+        self.conv3d_3 = nn.Conv3d(in_channels=64, out_channels=128, kernel_size=3, padding='same', device=device)
+        self.bn_3 = nn.BatchNorm3d(128, device=device)
+        self.conv3d_4 = nn.Conv3d(in_channels=128, out_channels=256, kernel_size=3, padding='same', device=device)
+        self.bn_4 = nn.BatchNorm3d(256, device=device)
+        self.conv3d_4 = nn.Conv3d(in_channels=256, out_channels=541, kernel_size=3, padding='same', device=device)
         # self.conv3d_3 = nn.Conv3d(in_channels=16, out_channels=32, kernel_size=5, padding='same', device=device)
-        self.dense_2d = nn.Linear(16 * int(input_size[1] / 4) * int(input_size[2] / 4), num_classes,
-                                  device=device)
-        # else:
-        self.conv3d_1 = nn.Conv3d(in_channels=input_size[-1], out_channels=8, kernel_size=3, padding='same',
-                                  device=device)
-        self.conv3d_2 = nn.Conv3d(in_channels=8, out_channels=16, kernel_size=3, padding='same', device=device)
-        # self.conv3d_3 = nn.Conv3d(in_channels=16, out_channels=32, kernel_size=5, padding='same', device=device)
-        self.dense_3d = nn.Linear(16 * int(input_size[1] / 4) * int(input_size[2] / 4) * input_size[0], num_classes,
-                                  device=device)
+        self.dense_3d = nn.Linear(512 * int(input_size[1] / 32) * int(input_size[2] / 32) * input_size[0],
+                                  256, device=device)
+        # self.dense_3d_2 = nn.Linear(256, 64, device=device)
+        self.bn_d1 = nn.BatchNorm1d(256, device=device)
+        self.dense_3d_3 = nn.Linear(256, num_classes, device=device)
         self.post = nn.Softmax(dim=1)
 
     def forward(self, x):
-        if len(self.input_size) < 3 or len(self.input_size) > 4:
-            print('len(self.input_size) < 3 or len(self.input_size) > 4')
-            x = F.relu(F.normalize(self.dense_1(x)))
-            x = F.relu(F.normalize(self.dense_2(x)))
-            x = x.reshape(x.size(0), -1)
-            x = self.post(self.dense_5(x))
-        elif len(self.input_size) == 3:
-            print('len(self.input_size) == 3')
-            x = x.permute(0, 3, 1, 2)
-            x = F.max_pool2d(F.relu(F.normalize(self.conv2d_1(x))), (2, 2))
-            x = F.max_pool2d(F.relu(F.normalize(self.conv2d_2(x))), (2, 2))
-            x = x.reshape(x.size(0), -1)
-            x = self.post(self.dense_2d(x))
-        else:
-            print('len(self.input_size) == 4')
-            x = x.permute(0, 4, 1, 2, 3)
-            x = F.max_pool3d(F.relu(F.normalize(self.conv3d_1(x))), (1, 2, 2))
-            x = F.max_pool3d(F.relu(F.normalize(self.conv3d_2(x))), (1, 2, 2))
-            x = x.reshape(x.size(0), -1)
-            x = self.post(self.dense_3d(x))
+        print('input', x.size())
+        x = x.permute(0, 4, 1, 2, 3)
+        x = F.max_pool3d(F.relu(F.normalize(self.conv3d_1(x))), (1, 2, 2))
+        x = F.max_pool3d(F.relu(F.normalize(self.conv3d_2(x))), (1, 2, 2))
+        x = F.max_pool3d(F.relu(F.normalize(self.conv3d_3(x))), (1, 2, 2))
+        x = F.max_pool3d(F.relu(F.normalize(self.conv3d_4(x))), (1, 2, 2))
+        x = F.max_pool3d(F.relu(F.normalize(self.conv3d_4(x))), (1, 2, 2))
+        # x = F.max_pool3d(F.relu(self.bn_1(self.conv3d_1(x))), (1, 2, 2))
+        # x = F.max_pool3d(F.relu(self.bn_2(self.conv3d_2(x))), (1, 2, 2))
+        # x = F.max_pool3d(F.relu(self.bn_3(self.conv3d_3(x))), (1, 2, 2))
+        # x = F.max_pool3d(F.relu(self.bn_4(self.conv3d_4(x))), (1, 2, 2))
+        print('conv', x.size())
+        x = x.reshape(x.size(0), -1)
+        # print('reshape', x.size())
+        x = self.dense_3d(x)
+        print('dense_3d', x.size())
+        x = F.relu(F.normalize(x))
+        x = self.post(self.dense_3d_3(x))
+        print('dense', x.size())
         return x
 
 
@@ -102,13 +99,17 @@ class VideoClassifier:
         for k in keys:
             if k not in array_keys and type(getattr(dataset, k)) == np.ndarray:
                 array_keys.append(k)
+        print(array_keys)
         for k in array_keys:
             arr = np.array(getattr(dataset, k))
+            print(arr.shape)
             np.save(os.path.join(save_path, f'{k}.npy'), arr, allow_pickle=True)
+            print(os.path.join(save_path, f'{k}.npy'))
         dict_ = {}
         for k in keys:
             if k not in array_keys:
                 dict_[k] = getattr(dataset, k)
+        print(dict_)
         save_data(dict_, save_path, 'dataset_data')
 
     @staticmethod
@@ -404,7 +405,7 @@ class VideoClassifier:
             else:
                 os.mkdir(os.path.join(ROOT_DIR, 'video_class_train', name))
                 stop = True
-
+        print(os.path.join(ROOT_DIR, 'video_class_train', name))
         if load_dataset_path:
             dataset = self.load_dataset(load_dataset_path)
 
@@ -549,48 +550,31 @@ if __name__ == "__main__":
     classes = ['115x200', '115x400', '150x300', '60x90', '85x150']
     st = time.time()
     device = 'cuda:0'
-    # device = 'cpu'
-    num_frames = 6
-    concat_axis = 1
+    num_frames = 16
+    concat_axis = 2
     name = 'video data'
     dataset_path = ''
+    # device = 'cpu'
+    dataset = VideoClassifier.create_box_video_dataset(
+        box_path=os.path.join(ROOT_DIR, 'tests/class_boxes_26_model3_full.dict'),
+        split=0.9,
+        frame_size=(128, 128),
+    )
 
-    if dataset_path:
-        dataset = VideoClassifier.load_dataset(os.path.join(ROOT_DIR, dataset_path))
-    else:
-        dataset = VideoClassifier.create_box_video_dataset(
-            box_path=os.path.join(ROOT_DIR, 'tests/class_boxes_10_model3_full.dict'),
-            split=0.9,
-            frame_size=(128, 128),
-        )
-
-
-    logger.info(f'Dataset generator was formed\nclasses {dataset.classes}\ntrain_stat {dataset.train_stat}\n'
+    logger.info(f'Dataset was formed\nclasses {dataset.classes}\ntrain_stat {dataset.train_stat}\n'
                 f'val_stat {dataset.val_stat}\nparameters: {dataset.params}\n')
-    # print(dataset.x_train[0][0].shape)
-    # print(dataset.x_train[0][1].shape)
-    #
-    # out = cv2.VideoWriter(os.path.join(ROOT_DIR, 'temp/test.mp4'), cv2.VideoWriter_fourcc(*'DIVX'), 25, (256, 128))
-    # for i in range(len(dataset.x_train[0][0])):
-    #     img = np.concatenate([dataset.x_train[0][0][i], dataset.x_train[0][1][i]], axis=1)
-    #     img = np.concatenate([img, img, img], axis=-1) * 255
-    #     img = img.astype(np.uint8)
-    #     print(i, img.shape, img.max())
-    #     # cv2.imshow('image', img)
-    #     cv2.waitKey(500)
-    #     for _ in range(10):
-    #         out.write(img)
-    # out.release()
 
     inp = [1, num_frames, *dataset.x_val[0][0][0].shape]
     inp[concat_axis] = inp[concat_axis] * 2
+    print('input size', inp)
     vc = VideoClassifier(num_classes=len(dataset.classes), weights='',
                          input_size=tuple(inp[1:]), name=name, device=device)
+    print("Training is started")
     vc.train(
         dataset=dataset,
-        epochs=1,
-        batch_size=32,
+        epochs=50,
+        batch_size=4,
         lr=0.00005,
         num_frames=num_frames,
-        concat_axis=2
+        concat_axis=concat_axis
     )
