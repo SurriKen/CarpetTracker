@@ -4,7 +4,7 @@ import shutil
 import cv2
 
 from dataset_processing import DatasetProcessing
-from parameters import ROOT_DIR
+from parameters import ROOT_DIR, DATASET_DIR
 from utils import get_name_from_link
 
 # Link to video (from repository/content root)
@@ -31,7 +31,7 @@ from utils import get_name_from_link
 #     # 'videos/classification_videos/video/test 33_cam 1_sync.mp4', 'videos/classification_videos/video/test 33_cam 2_sync.mp4',
 #     # 'videos/classification_videos/video/test 36_cam 1.mp4', 'videos/classification_videos/video/test 36_cam 2.mp4',
 # ]
-folder = os.path.join(ROOT_DIR, 'videos/classification_videos/video')
+folder = os.path.join(DATASET_DIR, 'videos/classification_videos/video')
 vid = os.listdir(folder)
 print("Folder content =", vid)
 TARGET_FPS = 25

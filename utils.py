@@ -5,6 +5,7 @@ import pickle
 import random
 from copy import deepcopy
 import logging
+from typing import Optional
 
 import cv2
 import numpy as np
@@ -84,7 +85,7 @@ def save_data(data, folder_path: str, filename: str) -> None:
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def load_data(pickle_path: str) -> dict:
+def load_data(pickle_path: str):
     """Load a dictionary from saved file"""
     with open(pickle_path, 'rb') as handle:
         b = pickle.load(handle)

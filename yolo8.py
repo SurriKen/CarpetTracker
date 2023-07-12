@@ -115,10 +115,12 @@ def detect_mono_video_polygon(
 
     finish = int(f) if finish == 0 or finish < start else finish
     true_bb = {}
+    frames = []
     count = 0
     for i in range(0, finish):
         fr_time = time.time()
         _, frame = vc.read()
+        frames.append(frame)
 
         if i >= start:
             res = model.predict(frame, iou=iou, conf=conf)
@@ -170,6 +172,8 @@ def detect_mono_video_polygon(
     if save_boxes_path and save_boxes_mode == 'single_file':
         save_data(data=true_bb, folder_path=save_boxes_path,
                   filename=f"true_bb_2_{video_path.split('/')[-1].split('_')[0]}")
+    vc.release()
+    cv2.destroyAllWindows()
     return true_bb
 
 

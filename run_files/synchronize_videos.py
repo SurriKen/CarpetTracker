@@ -1,7 +1,7 @@
 import os.path
 
 from dataset_processing import DatasetProcessing
-from parameters import ROOT_DIR
+from parameters import ROOT_DIR, DATASET_DIR
 
 # dict with info about video, where key - link to video, value - list of info,
 # index 0 - frame to start synch, index 1 - timestamp in video for this frame
@@ -94,36 +94,42 @@ sync_videos = [
     #  'camera 2': ['videos/classification_videos/video/test 44_cam 2.mp4', 111]},
     # {'camera 1': ['videos/classification_videos/video/test 45_cam 1.mp4', 35],
     #  'camera 2': ['videos/classification_videos/video/test 45_cam 2.mp4', 482]},
-    {'camera 1': ['videos/classification_videos/video/test 46_cam 1.mp4', 112],
-     'camera 2': ['videos/classification_videos/video/test 46_cam 2.mp4', 2240]},
-    {'camera 1': ['videos/classification_videos/video/test 47_cam 1.mp4', 1380],
-     'camera 2': ['videos/classification_videos/video/test 47_cam 2.mp4', 573]},
-    {'camera 1': ['videos/classification_videos/video/test 48_cam 1.mp4', 2705],
-     'camera 2': ['videos/classification_videos/video/test 48_cam 2.mp4', 482]},
+    # {'camera 1': ['videos/classification_videos/video/test 46_cam 1.mp4', 112],
+    #  'camera 2': ['videos/classification_videos/video/test 46_cam 2.mp4', 2240]},
+    # {'camera 1': ['videos/classification_videos/video/test 47_cam 1.mp4', 1380],
+    #  'camera 2': ['videos/classification_videos/video/test 47_cam 2.mp4', 573]},
+    # {'camera 1': ['videos/classification_videos/video/test 48_cam 1.mp4', 2705],
+    #  'camera 2': ['videos/classification_videos/video/test 48_cam 2.mp4', 482]},
+    # {'camera 1': ['videos/classification_videos/video/test 49_cam 1.mp4', 388],
+    #  'camera 2': ['videos/classification_videos/video/test 49_cam 2.mp4', 561]},
+    {'camera 1': ['videos/classification_videos/video/test 50_cam 1.mp4', 2546],
+     'camera 2': ['videos/classification_videos/video/test 50_cam 2.mp4', 2743]},
+    # {'camera 1': ['videos/classification_videos/video/test 51_cam 1.mp4', 2092],
+    #  'camera 2': ['videos/classification_videos/video/test 51_cam 2.mp4', 2669]},
 ]
 save_folder = 'videos/classification_videos/video_sync'
 
 for pair in sync_videos:
     # save_name_1 = f"{pair.get('camera 1').split('/')[-1].split('.')[0]}_sync.mp4"
-    vn = pair.get('camera 1').split('/')[-1].split('.')[:-1]
+    vn = pair.get('camera 1')[0].split('/')[-1].split('.')[:-1]
     save_name_1 = ''
     for v in vn:
         save_name_1 = f"{save_name_1}.{v}"
     save_name_1 = f"{save_name_1[1:]}_sync.mp4"
     print(save_name_1)
     DatasetProcessing.synchronize_video(
-        video_path=os.path.join(ROOT_DIR, pair.get('camera 1')[0]),
-        save_path=os.path.join(ROOT_DIR, f"{save_folder}/{save_name_1}"),
-        from_frame=os.path.join(ROOT_DIR, pair.get('camera 1')[1])
+        video_path=os.path.join(DATASET_DIR, pair.get('camera 1')[0]),
+        save_path=os.path.join(DATASET_DIR, f"{save_folder}/{save_name_1}"),
+        from_frame=pair.get('camera 1')[1]
     )
-    vn = pair.get('camera 2').split('/')[-1].split('.')[:-1]
+    vn = pair.get('camera 2')[0].split('/')[-1].split('.')[:-1]
     save_name_2 = ''
     for v in vn:
         save_name_2 = f"{save_name_2}.{v}"
     save_name_2 = f"{save_name_2[1:]}_sync.mp4"
     print(save_name_2)
     DatasetProcessing.synchronize_video(
-        video_path=os.path.join(ROOT_DIR, pair.get('camera 2')[0]),
-        save_path=os.path.join(ROOT_DIR, f"{save_folder}/{save_name_2}"),
-        from_frame=os.path.join(ROOT_DIR, pair.get('camera 2')[1])
+        video_path=os.path.join(DATASET_DIR, pair.get('camera 2')[0]),
+        save_path=os.path.join(DATASET_DIR, f"{save_folder}/{save_name_2}"),
+        from_frame=pair.get('camera 2')[1]
     )

@@ -4,7 +4,7 @@ import numpy as np
 from pywt.data import camera
 from ultralytics import YOLO
 from scipy import stats
-from parameters import ROOT_DIR
+from parameters import ROOT_DIR, DATASET_DIR
 from utils import save_data, load_data
 from yolo8 import detect_mono_video_polygon
 
@@ -21,8 +21,8 @@ model3 = {
     'model_1': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_1_mix+++_8n_200ep/weights/best.pt')),
     'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_2_mix+++_8n_200ep/weights/best.pt'))
 }
-# vid = os.path.join(ROOT_DIR, 'datasets/class_videos_10/60x90/camera_2/7.mp4')
-dataset = os.path.join(ROOT_DIR, 'datasets/class_videos_26')
+# vid = os.path.join(DATASET_DIR, 'datasets/class_videos_10/60x90/camera_2/7.mp4')
+dataset = os.path.join(DATASET_DIR, 'datasets/class_videos_27')
 target_model = model3
 box_data = {}
 # box_data:
@@ -105,4 +105,4 @@ for class_ in os.listdir(dataset):
 for k, v in stat.items():
     print(k, v)
 
-save_data(data=box_data, folder_path=os.path.join(ROOT_DIR, 'tests'), filename=f'class_boxes_26_model3_full')
+save_data(data=box_data, folder_path=os.path.join(ROOT_DIR, 'tests'), filename=f'class_boxes_27_model3_full')
