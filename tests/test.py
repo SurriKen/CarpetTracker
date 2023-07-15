@@ -32,8 +32,10 @@ def nested_children(m: torch.nn.Module):
 
 print(model.model.code)
 xxx = nested_children(model.model)
-for name, child in xxx.items():
-    if 'conv3d' in name:
-        print(f"name={name}, in_channels={child.in_channels}, out_channels={child.out_channels}, kernel_size={child.kernel_size}")
-    if 'dense' in name:
-        print(f"name={name}, in_features={child.in_features}, out_features={child.out_features}")
+print(model.model.input_size)
+# for name, child in xxx.items():
+#
+#     if 'conv3d' in name:
+#         print(f"name={name}, in_channels={child.in_channels}, out_channels={child.out_channels}, kernel_size={child.kernel_size}")
+#     if 'dense' in name:
+#         print(f"name={name}, in_features={child.in_features}, out_features={child.out_features}")

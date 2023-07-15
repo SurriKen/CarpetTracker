@@ -21,10 +21,10 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.input_size = input_size
         self.conv3d_1 = nn.Conv3d(
-            in_channels=input_size[-1], out_channels=32, kernel_size=3, padding='same', device=device)
-        self.conv3d_2 = nn.Conv3d(in_channels=32, out_channels=64, kernel_size=3, padding='same', device=device)
-        self.conv3d_3 = nn.Conv3d(in_channels=64, out_channels=128, kernel_size=3, padding='same', device=device)
-        self.conv3d_4 = nn.Conv3d(in_channels=128, out_channels=256, kernel_size=3, padding='same', device=device)
+            in_channels=input_size[-1], out_channels=16, kernel_size=3, padding='same', device=device)
+        self.conv3d_2 = nn.Conv3d(in_channels=16, out_channels=32, kernel_size=3, padding='same', device=device)
+        self.conv3d_3 = nn.Conv3d(in_channels=32, out_channels=64, kernel_size=3, padding='same', device=device)
+        self.conv3d_4 = nn.Conv3d(in_channels=64, out_channels=128, kernel_size=3, padding='same', device=device)
         self.dense_3d = nn.Linear(in_features=128 * int(input_size[1] / 16) * int(input_size[2] / 16) * input_size[0],
                                   out_features=256, device=device)
         self.dense_3d_3 = nn.Linear(in_features=256, out_features=num_classes, device=device)
@@ -32,12 +32,15 @@ class Net(nn.Module):
 
     def forward(self, x):
         x = x.permute(0, 4, 1, 2, 3)
+        # print(x.size())
         x = F.max_pool3d(F.relu(F.normalize(self.conv3d_1(x))), (1, 2, 2))
         x = F.max_pool3d(F.relu(F.normalize(self.conv3d_2(x))), (1, 2, 2))
         x = F.max_pool3d(F.relu(F.normalize(self.conv3d_3(x))), (1, 2, 2))
         x = F.max_pool3d(F.relu(F.normalize(self.conv3d_4(x))), (1, 2, 2))
+        # print(x.size())
         x = x.reshape(x.size(0), -1)
         x = F.normalize(self.dense_3d(x))
+        # print(x.size())
         x = self.post(F.normalize(self.dense_3d_3(x)))
         return x
 
@@ -397,7 +400,8 @@ class VideoClassifier:
         num_val_batches = len(dataset.x_val)
 
         optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
-        criterion = nn.CrossEntropyLoss()
+        # criterion = nn.CrossEntropyLoss()
+        criterion = nn.L1Loss()
         best_loss, best_acc = 10000., 0.
 
         logger_batch_markers = []
@@ -530,12 +534,12 @@ if __name__ == "__main__":
     device = 'cuda:0'
     num_frames = 16
     concat_axis = 2
-    name = 'video data'
+    name = 'model5_16f'
     dataset_path = ''
     # device = 'cpu'
     dataset = VideoClassifier.create_box_video_dataset(
-        box_path=os.path.join(ROOT_DIR, 'tests/class_boxes_26_model3_full.dict'),
-        split=0.9,
+        box_path=os.path.join(ROOT_DIR, 'tests/class_boxes_27_model5_full.dict'),
+        split=0.8,
         frame_size=(128, 128),
     )
 

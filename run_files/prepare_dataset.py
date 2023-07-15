@@ -21,9 +21,9 @@ data = [
     [os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_mine/obj_train_data/batch_01'),
      os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_mine/obj_train_data/batch_01_'), 1.0],
     [os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_06/cam_1/init'),
-     os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_06/cam_1/boxes'), 0.25],
+     os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_06/cam_1/boxes'), 0.5],
     [os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_06/cam_2/init'),
-     os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_06/cam_2/boxes'), 0.25],
+     os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_06/cam_2/boxes'), 0.5],
     [os.path.join(DATASET_DIR, 'datasets/От разметчиков/60x90/60x90'),
      os.path.join(DATASET_DIR, 'datasets/От разметчиков/60x90/60x90_boxes'), 1],
     [os.path.join(DATASET_DIR, 'datasets/От разметчиков/85x150/85x150'),
@@ -34,6 +34,8 @@ data = [
      os.path.join(DATASET_DIR, 'datasets/От разметчиков/115x400/115x400_boxes'), 1],
     [os.path.join(DATASET_DIR, 'datasets/От разметчиков/150x300/150x300'),
      os.path.join(DATASET_DIR, 'datasets/От разметчиков/150x300/150x300_boxes'), 1],
+    [os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_07/img'),
+     os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_07/boxes'), 1],
 ]
 
 split = 0.9
@@ -48,12 +50,12 @@ DatasetProcessing.form_dataset_for_train(
     condition={'orig_shape': (1920, 1080)}
 )
 # put box on image to check quality of dataset
-for l in ['train', 'val']:
-    DatasetProcessing.put_box_on_image(
-        images=f'{save_path_1}/{l}/images',
-        labels=f'{save_path_1}/{l}/labels',
-        save_path=f'{save_path_1}/{l}/img+lbl'
-    )
+# for l in ['train', 'val']:
+#     DatasetProcessing.put_box_on_image(
+#         images=f'{save_path_1}/{l}/images',
+#         labels=f'{save_path_1}/{l}/labels',
+#         save_path=f'{save_path_1}/{l}/img+lbl'
+#     )
 
 # form dataset for camera 2 with frame shape 640, 360
 DatasetProcessing.form_dataset_for_train(
@@ -63,9 +65,9 @@ DatasetProcessing.form_dataset_for_train(
     condition={'orig_shape': (640, 360)}
 )
 # put box on image to check quality of dataset
-for l in ['train', 'val']:
-    DatasetProcessing.put_box_on_image(
-        images=f'{save_path_2}/{l}/images',
-        labels=f'{save_path_2}/{l}/labels',
-        save_path=f'{save_path_2}/{l}/img+lbl'
-    )
+# for l in ['train', 'val']:
+#     DatasetProcessing.put_box_on_image(
+#         images=f'{save_path_2}/{l}/images',
+#         labels=f'{save_path_2}/{l}/labels',
+#         save_path=f'{save_path_2}/{l}/img+lbl'
+#     )

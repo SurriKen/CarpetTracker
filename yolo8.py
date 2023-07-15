@@ -6,8 +6,10 @@ import cv2
 import numpy as np
 import wget
 from ultralytics import YOLO
-from tracker import PolyTracker
+# from tracker import PolyTracker
+
 from parameters import POLY_CAM1_IN, POLY_CAM1_OUT, POLY_CAM2_OUT, POLY_CAM2_IN, ROOT_DIR
+from tests.test_tracker import PolyTracker
 from utils import get_colors, add_headline_to_cv_image, logger, time_converter, save_data, \
     clean_diff_image, save_txt
 
@@ -111,7 +113,7 @@ def detect_mono_video_polygon(
     if debug:
         print(f"Video data: frames={f}, fps={fps}, width={w}, height={h}")
     if save_path:
-        out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), 25, (w, h * 2))
+        out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), 25, (w, h))
 
     finish = int(f) if finish == 0 or finish < start else finish
     true_bb = {}
@@ -137,7 +139,7 @@ def detect_mono_video_polygon(
                 image=frame,
                 colors=colors,
                 tracker_current_boxes=tracker.current_boxes,
-                polygon_in=polygon_in,
+                # polygon_in=polygon_in,
                 polygon_out=polygon_out,
                 poly_width=5,
                 reshape=(w, h)
@@ -224,8 +226,8 @@ def detect_synchro_video_polygon(
     h = min([h1, h2])
 
     step = min([fps1, fps2])
-    range_1 = [(i, round(i * 1000 / fps1, 1)) for i in range(int(f1))]
-    range_2 = [(i, round(i * 1000 / fps2, 1)) for i in range(int(f2))]
+    range_1 = [(i, round(i * 1000 / fps1, 1)) for i in range(int(f1)+10)]
+    range_2 = [(i, round(i * 1000 / fps2, 1)) for i in range(int(f2)+10)]
     (min_range, max_range) = (range_1, range_2) if step == fps1 else (range_2, range_1)
     (min_vc, max_vc) = (vc1, vc2) if step == fps1 else (vc2, vc1)
 
@@ -242,16 +244,15 @@ def detect_synchro_video_polygon(
         # print("Dist", dist)
         return dist[0][1]
 
-    if save_path and mode in ['standard', 'masked', 'red']:
-        out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), 25, (w, h * 2))
-    if save_path and mode in ['diff']:
-        out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), 25, (w * 2, h * 2))
+    out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), 25, (w, h * 2))
 
     # f = min([f1, f2])
     f = f1 if step == fps1 else f2
     finish = int(f) if finish == 0 or finish < start else finish
     true_bb_1, true_bb_2 = [], []
     count = 0
+    classes = ['115x200', '115x400', '150x300', '60x90', '85x150']
+    class_counter = {cl: 0 for cl in classes}
     last_track_seq = {'tr1': [], 'tr2': []}
     last_img_1, last_img_2 = [], []
     for i in range(0, finish):
@@ -285,12 +286,17 @@ def detect_synchro_video_polygon(
             tracker_2.process(frame_id=i, boxes=res2[0].boxes.data.tolist(), img_shape=res2[0].orig_shape[:2],
                               debug=False)
 
+            existing_tracks = [len(tracker_1.track_list), len(tracker_2.track_list)]
             count, last_track_seq = PolyTracker.combine_count(
                 count=count,
                 last_track_seq=last_track_seq,
                 tracker_1_count_frames=copy.deepcopy(tracker_1.count_frames),
                 tracker_2_count_frames=copy.deepcopy(tracker_2.count_frames),
-                frame_id=i
+                frame_id=i,
+                # model=None,
+                # class_counter=class_counter,
+                # class_list=classes,
+                # existing_tracks=existing_tracks
             )
             # save_time = time.time()
             if save_path:
@@ -298,7 +304,7 @@ def detect_synchro_video_polygon(
                     image=frame1,
                     colors=colors,
                     tracker_current_boxes=tracker_1.current_boxes,
-                    polygon_in=tracker_1.polygon_in,
+                    # polygon_in=tracker_1.polygon_in,
                     polygon_out=tracker_1.polygon_out,
                     poly_width=5,
                     reshape=(w, h)
@@ -309,39 +315,12 @@ def detect_synchro_video_polygon(
                     image=frame2,
                     colors=colors,
                     tracker_current_boxes=tracker_2.current_boxes,
-                    polygon_in=tracker_2.polygon_in,
+                    # polygon_in=tracker_2.polygon_in,
                     polygon_out=tracker_2.polygon_out,
                     poly_width=2,
                     reshape=(w, h)
                 )
-                if mode in ['diff', 'masked', 'red']:
-                    image_1 = PolyTracker.prepare_image(
-                        image=image_1,
-                        colors=colors,
-                        tracker_current_boxes=tracker_1.current_boxes,
-                        polygon_in=POLY_CAM1_IN,
-                        polygon_out=POLY_CAM1_OUT,
-                        poly_width=5,
-                        reshape=(w, h)
-                    )
-                    image_2 = PolyTracker.prepare_image(
-                        image=image_2,
-                        colors=colors,
-                        tracker_current_boxes=tracker_2.current_boxes,
-                        polygon_in=POLY_CAM2_IN,
-                        polygon_out=POLY_CAM2_OUT,
-                        poly_width=2,
-                        reshape=(w, h)
-                    )
-                img_process = time.time()
-                if save_path and mode == 'standard':
-                    img = np.concatenate((frame_1, frame_2), axis=0)
-                if save_path and mode in ['diff']:
-                    img1 = np.concatenate((frame_1, frame_2), axis=0)
-                    img2 = np.concatenate((image_1, image_2), axis=0)
-                    img = np.concatenate((img1, img2), axis=1)
-                if save_path and mode in ['masked', 'red']:
-                    img = np.concatenate((image_1, image_2), axis=0)
+                img = np.concatenate((frame_1, frame_2), axis=0)
 
                 headline = f"Обнаружено ковров: {count}\nТрекер 1: {tracker_1.count}\nТрекер 2: {tracker_2.count}"
                 img = add_headline_to_cv_image(

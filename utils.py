@@ -182,7 +182,7 @@ def add_headline_to_cv_image(image, headline: str):
     if headline:
         img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         im_pil = Image.fromarray(img)
-        font_size = int(im_pil.size[0] * 0.03)
+        font_size = int(im_pil.size[0] * 0.02)
         draw = ImageDraw.Draw(im_pil)
         font = ImageFont.truetype(os.path.join(ROOT_DIR, "arial.ttf"), font_size)
         label_size = draw.textsize(headline, font)
