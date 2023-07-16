@@ -286,7 +286,7 @@ class VideoClassifier:
 
     @staticmethod
     def create_box_video_dataset(
-            box_path: str, split: float, num_frames: int = 6, frame_size: tuple = (128, 128)) -> VideoClass:
+            box_path: str, split: float, frame_size: tuple = (128, 128)) -> VideoClass:
         vc = VideoClass()
         vc.params['split'] = split
         vc.params['box_path'] = box_path
@@ -586,28 +586,31 @@ class VideoClassifier:
         return list(np.argmax(output, axis=-1))
 
     @staticmethod
-    def evaluate_on_test_data(test_dataset: str, weights: str = '', frame_size=(128, 128),
-                              num_frames: int = 16, concat_axis: int = 2) -> list:
+    def evaluate_on_test_data(test_dataset: str, weights: str = '') -> np.ndarray:
         weights_folder = weights[:-len(weights.split('/')[-1])]
         save_cm = f"{weights_folder}Test_Confusion Matrix.jpg"
         test_loss = 0
+        dataset = load_data(test_dataset)
+        classes = sorted(list(dataset.keys()))
+        vc = VideoClassifier(num_classes=len(classes), weights=weights)
         dataset = VideoClassifier.create_box_video_dataset(
             box_path=test_dataset,
             split=1.0,
-            frame_size=frame_size,
+            frame_size=vc.model.frame_size,
         )
         num_test_batches = len(dataset.x_train)
 
-        inp = [1, num_frames, *dataset.x_train[0][0][0].shape]
-        inp[concat_axis] = inp[concat_axis] * 2
-        vc = VideoClassifier(num_classes=len(dataset.classes), weights='', input_size=tuple(inp[1:]))
+        # inp = [1, num_frames, *dataset.x_train[0][0][0].shape]
+        # inp[concat_axis] = inp[concat_axis] * 2
+
         criterion = nn.CrossEntropyLoss()
 
         y_true, y_pred = [], []
         with torch.no_grad():
             for test_batch in range(num_test_batches):
                 x_test = vc.get_x_batch(
-                    x_train=dataset.x_train[test_batch: test_batch + 1], num_frames=num_frames, concat_axis=concat_axis)
+                    x_train=dataset.x_train[test_batch: test_batch + 1], num_frames=vc.model.num_frames,
+                    concat_axis=vc.model.concat_axis)
                 y_test = vc.get_y_batch(
                     label=dataset.y_train[test_batch: test_batch + 1], num_labels=len(dataset.classes))
                 y_true.append(dataset.classes[dataset.y_train[test_batch]])
@@ -616,8 +619,9 @@ class VideoClassifier:
                 loss = criterion(output, y_test)
                 test_loss += loss.cpu().detach().numpy()
 
-        vc.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
+        cm = vc.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
         print(f"Confusion Matrix were saved in folder '{weights_folder}'")
+        return cm
 
 
 if __name__ == "__main__":
