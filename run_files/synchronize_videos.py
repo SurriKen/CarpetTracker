@@ -98,42 +98,43 @@ sync_videos = [
     #  'camera 2': ['videos/classification_videos/video/test 46_cam 2.mp4', 2240]},
     # {'camera 1': ['videos/classification_videos/video/test 47_cam 1.mp4', 1380],
     #  'camera 2': ['videos/classification_videos/video/test 47_cam 2.mp4', 573]},
-    # {'camera 1': ['videos/classification_videos/video/test 48_cam 1.mp4', 2705],
-    #  'camera 2': ['videos/classification_videos/video/test 48_cam 2.mp4', 482]},
+    {'camera 1': ['video_class_train/test 48_cam 1.mp4', 2705],
+     'camera 2': ['video_class_train/test 48_cam 2.mp4', 586]},
     # {'camera 1': ['videos/classification_videos/video/test 49_cam 1.mp4', 388],
     #  'camera 2': ['videos/classification_videos/video/test 49_cam 2.mp4', 561]},
     # {'camera 1': ['videos/classification_videos/video/test 50_cam 1.mp4', 2546],
     #  'camera 2': ['videos/classification_videos/video/test 50_cam 2.mp4', 2743]},
     # {'camera 1': ['videos/classification_videos/video/test 51_cam 1.mp4', 2092],
     #  'camera 2': ['videos/classification_videos/video/test 51_cam 2.mp4', 2669]},
-    {'camera 1': ['videos/classification_videos/video/СЕРГЕЕВ КАМ1.mp4', 109],
-     'camera 2': ['videos/classification_videos/video/СЕРГЕЕВ КАМ2.mp4', 145]},
+    # {'camera 1': ['video_class_train/test 52_cam 1.mp4', 109],
+    #  'camera 2': ['video_class_train/test 52_cam 2.mp4', 145]},
 ]
-save_folder = 'videos/classification_videos/video_sync'
+save_folder = 'video_class_train'
 
 for pair in sync_videos:
-    # save_name_1 = f"{pair.get('camera 1').split('/')[-1].split('.')[0]}_sync.mp4"
-    # vn = pair.get('camera 1')[0].split('/')[-1].split('.')[:-1]
-    # save_name_1 = ''
-    # for v in vn:
-    #     save_name_1 = f"{save_name_1}.{v}"
-    # save_name_1 = f"{save_name_1[1:]}_sync.mp4"
-    save_name_1 = f"test 52_cam 1_sync.mp4"
+    print(pair)
+    # save_name_1 = f"{pair.get('camera 1')[0].split('/')[-1].split('.')[0]}_sync.mp4"
+    vn = pair.get('camera 1')[0].split('/')[-1].split('.')[:-1]
+    save_name_1 = ''
+    for v in vn:
+        save_name_1 = f"{save_name_1}.{v}"
+    save_name_1 = f"{save_name_1[1:]}_sync.mp4"
+    # save_name_1 = f"test 52_cam 1_sync.mp4"
     print(save_name_1)
-    DatasetProcessing.synchronize_video(
-        video_path=os.path.join(DATASET_DIR, pair.get('camera 1')[0]),
-        save_path=os.path.join(DATASET_DIR, f"{save_folder}/{save_name_1}"),
-        from_frame=pair.get('camera 1')[1]
-    )
-    # vn = pair.get('camera 2')[0].split('/')[-1].split('.')[:-1]
-    # save_name_2 = ''
-    # for v in vn:
-    #     save_name_2 = f"{save_name_2}.{v}"
-    # save_name_2 = f"{save_name_2[1:]}_sync.mp4"
-    save_name_2 = f"test 52_cam 2_sync.mp4"
+    # DatasetProcessing.synchronize_video(
+    #     video_path=os.path.join(ROOT_DIR, pair.get('camera 1')[0]),
+    #     save_path=os.path.join(ROOT_DIR, f"{save_folder}/{save_name_1}"),
+    #     from_frame=pair.get('camera 1')[1]
+    # )
+    vn = pair.get('camera 2')[0].split('/')[-1].split('.')[:-1]
+    save_name_2 = ''
+    for v in vn:
+        save_name_2 = f"{save_name_2}.{v}"
+    save_name_2 = f"{save_name_2[1:]}_sync.mp4"
+    # save_name_2 = f"test 52_cam 2_sync.mp4"
     print(save_name_2)
     DatasetProcessing.synchronize_video(
-        video_path=os.path.join(DATASET_DIR, pair.get('camera 2')[0]),
-        save_path=os.path.join(DATASET_DIR, f"{save_folder}/{save_name_2}"),
+        video_path=os.path.join(ROOT_DIR, pair.get('camera 2')[0]),
+        save_path=os.path.join(ROOT_DIR, f"{save_folder}/{save_name_2}"),
         from_frame=pair.get('camera 2')[1]
     )

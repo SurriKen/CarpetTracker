@@ -1,17 +1,17 @@
 import copy
 import os
 import time
+from collections import Counter
 
 import cv2
 import numpy as np
 import wget
 from ultralytics import YOLO
-# from tracker import PolyTracker
+from tracker import PolyTracker
 
 from parameters import POLY_CAM1_IN, POLY_CAM1_OUT, POLY_CAM2_OUT, POLY_CAM2_IN, ROOT_DIR
-from tests.test_tracker import PolyTracker
-from utils import get_colors, add_headline_to_cv_image, logger, time_converter, save_data, \
-    clean_diff_image, save_txt
+# from tests.test_tracker import PolyTracker
+from utils import get_colors, add_headline_to_cv_image, logger, time_converter, save_data, save_txt
 
 yolov8_types = {
     "yolov8n": {"Test Size": 640, "link": "https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8n.pt"},
@@ -35,29 +35,6 @@ def load_yolo_v8(v8_mode="yolov8n") -> None:
     if not os.path.isdir(f"yolov8/{v8_mode}.pt"):
         url = yolov8_types[v8_mode]["link"]
         wget.download(url, f"yolov8/{v8_mode}.pt")
-
-
-def process_image_for_predict(image: np.ndarray, last_image: np.ndarray, mode: str = 'standard'):
-    if mode == 'standard':
-        return image
-    if mode == 'diff':
-        diff1 = image - last_image
-        cleaned_image, mask = clean_diff_image(diff1, high_color=245)
-        return cleaned_image
-    if mode == 'masked':
-        diff1 = image - last_image
-        cleaned_image, mask = clean_diff_image(diff1, high_color=245)
-        b_img = np.where(mask == 0, image, (0, 0, 0))
-        b_img = b_img.astype(np.uint8)
-        b_img = cv2.addWeighted(b_img, 0.4, image, 0.6, 0)
-        return b_img
-    if mode == 'red':
-        diff1 = image - last_image
-        cleaned_image, mask = clean_diff_image(diff1, high_color=245)
-        r_img = np.where(mask == 0, (0, 0, 255), (255, 0, 0))
-        r_img = r_img.astype(np.uint8)
-        r_img = cv2.addWeighted(r_img, 0.2, image, 0.8, 0)
-        return r_img
 
 
 def detect_mono_video_polygon(
@@ -190,6 +167,7 @@ def detect_synchro_video_polygon(
         interactive_video: bool = False,
         mode: str = 'standard',  # standard, diff, masked, red
         save_boxes: bool = False,
+        debug: bool = False
 ):
     """
     Detect two synchronized videos and save them as one video with boxes to save_path.
@@ -252,9 +230,11 @@ def detect_synchro_video_polygon(
     true_bb_1, true_bb_2 = [], []
     count = 0
     classes = ['115x200', '115x400', '150x300', '60x90', '85x150']
-    class_counter = {cl: 0 for cl in classes}
+    class_counter = [] #{cl: 0 for cl in classes}
     last_track_seq = {'tr1': [], 'tr2': []}
     last_img_1, last_img_2 = [], []
+    tracks = []
+    stop_flag = False
     for i in range(0, finish):
         fr_time = time.time()
         _, frame1 = min_vc.read()
@@ -269,35 +249,60 @@ def detect_synchro_video_polygon(
         # logger.info(f'-- min_range {min_range[:5]}, \nmax_range {max_range[:5]}')
 
         if i >= start and len(last_img_1) and len(last_img_2):
+            if i == finish - 1:
+                stop_flag = True
             logger.info(f"Processed {i + 1} / {f} frames")
             # image_1_time = time.time()
-            image_1 = process_image_for_predict(image=frame1, last_image=last_img_1, mode=mode)
             # print("image_1_time process", time_converter(time.time() - image_1_time))
-            res1 = models[0].get('model_1').predict(image_1, iou=iou, conf=conf)
+            res1 = models[0].get('model_1').predict(frame1, iou=iou, conf=conf)
             true_bb_1.append(res1[0].boxes.data.tolist())
             tracker_1.process(frame_id=i, boxes=res1[0].boxes.data.tolist(), img_shape=res1[0].orig_shape[:2],
-                              debug=False)
+                              debug=False, stop_flag=stop_flag)
 
-            # image_2_time = time.time()
-            image_2 = process_image_for_predict(image=frame2, last_image=last_img_2, mode=mode)
             # print("image_2_time process", time_converter(time.time() - image_2_time))
-            res2 = models[0].get('model_2').predict(image_2, iou=iou, conf=conf)
+            res2 = models[0].get('model_2').predict(frame2, iou=iou, conf=conf)
             true_bb_2.append(res2[0].boxes.data.tolist())
             tracker_2.process(frame_id=i, boxes=res2[0].boxes.data.tolist(), img_shape=res2[0].orig_shape[:2],
-                              debug=False)
+                              debug=False, stop_flag=stop_flag)
+            if debug:
+                print('================================================================')
+                print(f"Current_frame = {i}, current count = {count}, stop_flag={stop_flag}")
+                print(f"Input boxes, tracker 1 = {res1[0].boxes.data.tolist()}, tracker 2 = {res2[0].boxes.data.tolist()}")
+                print(f'tracker_1.track_list. Track num = {len(tracker_1.track_list)}')
+                for tr in tracker_1.track_list:
+                    print(f"--ID={tr['id']}, frames={tr['frame_id']}, check_out={tr['check_out']}, "
+                          f"boxes={tr['boxes']}")
+                print('tracker_1.dead_boxes', tracker_1.dead_boxes)
+                print(f'tracker_2.track_list. Track num = {len(tracker_2.track_list)}')
+                for tr in tracker_2.track_list:
+                    print(f"--ID={tr['id']}, frames={tr['frame_id']}, check_out={tr['check_out']}, "
+                          f"boxes={tr['boxes']}")
 
             existing_tracks = [len(tracker_1.track_list), len(tracker_2.track_list)]
-            count, last_track_seq = PolyTracker.combine_count(
+            class_counter, last_track_seq, end_track = PolyTracker.combine_count(
                 count=count,
                 last_track_seq=last_track_seq,
                 tracker_1_count_frames=copy.deepcopy(tracker_1.count_frames),
                 tracker_2_count_frames=copy.deepcopy(tracker_2.count_frames),
                 frame_id=i,
-                # model=None,
-                # class_counter=class_counter,
-                # class_list=classes,
-                # existing_tracks=existing_tracks
+                class_model=None,
+                class_counter=class_counter,
+                class_list=classes,
+                existing_tracks=existing_tracks,
+                frame_size=(128, 128),
+                stop_flag=stop_flag,
+                debug=True
             )
+            if debug:
+                print('class_counter, last_track_seq, end_track', class_counter, last_track_seq, end_track)
+            count = len(class_counter)
+            cl_count = {cl: 0 for cl in classes}
+            # print('class_counter', class_counter)
+            if class_counter:
+                cl_count.update(dict(Counter(class_counter)))
+            if end_track != {'tr1': [], 'tr2': []}:
+                tracks.append(end_track)
+                # print('0000', tracks, end_track)
             # save_time = time.time()
             if save_path:
                 frame_1 = PolyTracker.prepare_image(
@@ -321,8 +326,12 @@ def detect_synchro_video_polygon(
                     reshape=(w, h)
                 )
                 img = np.concatenate((frame_1, frame_2), axis=0)
-
-                headline = f"Обнаружено ковров: {count}\nТрекер 1: {tracker_1.count}\nТрекер 2: {tracker_2.count}"
+                txt = ''
+                for cl in classes:
+                    txt = f"{txt}{cl} - {cl_count.get(cl)}\n"
+                headline = f"Обнаружено ковров: {count}\n" \
+                           f"{txt[:-1]}"
+                # headline = f"Обнаружено ковров: {count}\nТрекер 1: {tracker_1.count}\nТрекер 2: {tracker_2.count}"
                 img = add_headline_to_cv_image(
                     image=img,
                     headline=headline
@@ -336,16 +345,18 @@ def detect_synchro_video_polygon(
                 out.write(img)
 
             # print("time save_path:", time_converter(time.time() - x))
-            print("frame time:", time_converter(time.time() - fr_time),
-                  # "save_time", time_converter(time.time() - save_time),
-                  # "img_process", time_converter(img_process - save_time),
-                  '\n')
+            # print("frame time:", time_converter(time.time() - fr_time),
+            #       # "save_time", time_converter(time.time() - save_time),
+            #       # "img_process", time_converter(img_process - save_time),
+            #       '\n')
             logger.info(f"-- count: {count}")
             if i >= finish - 1 or not min_range or not max_range:
                 break
 
         last_img_1 = frame1
         last_img_2 = frame2
+    out.release()
+    cv2.destroyAllWindows()
     if save_path:
         out.release()
     if save_boxes:
@@ -354,7 +365,7 @@ def detect_synchro_video_polygon(
                   filename=f"true_bb_1_{video_paths.get('model_1').split('/')[-1].split('_')[0]} {models[1]}")
         save_data(data=true_bb_2, folder_path=path,
                   filename=f"true_bb_2_{video_paths.get('model_2').split('/')[-1].split('_')[0]} {models[1]}")
-    return count
+    return count, tracks
 
 
 def train(weights='yolo_weights/yolov8n.pt', config='data_custom.yaml', epochs=50, batch_size=4, name=None):

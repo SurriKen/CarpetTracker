@@ -242,18 +242,20 @@ class PolyTracker:
     @staticmethod
     def predict_track_class(model: nn.Module, tracks, classes, frame_size: tuple[int, int]):
         # vc = VideoClassifier(num_classes=len(classes), weights=model_weights)
-        arr = VideoClassifier.track_to_array(
-            tracks=[tracks['tr1'], tracks['tr2']], frame_size=frame_size, num_frames=model.input_size[0]
-        )
-        return vc.predict(arr, model=model, classes=classes)
+        # arr = VideoClassifier.track_to_array(
+        #     tracks=[tracks['tr1'], tracks['tr2']], frame_size=frame_size, num_frames=model.input_size[0]
+        # )
+        # return vc.predict(arr, model=model, classes=classes)
+        return classes
 
     @staticmethod
     def combine_count(frame_id: int, count: int, last_track_seq: dict, class_counter: list, class_list: list,
                       tracker_1_count_frames: list, tracker_2_count_frames: list, class_model: nn.Module,
                       existing_tracks: list[int, int], frame_size: tuple[int, int],
-                      debug: bool = False, stop_flag: bool = False, ) -> (list, dict):
-        print(f"combine_count: frame_id={frame_id}, count={count}, last_track_seq={last_track_seq}, "
-              f"tracker_1_count_frames={tracker_1_count_frames}, tracker_2_count_frames={tracker_2_count_frames}")
+                      debug: bool = False, stop_flag: bool = False, ) -> (list, dict, list):
+        if debug:
+            print(f"combine_count: frame_id={frame_id}, count={count}, last_track_seq={last_track_seq}, "
+                  f"tracker_1_count_frames={tracker_1_count_frames}, tracker_2_count_frames={tracker_2_count_frames}")
 
         last_state = [False, False]
         for p, key in enumerate(last_track_seq.keys()):
@@ -277,29 +279,47 @@ class PolyTracker:
                   f"last_track_seq={last_track_seq}, new_track_seq={new_track_seq}")
 
         limit = MIN_EMPTY_SEQUENCE
+        end_track = {'tr1': [], 'tr2': []}
+        if stop_flag and (new_track_seq['tr1'] or new_track_seq['tr2']):
+            len_1 = len(new_track_seq['tr1'][0]) if new_track_seq['tr1'] else 0
+            len_2 = len(new_track_seq['tr2'][0]) if new_track_seq['tr2'] else 0
+            # print(0, "len(last_track_seq['tr1'][0])", len(new_track_seq['tr1'][0]),
+            # "len(last_track_seq['tr2'][0])", len(new_track_seq['tr2'][0]))
+            if len_1 >= MIN_OBJ_SEQUENCE or len_2 >= MIN_OBJ_SEQUENCE:
+                last_track_seq['tr1'] = new_track_seq['tr1'] if new_state[0] else last_track_seq['tr1']
+                last_track_seq['tr2'] = new_track_seq['tr2'] if new_state[1] else last_track_seq['tr2']
+                predict_class = PolyTracker.predict_track_class(
+                    model=class_model, tracks=last_track_seq, classes=class_list, frame_size=frame_size)
+                class_counter.append(predict_class[0])
+                end_track = copy.deepcopy(last_track_seq)
+                # print(0, "frame_id", frame_id, "last_track_seq", last_track_seq)
+                return class_counter, last_track_seq, end_track
+
         if new_state == [False, False] and last_state == [False, False]:
-            return class_counter, last_track_seq
+            return class_counter, last_track_seq, end_track
 
         elif new_state == [False, False] and last_state != [False, False]:
             max_last_1 = max(last_track_seq['tr1'][0]) if last_track_seq['tr1'] else 0
             max_last_2 = max(last_track_seq['tr2'][0]) if last_track_seq['tr2'] else 0
+
             if (last_state == [True, True] and frame_id - max([max_last_1, max_last_2]) > limit) or \
                     (last_state != [False, False] and last_state != [True, True] and existing_tracks == [0, 0]):
                 predict_class = PolyTracker.predict_track_class(
                     model=class_model, tracks=last_track_seq, classes=class_list, frame_size=frame_size)
                 class_counter.append(predict_class[0])
-                print(1, "frame_id", frame_id, "last_track_seq", last_track_seq)
+                end_track = copy.deepcopy(last_track_seq)
+                # print(1, "frame_id", frame_id, "last_track_seq", last_track_seq)
                 last_track_seq['tr1'] = []
                 last_track_seq['tr2'] = []
-                return class_counter, last_track_seq
-            return class_counter, last_track_seq
+                return class_counter, last_track_seq, end_track
+            return class_counter, last_track_seq, end_track
 
         elif new_state != [False, False] and last_state == [False, False]:
             if new_state[0]:
                 last_track_seq['tr1'] = new_track_seq['tr1']
             if new_state[1]:
                 last_track_seq['tr2'] = new_track_seq['tr2']
-            return class_counter, last_track_seq
+            return class_counter, last_track_seq, end_track
 
         elif last_state == [True, True] or new_state == [True, True] or \
                 (last_state == [True, False] and new_state == [True, False]) or \
@@ -307,15 +327,16 @@ class PolyTracker:
             predict_class = PolyTracker.predict_track_class(
                 model=class_model, tracks=last_track_seq, classes=class_list, frame_size=frame_size)
             class_counter.append(predict_class[0])
-            print(2, "frame_id", frame_id, "last_track_seq", last_track_seq)
+            end_track = copy.deepcopy(last_track_seq)
+            # print(2, "frame_id", frame_id, "last_track_seq", last_track_seq)
             last_track_seq['tr1'] = new_track_seq['tr1'] if new_state[0] else []
             last_track_seq['tr2'] = new_track_seq['tr2'] if new_state[1] else []
-            return class_counter, last_track_seq
+            return class_counter, last_track_seq, end_track
 
         else:
             last_track_seq['tr1'] = new_track_seq['tr1'] if new_state[0] else last_track_seq['tr1']
             last_track_seq['tr2'] = new_track_seq['tr2'] if new_state[1] else last_track_seq['tr2']
-            return class_counter, last_track_seq
+            return class_counter, last_track_seq, end_track
 
         # if new_state == [False, False]:
         #     pass
@@ -730,8 +751,8 @@ if __name__ == '__main__':
     model_id = 'mix4+ 350ep'
     # model_id = 'mix+++ 200ep'
 
-    # vid_1 = f'videos/sync_test/test {test_vid}_cam 1_sync.mp4'
-    # vid_2 = f'videos/sync_test/test {test_vid}_cam 2_sync.mp4'
+    vid_1 = f'videos/sync_test/test {test_vid}_cam 1_sync.mp4'
+    vid_2 = f'videos/sync_test/test {test_vid}_cam 2_sync.mp4'
 
     true_bb_1 = load_data(
         pickle_path=os.path.join(ROOT_DIR, f'tests/boxes/true_bb_1_test {test_vid} ({model_id}).dict'))
@@ -790,6 +811,7 @@ if __name__ == '__main__':
         return dist[0][1]
 
 
+    tracks = []
     stop_flag = False
     count = 0
     last_track_seq = {'tr1': [], 'tr2': []}
@@ -833,7 +855,7 @@ if __name__ == '__main__':
             print('tracker_2.dead_boxes', tracker_2.dead_boxes)
             existing_tracks = [len(tracker_1.track_list), len(tracker_2.track_list)]
 
-            class_counter, last_track_seq = PolyTracker.combine_count(
+            class_counter, last_track_seq, end_track = PolyTracker.combine_count(
                 count=count,
                 last_track_seq=last_track_seq,
                 tracker_1_count_frames=copy.deepcopy(tracker_1.count_frames),
@@ -847,6 +869,7 @@ if __name__ == '__main__':
                 debug=True,
                 frame_size=vc.frame_size
             )
+            tracks.append(end_track)
             count = len(class_counter)
             cl_count = {cl: 0 for cl in classes}
             # print('class_counter', class_counter)

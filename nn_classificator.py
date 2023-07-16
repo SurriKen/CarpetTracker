@@ -3,7 +3,6 @@ import os.path
 import random
 from collections import Counter
 import numpy as np
-import torch
 import torch as torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -55,8 +54,7 @@ class VideoClassifier:
         self.concat_axis = concat_axis
         self.torch_device = torch.device(device)
         self.weights = weights
-        self.model = None
-        self.load_model(weights)
+        self.model = self.load_model(weights)
         self.history = {}
         try:
             os.mkdir(os.path.join(ROOT_DIR, 'video_class_train'))
@@ -64,15 +62,18 @@ class VideoClassifier:
             pass
         self.name = name
 
-    def load_model(self, weights: str = '') -> None:
+    def load_model(self, weights: str = '') -> nn.Module:
         if weights and weights.split('.')[-1] == 'pt':
             self.model = torch.jit.load(weights)
             self.input_size = self.model.input_size
-            if self.device == 'cuda:0':
-                self.model.cuda(self.torch_device)
+            try:
+                self.model.cuda(torch.device('cuda:0'))
+            except:
+                pass
         else:
             self.model = Net(device=self.device, num_classes=self.num_classes, input_size=self.input_size,
                              frame_size=self.frame_size, concat_axis=2)
+        return self.model
 
     def save_model(self, name, mode: str = 'last'):
         model_scripted = torch.jit.script(self.model)  # Export to TorchScript
@@ -457,8 +458,8 @@ class VideoClassifier:
         num_val_batches = len(dataset.x_val)
 
         optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
-        # criterion = nn.CrossEntropyLoss()
-        criterion = nn.L1Loss()
+        criterion = nn.CrossEntropyLoss()
+        # criterion = nn.L1Loss()
         best_loss, best_acc = 10000., 0.
 
         logger_batch_markers = []
@@ -575,6 +576,7 @@ class VideoClassifier:
             classes = []
         # if weights:
         #     self.load_model(weights)
+
         array = self.numpy_to_torch(array)
         output = model(array)
         output = output.cpu().detach().numpy() if self.device != 'cpu' else output.detach().numpy()
@@ -582,6 +584,40 @@ class VideoClassifier:
         if classes:
             return [classes[i] for i in list(np.argmax(output, axis=-1))]
         return list(np.argmax(output, axis=-1))
+
+    @staticmethod
+    def evaluate_on_test_data(test_dataset: str, weights: str = '', frame_size=(128, 128),
+                              num_frames: int = 16, concat_axis: int = 2) -> list:
+        weights_folder = weights[:-len(weights.split('/')[-1])]
+        save_cm = f"{weights_folder}Test_Confusion Matrix.jpg"
+        test_loss = 0
+        dataset = VideoClassifier.create_box_video_dataset(
+            box_path=test_dataset,
+            split=1.0,
+            frame_size=frame_size,
+        )
+        num_test_batches = len(dataset.x_train)
+
+        inp = [1, num_frames, *dataset.x_train[0][0][0].shape]
+        inp[concat_axis] = inp[concat_axis] * 2
+        vc = VideoClassifier(num_classes=len(dataset.classes), weights='', input_size=tuple(inp[1:]))
+        criterion = nn.CrossEntropyLoss()
+
+        y_true, y_pred = [], []
+        with torch.no_grad():
+            for test_batch in range(num_test_batches):
+                x_test = vc.get_x_batch(
+                    x_train=dataset.x_train[test_batch: test_batch + 1], num_frames=num_frames, concat_axis=concat_axis)
+                y_test = vc.get_y_batch(
+                    label=dataset.y_train[test_batch: test_batch + 1], num_labels=len(dataset.classes))
+                y_true.append(dataset.classes[dataset.y_train[test_batch]])
+                output = vc.model(x_test)
+                y_pred.append(dataset.classes[np.argmax(output.cpu().detach().numpy(), axis=-1)[0]])
+                loss = criterion(output, y_test)
+                test_loss += loss.cpu().detach().numpy()
+
+        vc.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
+        print(f"Confusion Matrix were saved in folder '{weights_folder}'")
 
 
 if __name__ == "__main__":
