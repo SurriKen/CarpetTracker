@@ -20,11 +20,11 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.input_size = input_size
         self.conv3d_1 = nn.Conv3d(
-            in_channels=input_size[-1], out_channels=16, kernel_size=3, padding='same', device=device)
-        self.conv3d_2 = nn.Conv3d(in_channels=16, out_channels=32, kernel_size=3, padding='same', device=device)
-        self.conv3d_3 = nn.Conv3d(in_channels=32, out_channels=64, kernel_size=3, padding='same', device=device)
-        self.conv3d_4 = nn.Conv3d(in_channels=64, out_channels=128, kernel_size=3, padding='same', device=device)
-        self.dense_3d = nn.Linear(in_features=128 * int(input_size[1] / 16) * int(input_size[2] / 16) * input_size[0],
+            in_channels=input_size[-1], out_channels=32, kernel_size=3, padding='same', device=device)
+        self.conv3d_2 = nn.Conv3d(in_channels=32, out_channels=64, kernel_size=3, padding='same', device=device)
+        self.conv3d_3 = nn.Conv3d(in_channels=64, out_channels=128, kernel_size=3, padding='same', device=device)
+        self.conv3d_4 = nn.Conv3d(in_channels=128, out_channels=256, kernel_size=3, padding='same', device=device)
+        self.dense_3d = nn.Linear(in_features=256 * int(input_size[1] / 16) * int(input_size[2] / 16) * input_size[0],
                                   out_features=256, device=device)
         self.dense_3d_3 = nn.Linear(in_features=256, out_features=num_classes, device=device)
         self.post = nn.Softmax(dim=1)
@@ -115,9 +115,12 @@ class VideoClassifier:
 
     def get_x_batch(self, x_train: list, num_frames: int = None, concat_axis: int = None) -> torch.Tensor:
         if num_frames and 3 < num_frames:
+            # x_train =np.resize(x_train, (num_frames))
             x1, x2 = [], []
             for batch in x_train:
                 b1, b2 = batch[0], batch[1]
+                # b1 = np.resize(b1, (num_frames, *b1.shape[1:]))
+                # b2 = np.resize(b1, (num_frames, *b1.shape[1:]))
                 sequence = list(range(len(b1)))
                 idx = VideoClassifier.resize_list(sequence, num_frames)
                 b1, b2 = b1[idx], b2[idx]
@@ -129,6 +132,7 @@ class VideoClassifier:
                 x_train = np.concatenate([x1, x2], axis=1)
                 print("Concat_axis is our of range. Choose from None, 0, 1, 2 or -1. "
                       "Used default value concat_axis=None")
+        # print(x_train.shape)
         x_train = torch.from_numpy(np.array(x_train))
         if 'cuda' in self.device:
             return x_train.to(self.torch_device, dtype=torch.float)
@@ -238,8 +242,8 @@ class VideoClassifier:
             y = [sequence[i] for i in idx]
         return y
 
-    @staticmethod
-    def track_to_array(tracks: list[list, list], frame_size: tuple = (128, 128), num_frames: int = 16,
+    # @staticmethod
+    def track_to_array(self, tracks: list[list, list], frame_size: tuple = (128, 128), num_frames: int = 16,
                        concat_axis: int = 2) -> np.ndarray:
         """
         tracks: a list of lists [camera_1, camera_2] where camera_X = [[frame_id_1, frame_id_2, ...],[box_1, box_2, ...]]
@@ -249,48 +253,30 @@ class VideoClassifier:
 
         min_fr = min([min(tr1[0]), min(tr2[0])])
         max_fr = max([max(tr1[0]), max(tr2[0])])
-        print(min_fr, max_fr)
         sequence = list(range(min_fr, max_fr + 1))
         seq_frame_1, seq_frame_2 = [], []
-        for fr in range(len(sequence)):
-            fr1 = np.zeros(frame_size)
-            fr2 = np.zeros(frame_size)
-
+        for fr in sequence:
             if fr in tr1[0]:
-                if tr1[1][tr1[0].index(fr)]:
-                    box1 = [int(bb * frame_size[i % 2]) for i, bb in enumerate(tr1[1][tr1[0].index(fr)])]
-                    fr1[box1[1]:box1[3], box1[0]:box1[2]] = 1.
-            fr1 = np.expand_dims(fr1, axis=-1)
-            seq_frame_1.append(fr1)
+                seq_frame_1.append(tr1[1][tr1[0].index(fr)])
+            else:
+                seq_frame_1.append([])
 
             if fr in tr2[0]:
-                if tr2[1][tr2[0].index(fr)]:
-                    box2 = [int(bb * frame_size[i % 2]) for i, bb in enumerate(tr2[1][tr2[0].index(fr)])]
-                    fr2[box2[1]:box2[3], box2[0]:box2[2]] = 1.
-            fr2 = np.expand_dims(fr2, axis=-1)
-            seq_frame_2.append(fr2)
-
-        batch = np.array([[np.array(seq_frame_1), np.array(seq_frame_2)]])
-        if num_frames:
-            row = list(range(len(batch[0][0])))
-            idx = VideoClassifier.resize_list(row, num_frames)
-            batch = batch[:, :, idx, ...]
-            if concat_axis in [1, 2, -1]:
-                batch = np.concatenate([batch[:, 0, ...], batch[:, 1, ...]], axis=concat_axis)
+                seq_frame_2.append(tr2[1][tr2[0].index(fr)])
             else:
-                batch = np.concatenate([batch[:, 0, ...], batch[:, 1, ...]], axis=1)
-                print("Concat_axis is our of range. Choose from None, 0, 1, 2 or -1. "
-                      "Used default value concat_axis=None")
-            # batch = torch.from_numpy(np.array(batch))
-        return batch
+                seq_frame_2.append([])
+
+        track = {'cl': {'type': {"1": seq_frame_1, "2": seq_frame_2}}}
+        dataset = self.create_box_video_dataset(track, 1., frame_size=frame_size)
+        batch = self.get_x_batch(x_train=dataset.x_train[0: 1], num_frames=num_frames, concat_axis=concat_axis)
+        return batch.cpu().numpy()
 
     @staticmethod
     def create_box_video_dataset(
-            box_path: str, split: float, frame_size: tuple = (128, 128)) -> VideoClass:
+            dataset: dict, split: float, frame_size: tuple = (128, 128)) -> VideoClass:
         vc = VideoClass()
         vc.params['split'] = split
-        vc.params['box_path'] = box_path
-        dataset = load_data(box_path)
+        vc.params['box_path'] = dataset
         vc.classes = sorted(list(dataset.keys()))
 
         data = []
@@ -417,7 +403,7 @@ class VideoClassifier:
         return vc
 
     def train(self, dataset: VideoClass, epochs: int, batch_size: int = 1, weights: str = '',
-              lr: float = 0.005, num_frames: int = 6, concat_axis: int = 2, save_dataset: bool = True,
+              lr: float = 0.005, num_frames: int = 6, concat_axis: int = 2, save_dataset: bool = False,
               load_dataset_path: str = '') -> None:
         # try:
         if weights:
@@ -578,46 +564,39 @@ class VideoClassifier:
         #     self.load_model(weights)
 
         array = self.numpy_to_torch(array)
-        output = model(array)
+        with torch.no_grad():
+            output = model(array)
         output = output.cpu().detach().numpy() if self.device != 'cpu' else output.detach().numpy()
-        print('predict output', np.argmax(output, axis=-1), classes, output)
+        # print('\npredict output', np.argmax(output, axis=-1), classes, output)
         if classes:
             return [classes[i] for i in list(np.argmax(output, axis=-1))]
         return list(np.argmax(output, axis=-1))
 
     @staticmethod
-    def evaluate_on_test_data(test_dataset: str, weights: str = '') -> np.ndarray:
+    def evaluate_on_test_data(test_dataset: str, weights: str = '', frame_size=(128, 128), num_frames=16,
+                              concat_axis=2) -> np.ndarray:
         weights_folder = weights[:-len(weights.split('/')[-1])]
         save_cm = f"{weights_folder}Test_Confusion Matrix.jpg"
-        test_loss = 0
         dataset = load_data(test_dataset)
         classes = sorted(list(dataset.keys()))
         vc = VideoClassifier(num_classes=len(classes), weights=weights)
         dataset = VideoClassifier.create_box_video_dataset(
-            box_path=test_dataset,
+            dataset=dataset,
             split=1.0,
-            frame_size=vc.model.frame_size,
+            frame_size=frame_size,
         )
         num_test_batches = len(dataset.x_train)
-
-        # inp = [1, num_frames, *dataset.x_train[0][0][0].shape]
-        # inp[concat_axis] = inp[concat_axis] * 2
-
-        criterion = nn.CrossEntropyLoss()
 
         y_true, y_pred = [], []
         with torch.no_grad():
             for test_batch in range(num_test_batches):
                 x_test = vc.get_x_batch(
-                    x_train=dataset.x_train[test_batch: test_batch + 1], num_frames=vc.model.num_frames,
-                    concat_axis=vc.model.concat_axis)
-                y_test = vc.get_y_batch(
-                    label=dataset.y_train[test_batch: test_batch + 1], num_labels=len(dataset.classes))
+                    x_train=dataset.x_train[test_batch: test_batch + 1], num_frames=num_frames,
+                    concat_axis=concat_axis)
                 y_true.append(dataset.classes[dataset.y_train[test_batch]])
                 output = vc.model(x_test)
+                # print(y_true[-1], output, classes)
                 y_pred.append(dataset.classes[np.argmax(output.cpu().detach().numpy(), axis=-1)[0]])
-                loss = criterion(output, y_test)
-                test_loss += loss.cpu().detach().numpy()
 
         cm = vc.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
         print(f"Confusion Matrix were saved in folder '{weights_folder}'")
@@ -625,76 +604,36 @@ class VideoClassifier:
 
 
 if __name__ == "__main__":
-    dataset_path = load_data(os.path.join(ROOT_DIR, 'tests/class_boxes_27_model5_full.dict'))
-    classes = list(dataset_path.keys())
-    cl = np.random.choice(classes)
-    vid_list = list(dataset_path.get(cl).keys())
-    vid = np.random.choice(vid_list)
-    cameras = sorted(list(dataset_path.get(cl).get(vid).keys()))
-    print(cl, vid, cameras[0])
-    tr1 = dataset_path.get(cl).get(vid).get(cameras[0])
-    tr2 = dataset_path.get(cl).get(vid).get(cameras[1])
-    print(len(tr1), tr1)
-    print(len(tr2), tr2)
-    last_track_seq = {
-        'tr1': [
-            [187, 188, 189, 190, 191, 192, 193, 196, 199, 200, 201, 202, 203, 204],
-            [[0.290625, 0.34814814814814815, 0.3697916666666667, 0.47314814814814815],
-             [0.3020833333333333, 0.33240740740740743, 0.38333333333333336, 0.4861111111111111],
-             [0.340625, 0.30092592592592593, 0.40520833333333334, 0.4648148148148148],
-             [0.34010416666666665, 0.30092592592592593, 0.40520833333333334, 0.4648148148148148],
-             [0.359375, 0.26944444444444443, 0.43020833333333336, 0.4388888888888889],
-             [0.3723958333333333, 0.24351851851851852, 0.4401041666666667, 0.39166666666666666],
-             [0.371875, 0.2175925925925926, 0.4609375, 0.337037037037037],
-             [0.39166666666666666, 0.14907407407407408, 0.4864583333333333, 0.21666666666666667],
-             [0.434375, 0.07685185185185185, 0.5401041666666667, 0.17777777777777778],
-             [0.434375, 0.07592592592592592, 0.5395833333333333, 0.1787037037037037],
-             [0.434375, 0.07685185185185185, 0.5395833333333333, 0.1787037037037037],
-             [0.4395833333333333, 0.05740740740740741, 0.5328125, 0.16203703703703703],
-             [0.4583333333333333, 0.05092592592592592, 0.5333333333333333, 0.16111111111111112],
-             [0.46927083333333336, 0.05, 0.5333333333333333, 0.1648148148148148]]],
-        'tr2': [
-            [188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207],
-            [[0.21875, 0.37222222222222223, 0.3234375, 0.4722222222222222],
-             [0.2203125, 0.36666666666666664, 0.3359375, 0.5055555555555555],
-             [0.2296875, 0.3277777777777778, 0.3828125, 0.5194444444444445],
-             [0.24375, 0.3055555555555556, 0.3953125, 0.525],
-             [0.2515625, 0.28888888888888886, 0.40625, 0.5138888888888888],
-             [0.284375, 0.2722222222222222, 0.428125, 0.4861111111111111],
-             [0.33125, 0.2861111111111111, 0.4734375, 0.4583333333333333],
-             [0.3984375, 0.25555555555555554, 0.4953125, 0.4638888888888889],
-             [0.446875, 0.24722222222222223, 0.540625, 0.4388888888888889],
-             [0.478125, 0.2611111111111111, 0.5828125, 0.4083333333333333], [0.5, 0.275, 0.60625, 0.4],
-             [0.534375, 0.29444444444444445, 0.653125, 0.45],
-             [0.5578125, 0.3333333333333333, 0.7234375, 0.4638888888888889],
-             [0.5921875, 0.35, 0.7515625, 0.49444444444444446],
-             [0.6234375, 0.3472222222222222, 0.80625, 0.5305555555555556],
-             [0.6421875, 0.35, 0.821875, 0.5611111111111111],
-             [0.6828125, 0.35833333333333334, 0.846875, 0.6],
-             [0.71875, 0.37222222222222223, 0.8703125, 0.6444444444444445],
-             [0.74375, 0.4, 0.878125, 0.675],
-             [0.7765625, 0.46111111111111114, 0.890625, 0.7083333333333334]]]}
-    print(len(last_track_seq['tr1'][0]), last_track_seq['tr1'])
-    print(len(last_track_seq['tr2'][0]), last_track_seq['tr2'])
-    arr = VideoClassifier.track_to_array(
-        tracks=[[list(range(len(tr1))), tr1], [list(range(len(tr2))), tr2]],
-        # tracks=[last_track_seq['tr1'], last_track_seq['tr2']],
-        frame_size=(128, 128), num_frames=12
+    dataset = load_data(os.path.join(ROOT_DIR, 'tests/train_class_boxes_model5_Pex.dict'))
+    # weights = os.path.join(ROOT_DIR, 'video_class_train/model5_16f_3/best.pt')
+    frame_size = (96, 96)
+    concat_axis = 2
+    num_frames = 12
+
+    st = time.time()
+    device = 'cuda:0'
+    name = f'model5_{num_frames}f'
+    # device = 'cpu'
+    dataset = VideoClassifier.create_box_video_dataset(
+        dataset=dataset,
+        split=0.9,
+        frame_size=frame_size,
     )
-    # print(arr.shape)
-    vc = VideoClassifier(num_classes=len(classes), frame_size=(128, 128), concat_axis=2,
-                         weights=os.path.join(ROOT_DIR, 'video_class_train/model5_95%/last.pt'))
-    # print(vc.input_size, vc.frame_size, vc.concat_axis)
-    print(vc.predict(arr, classes=classes, model=vc.model))
-    print()
-    arr = VideoClassifier.track_to_array(
-        # tracks=[[list(range(len(tr1))), tr1], [list(range(len(tr2))), tr2]],
-        tracks=[last_track_seq['tr1'], last_track_seq['tr2']],
-        frame_size=(128, 128), num_frames=12
+
+    inp = [1, num_frames, *dataset.x_val[0][0][0].shape]
+    inp[concat_axis] = inp[concat_axis] * 2
+    print('input size', inp)
+    vc = VideoClassifier(num_classes=len(dataset.classes), weights='',
+                         input_size=tuple(inp[1:]), name=name, device=device)
+    print("Training is started")
+    vc.train(
+        dataset=dataset,
+        epochs=100,
+        batch_size=4,
+        lr=0.00005,
+        num_frames=num_frames,
+        concat_axis=concat_axis,
+        save_dataset=False,
+        load_dataset_path=''
     )
-    model = torch.jit.load(os.path.join(ROOT_DIR, 'video_class_train/video data_94%/last.pt'))
-    # print(arr.shape)
-    print(vc.predict(arr, classes=classes, model=model))
-    arr = vc.numpy_to_torch(arr)
-    print(arr.shape)
-    print(model(arr))
+

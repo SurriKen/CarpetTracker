@@ -10,15 +10,14 @@ from utils import save_data, time_converter
 from yolo8 import detect_mono_video_polygon
 
 
-model = {
+target_model = {
     'model_1': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_1_mix4+_8n_350ep/weights/best.pt')),
     'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_2_mix4+_8n_350ep/weights/best.pt'))
 }
 
 classes = ['115x200', '115x400', '150x300', '60x90', '85x150']
 # vid = os.path.join(ROOT_DIR, 'datasets/class_videos_10/60x90/camera_2/7.mp4')
-dataset = os.path.join(DATASET_DIR, 'datasets/class_videos_27')
-target_model = model
+dataset = os.path.join(DATASET_DIR, 'datasets/train_class_videos')
 box_data = {}
 # box_data:
 #     - '115x200'
@@ -138,40 +137,40 @@ for class_ in os.listdir(dataset):
     #     #             img.save(f"{sp}/vid{video.split('.')[0]}_{cam}_{e}.png")
     #     print(diff1, diff2, empt)
 
-        print(len(frames_['camera_1']), len(frames_['camera_2']), frames_['id_1'], frames_['id_2'])
-        if box_data[class_][video] == {c: [] for c in os.listdir(os.path.join(dataset, class_))}:
-            empty += 1
-        else:
-            filled += 1
-        total += 1
-        min_frame, max_frame = 1000, 0
-        boxes_upd = {camera: [] for camera in os.listdir(os.path.join(dataset, class_))}
-        for camera in os.listdir(os.path.join(dataset, class_)):
-            print(box_data[class_][video])
-            if box_data[class_][video][camera]:
-                # print(box_data[class_][video][camera])
-                # if box_data[class_][video][camera][1]:
-                if min_frame > min(box_data[class_][video][camera][1]):
-                    min_frame = min(box_data[class_][video][camera][1])
-                if max_frame < max(box_data[class_][video][camera][1]):
-                    max_frame = max(box_data[class_][video][camera][1])
-
-        for i in range(min_frame, max_frame+1):
-            for camera in os.listdir(os.path.join(dataset, class_)):
-                if box_data[class_][video][camera] and i in box_data[class_][video][camera][1]:
-                    idx = box_data[class_][video][camera][1].index(i)
-                    boxes_upd[camera].append(box_data[class_][video][camera][0][idx])
-                else:
-                    boxes_upd[camera].append([])
-        # print(class_, video, "boxes_upd", boxes_upd)
-        if boxes_upd != {camera: [] for camera in os.listdir(os.path.join(dataset, class_))}:
-            box_data[class_][video] = boxes_upd
-    #     break
-    # break
-    stat[class_] = dict(total=total, filled=filled, empty=empty)
-print(time_converter(time.time() - start))
-for k, v in stat.items():
-    print(k, v)
-
-save_data(data=box_data, folder_path=os.path.join(ROOT_DIR, 'tests'), filename=f'class_boxes_27_model5_full')
+#         print(len(frames_['camera_1']), len(frames_['camera_2']), frames_['id_1'], frames_['id_2'])
+#         if box_data[class_][video] == {c: [] for c in os.listdir(os.path.join(dataset, class_))}:
+#             empty += 1
+#         else:
+#             filled += 1
+#         total += 1
+#         min_frame, max_frame = 1000, 0
+#         boxes_upd = {camera: [] for camera in os.listdir(os.path.join(dataset, class_))}
+#         for camera in os.listdir(os.path.join(dataset, class_)):
+#             print(box_data[class_][video])
+#             if box_data[class_][video][camera]:
+#                 # print(box_data[class_][video][camera])
+#                 # if box_data[class_][video][camera][1]:
+#                 if min_frame > min(box_data[class_][video][camera][1]):
+#                     min_frame = min(box_data[class_][video][camera][1])
+#                 if max_frame < max(box_data[class_][video][camera][1]):
+#                     max_frame = max(box_data[class_][video][camera][1])
+#
+#         for i in range(min_frame, max_frame+1):
+#             for camera in os.listdir(os.path.join(dataset, class_)):
+#                 if box_data[class_][video][camera] and i in box_data[class_][video][camera][1]:
+#                     idx = box_data[class_][video][camera][1].index(i)
+#                     boxes_upd[camera].append(box_data[class_][video][camera][0][idx])
+#                 else:
+#                     boxes_upd[camera].append([])
+#         # print(class_, video, "boxes_upd", boxes_upd)
+#         if boxes_upd != {camera: [] for camera in os.listdir(os.path.join(dataset, class_))}:
+#             box_data[class_][video] = boxes_upd
+#     #     break
+#     # break
+#     stat[class_] = dict(total=total, filled=filled, empty=empty)
+# print(time_converter(time.time() - start))
+# for k, v in stat.items():
+#     print(k, v)
+#
+# save_data(data=box_data, folder_path=os.path.join(ROOT_DIR, 'tests'), filename=f'class_boxes_27_model5_full')
 

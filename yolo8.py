@@ -7,6 +7,8 @@ import cv2
 import numpy as np
 import wget
 from ultralytics import YOLO
+
+from nn_classificator import VideoClassifier
 from tracker import PolyTracker
 
 from parameters import POLY_CAM1_IN, POLY_CAM1_OUT, POLY_CAM2_OUT, POLY_CAM2_IN, ROOT_DIR
@@ -160,6 +162,7 @@ def detect_synchro_video_polygon(
         models: tuple[dict, str],
         video_paths: dict,
         save_path: str,
+        class_model: VideoClassifier = None,
         start: int = 0,
         finish: int = 0,
         iou: float = 0.3,
@@ -285,13 +288,13 @@ def detect_synchro_video_polygon(
                 tracker_1_count_frames=copy.deepcopy(tracker_1.count_frames),
                 tracker_2_count_frames=copy.deepcopy(tracker_2.count_frames),
                 frame_id=i,
-                class_model=None,
+                class_model=class_model,
                 class_counter=class_counter,
                 class_list=classes,
                 existing_tracks=existing_tracks,
                 frame_size=(128, 128),
                 stop_flag=stop_flag,
-                debug=True
+                debug=False
             )
             if debug:
                 print('class_counter, last_track_seq, end_track', class_counter, last_track_seq, end_track)

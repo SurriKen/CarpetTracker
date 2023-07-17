@@ -7,6 +7,8 @@ import torchvision
 from torch import nn
 from torchvision.utils import draw_bounding_boxes
 import matplotlib.path as mpltPath
+
+from nn_classificator import VideoClassifier
 from parameters import MIN_OBJ_SEQUENCE, MIN_EMPTY_SEQUENCE, GLOBAL_STEP, ROOT_DIR, DEAD_LIMIT_PERCENT, \
     SPEED_LIMIT_PERCENT
 
@@ -220,17 +222,18 @@ class PolyTracker:
         }
 
     @staticmethod
-    def predict_track_class(model: nn.Module, tracks, classes, frame_size: tuple[int, int]):
+    def predict_track_class(model: VideoClassifier, tracks, classes, frame_size: tuple[int, int]):
         # vc = VideoClassifier(num_classes=len(classes), weights=model_weights)
-        # arr = VideoClassifier.track_to_array(
-        #     tracks=[tracks['tr1'], tracks['tr2']], frame_size=frame_size, num_frames=model.input_size[0]
-        # )
-        # return vc.predict(arr, model=model, classes=classes)
-        return classes
+        print('predict_track_class', tracks)
+        arr = model.track_to_array(
+            tracks=[tracks['tr1'], tracks['tr2']], frame_size=frame_size, num_frames=model.input_size[0]
+        )
+        return model.predict(arr, model=model.model, classes=classes)
+        # return classes
 
     @staticmethod
     def combine_count(frame_id: int, count: int, last_track_seq: dict, class_counter: list, class_list: list,
-                      tracker_1_count_frames: list, tracker_2_count_frames: list, class_model: nn.Module,
+                      tracker_1_count_frames: list, tracker_2_count_frames: list, class_model: VideoClassifier,
                       existing_tracks: list[int, int], frame_size: tuple[int, int],
                       debug: bool = False, stop_flag: bool = False, ) -> (list, dict, list):
         if debug:
@@ -317,93 +320,6 @@ class PolyTracker:
             last_track_seq['tr1'] = new_track_seq['tr1'] if new_state[0] else last_track_seq['tr1']
             last_track_seq['tr2'] = new_track_seq['tr2'] if new_state[1] else last_track_seq['tr2']
             return class_counter, last_track_seq, end_track
-
-        # if new_state == [False, False]:
-        #     pass
-        #
-        # elif last_state == [False, False] and new_state == [True, False]:
-        #     if debug:
-        #         print(1)
-        #     if existing_tracks == [0, 0]:
-        #         predict_class = PolyTracker.predict_track_class(
-        #             model=model, tracks=last_track_seq, classes=class_list)
-        #         class_counter[predict_class] += 1
-        #         count += 1
-        #     last_track_seq['tr1'] = new_track_seq['tr1']
-        #     # count += 1
-        #
-        # elif last_state == [True, False] and new_state == [True, False]:
-        #     if debug:
-        #         print(1-1)
-        #     predict_class = PolyTracker.predict_track_class(
-        #         model=model, tracks=last_track_seq, classes=class_list)
-        #     class_counter[predict_class] += 1
-        #     last_track_seq['tr1'] = new_track_seq['tr1']
-        #     count += 1
-        #
-        # elif last_state == [False, False] and new_state == [False, True]:
-        #     if debug:
-        #         print(2)
-        #     if existing_tracks == [0, 0]:
-        #         predict_class = PolyTracker.predict_track_class(
-        #             model=model, tracks=last_track_seq, classes=class_list)
-        #         class_counter[predict_class] += 1
-        #         count += 1
-        #     last_track_seq['tr2'] = new_track_seq['tr2']
-        #     # count += 1
-        #
-        # elif last_state == [False, True] and new_state == [False, True]:
-        #     if debug:
-        #         print(2)
-        #     last_track_seq['tr2'] = new_track_seq['tr2']
-        #     count += 1
-        #
-        # elif last_state == [True, False] and new_state == [False, True]:
-        #     if min(new_track_seq['tr2'][0]) - max(last_track_seq['tr1'][0]) > limit:
-        #         if debug:
-        #             print(3)
-        #         last_track_seq['tr1'] = []
-        #         last_track_seq['tr2'] = new_track_seq['tr2']
-        #         count += 1
-        #     else:
-        #         if debug:
-        #             print(4)
-        #         last_track_seq['tr2'] = new_track_seq['tr2']
-        #
-        # elif last_state == [False, True] and new_state == [True, False]:
-        #     if min(new_track_seq['tr1'][0]) - max(last_track_seq['tr2'][0]) > limit:
-        #         if debug:
-        #             print(5)
-        #         last_track_seq['tr2'] = []
-        #         last_track_seq['tr1'] = new_track_seq['tr1']
-        #         count += 1
-        #     else:
-        #         if debug:
-        #             print(6)
-        #         last_track_seq['tr1'] = new_track_seq['tr1']
-        #
-        # elif last_state == [True, True] and new_state == [True, False]:
-        #     if debug:
-        #         print(7)
-        #     last_track_seq['tr2'] = []
-        #     last_track_seq['tr1'] = new_track_seq['tr1']
-        #     count += 1
-        #
-        # elif last_state == [True, True] and new_state == [False, True]:
-        #     if debug:
-        #         print(9)
-        #     last_track_seq['tr1'] = []
-        #     last_track_seq['tr2'] = new_track_seq['tr2']
-        #     count += 1
-        #
-        # else:
-        #     if debug:
-        #         print(12)
-        #     last_track_seq['tr1'] = new_track_seq['tr1']
-        #     last_track_seq['tr2'] = new_track_seq['tr2']
-        #     count += 1
-
-        # return class_counter, last_track_seq
 
     @staticmethod
     def isin(pattern, sequence):
