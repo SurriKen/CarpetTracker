@@ -126,7 +126,7 @@ class VideoClassifier:
                 b1, b2 = b1[idx], b2[idx]
                 x1.append(b1)
                 x2.append(b2)
-            if concat_axis in [1, 2, -1]:
+            if concat_axis in [1, 2, 3, -1]:
                 x_train = np.concatenate([x1, x2], axis=concat_axis)
             else:
                 x_train = np.concatenate([x1, x2], axis=1)
@@ -452,6 +452,10 @@ class VideoClassifier:
         for i in range(10):
             logger_batch_markers.append(int(num_train_batches * (i + 1) / 10))
 
+        lr_steps = []
+        for i in range(2):
+            lr_steps.append(int(epochs * (i + 1) / 2))
+
         txt = f"training parameters:\n" \
               f"- name: {name},\n" \
               f"- save path: {os.path.join(ROOT_DIR, 'video_class_train', name)}\n" \
@@ -485,6 +489,7 @@ class VideoClassifier:
                 self.model.zero_grad()
                 loss.backward()
                 optimizer.step()
+                # print('optimizer lr =', optimizer.param_groups[0]['lr'])
 
                 if batch + 1 in logger_batch_markers:
                     save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, f'Train_Confusion Matrix.jpg')
@@ -497,6 +502,13 @@ class VideoClassifier:
                         f"average batch time = {round((time.time() - st_ep) * 1000 / (batch + 1), 1)} ms, "
                         f"time passed = {time_converter(int(time.time() - st))}"
                     )
+
+            if epoch + 1 in lr_steps and epoch + 1 != epochs:
+                logger.info(
+                    f"  -- Epoch {epoch + 1}, lr was reduced from  {optimizer.param_groups[0]['lr']} "
+                    f"to {optimizer.param_groups[0]['lr'] / 2}"
+                )
+                optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr'] / 2
 
             save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, f'Train_Confusion Matrix.jpg')
             cm = self.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
@@ -573,26 +585,27 @@ class VideoClassifier:
         return list(np.argmax(output, axis=-1))
 
     @staticmethod
-    def evaluate_on_test_data(test_dataset: str, weights: str = '', frame_size=(128, 128), num_frames=16,
-                              concat_axis=2) -> np.ndarray:
+    def evaluate_on_test_data(test_dataset: str, weights: str = '') -> np.ndarray:
         weights_folder = weights[:-len(weights.split('/')[-1])]
         save_cm = f"{weights_folder}Test_Confusion Matrix.jpg"
         dataset = load_data(test_dataset)
         classes = sorted(list(dataset.keys()))
         vc = VideoClassifier(num_classes=len(classes), weights=weights)
+        print(vc.model.frame_size, vc.model.input_size[0], vc.model.concat_axis)
         dataset = VideoClassifier.create_box_video_dataset(
             dataset=dataset,
             split=1.0,
-            frame_size=frame_size,
+            frame_size=vc.model.frame_size,
         )
         num_test_batches = len(dataset.x_train)
+        num_frames = vc.model.input_size[0] if vc.model.concat_axis != 1 else int(vc.model.input_size[0] / 2)
 
         y_true, y_pred = [], []
         with torch.no_grad():
             for test_batch in range(num_test_batches):
                 x_test = vc.get_x_batch(
                     x_train=dataset.x_train[test_batch: test_batch + 1], num_frames=num_frames,
-                    concat_axis=concat_axis)
+                    concat_axis=vc.model.concat_axis)
                 y_true.append(dataset.classes[dataset.y_train[test_batch]])
                 output = vc.model(x_test)
                 # print(y_true[-1], output, classes)
