@@ -175,12 +175,12 @@ video_paths = [
     #     'save_path': 'temp/test 29.mp4',
     #     'true_count': 130
     # },
-    {
-        'model_1': os.path.join(DATASET_DIR, 'videos/sync_test/test 30_cam 1_sync.mp4'),
-        'model_2': os.path.join(DATASET_DIR, 'videos/sync_test/test 30_cam 2_sync.mp4'),
-        'save_path': 'temp/test 30.mp4',
-        'true_count': 167
-    },
+    # {
+    #     'model_1': os.path.join(DATASET_DIR, 'videos/sync_test/test 30_cam 1_sync.mp4'),
+    #     'model_2': os.path.join(DATASET_DIR, 'videos/sync_test/test 30_cam 2_sync.mp4'),
+    #     'save_path': 'temp/test 30.mp4',
+    #     'true_count': 167
+    # },
     {
         'model_1': os.path.join(DATASET_DIR, 'videos/sync_test/test 31_cam 1_sync.mp4'),
         'model_2': os.path.join(DATASET_DIR, 'videos/sync_test/test 31_cam 2_sync.mp4'),
@@ -202,7 +202,7 @@ for mod in models:
             'conf': 0.3, 'iou': 0., 'mode': 'standard',
             'POLY_CAM1_IN': POLY_CAM1_IN, 'POLY_CA M1_OUT': POLY_CAM1_OUT,
             'POLY_CAM2_IN': POLY_CAM2_IN, 'POLY_CAM2_OUT': POLY_CAM2_OUT,
-            'start_frame': 5000, 'end_frame': 7500,
+            'start_frame': 0, 'end_frame': 0,
             'MIN_OBJ_SEQUENCE': MIN_OBJ_SEQUENCE, 'MIN_EMPTY_SEQUENCE': MIN_EMPTY_SEQUENCE,
         }
         st = time.time()
@@ -211,7 +211,7 @@ for mod in models:
             spf = f"{spf}/{x}"
         sp = f"{spf[1:]}/{get_name_from_link(video_paths[i].get('save_path'))} {mod[1]}.mp4" \
             if video_paths[i].get('save_path') else None
-        pred_count = detect_synchro_video_polygon(
+        count, tracks, class_counter = detect_synchro_video_polygon(
             models=mod,
             video_paths=video_paths[i],
             save_path=os.path.join(ROOT_DIR, sp),
@@ -229,7 +229,8 @@ for mod in models:
         txt = f"{dt} =========== Predict is finished ===========\n" \
               f"- Model {mod[1]}\n" \
               f"- Video '{video_paths[i]}'\n" \
-              f"- True count: '{video_paths[i].get('true_count')}; Predict count: '{pred_count}'\n" \
+              f"- True count: '{video_paths[i].get('true_count')}; Predict count: '{count}'\n" \
+              f"- Predict '{class_counter}'\n" \
               f"- Saves as '{sp}'\n" \
               f"- Predict args: {args}\n" \
               f"- Process time: {time_converter(time.time() - st)}\n"

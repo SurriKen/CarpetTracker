@@ -369,7 +369,7 @@ def detect_synchro_video_polygon(
                   filename=f"true_bb_1_{video_paths.get('model_1').split('/')[-1].split('_')[0]} {models[1]}")
         save_data(data=true_bb_2, folder_path=path,
                   filename=f"true_bb_2_{video_paths.get('model_2').split('/')[-1].split('_')[0]} {models[1]}")
-    return count, tracks
+    return count, tracks, class_counter
 
 
 def train(weights='yolo_weights/yolov8n.pt', config='data_custom.yaml', epochs=50, batch_size=4, name=None):
