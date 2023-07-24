@@ -52,6 +52,7 @@ def detect_mono_video_polygon(
         save_boxes_path: str = None,
         save_boxes_mode: str = 'separate',  # single_file
         debug: bool = False,
+        wait_key: int = 1
 ):
     """
     Detect two synchronized videos and save them as one video with boxes to save_path.
@@ -131,7 +132,7 @@ def detect_mono_video_polygon(
             )
             if interactive_video:
                 cv2.imshow('1', img)
-                cv2.waitKey(1)
+                cv2.waitKey(wait_key)
 
             if (i + 1) % 100 == 0:
                 logger.info(f"Frames {i + 1} / {finish} was processed")

@@ -25,7 +25,7 @@ model4 = {
     'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_2_mix4+_8n_250ep/weights/best.pt'))
 }
 model5 = {
-    'model_1': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_1_mix4+_8n_350ep/weights/best.pt')),
+    'model_1': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_1_mix4+_8n_350ep2/weights/best.pt')),
     'model_2': YOLO(os.path.join(ROOT_DIR, 'runs/detect/camera_2_mix4+_8n_350ep/weights/best.pt'))
 }
 
@@ -175,24 +175,24 @@ video_paths = [
     #     'save_path': 'temp/test 29.mp4',
     #     'true_count': 130
     # },
-    # {
-    #     'model_1': os.path.join(DATASET_DIR, 'videos/sync_test/test 30_cam 1_sync.mp4'),
-    #     'model_2': os.path.join(DATASET_DIR, 'videos/sync_test/test 30_cam 2_sync.mp4'),
-    #     'save_path': 'temp/test 30.mp4',
-    #     'true_count': 167
-    # },
-    # {
-    #     'model_1': os.path.join(DATASET_DIR, 'videos/sync_test/test 31_cam 1_sync.mp4'),
-    #     'model_2': os.path.join(DATASET_DIR, 'videos/sync_test/test 31_cam 2_sync.mp4'),
-    #     'save_path': 'temp/test 31.mp4',
-    #     'true_count': 0
-    # },
     {
-        'model_1': os.path.join(DATASET_DIR, 'videos/classification_videos/video_sync/test 52_cam 1_sync.mp4'),
-        'model_2': os.path.join(DATASET_DIR, 'videos/classification_videos/video_sync/test 52_cam 2_sync.mp4'),
-        'save_path': 'temp/test 52.mp4',
+        'model_1': os.path.join(DATASET_DIR, 'videos/sync_test/test 30_cam 1_sync.mp4'),
+        'model_2': os.path.join(DATASET_DIR, 'videos/sync_test/test 30_cam 2_sync.mp4'),
+        'save_path': 'temp/test 30.mp4',
+        'true_count': 167
+    },
+    {
+        'model_1': os.path.join(DATASET_DIR, 'videos/sync_test/test 31_cam 1_sync.mp4'),
+        'model_2': os.path.join(DATASET_DIR, 'videos/sync_test/test 31_cam 2_sync.mp4'),
+        'save_path': 'temp/test 31.mp4',
         'true_count': 0
     },
+    # {
+    #     'model_1': os.path.join(DATASET_DIR, 'videos/classification_videos/video_sync/test 52_cam 1_sync.mp4'),
+    #     'model_2': os.path.join(DATASET_DIR, 'videos/classification_videos/video_sync/test 52_cam 2_sync.mp4'),
+    #     'save_path': 'temp/test 52.mp4',
+    #     'true_count': 0
+    # },
 ]
 
 vc = VideoClassifier(num_classes=5, weights=os.path.join(ROOT_DIR, 'video_class_train/model5_16f_96%/best.pt'))
@@ -202,7 +202,7 @@ for mod in models:
             'conf': 0.3, 'iou': 0., 'mode': 'standard',
             'POLY_CAM1_IN': POLY_CAM1_IN, 'POLY_CA M1_OUT': POLY_CAM1_OUT,
             'POLY_CAM2_IN': POLY_CAM2_IN, 'POLY_CAM2_OUT': POLY_CAM2_OUT,
-            'start_frame': 0, 'end_frame': 0,
+            'start_frame': 5000, 'end_frame': 7500,
             'MIN_OBJ_SEQUENCE': MIN_OBJ_SEQUENCE, 'MIN_EMPTY_SEQUENCE': MIN_EMPTY_SEQUENCE,
         }
         st = time.time()
@@ -222,7 +222,8 @@ for mod in models:
             interactive_video=True,
             mode=args['mode'],
             save_boxes=True,
-            class_model=vc
+            class_model=vc,
+            debug=False
         )
         dt = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         txt = f"{dt} =========== Predict is finished ===========\n" \

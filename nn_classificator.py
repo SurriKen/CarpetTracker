@@ -250,9 +250,18 @@ class VideoClassifier:
         """
         tr1 = tracks[0]
         tr2 = tracks[1]
+        if not tr1:
+            tr1 = [[], []]
+            min_fr = min(tr2[0])
+            max_fr = max(tr2[0])
+        elif not tr2:
+            tr2 = [[], []]
+            min_fr = min(tr1[0])
+            max_fr = max(tr1[0])
+        else:
+            min_fr = min([min(tr1[0]), min(tr2[0])])
+            max_fr = max([max(tr1[0]), max(tr2[0])])
 
-        min_fr = min([min(tr1[0]), min(tr2[0])])
-        max_fr = max([max(tr1[0]), max(tr2[0])])
         sequence = list(range(min_fr, max_fr + 1))
         seq_frame_1, seq_frame_2 = [], []
         for fr in sequence:
@@ -617,7 +626,7 @@ class VideoClassifier:
 
 
 if __name__ == "__main__":
-    dataset = load_data(os.path.join(ROOT_DIR, 'tests/train_class_boxes_model5_Pex.dict'))
+    dataset = load_data(os.path.join(ROOT_DIR, 'datasets/train_class_boxes_model5_Pex.dict'))
     # weights = os.path.join(ROOT_DIR, 'video_class_train/model5_16f_3/best.pt')
     frame_size = (96, 96)
     concat_axis = 2

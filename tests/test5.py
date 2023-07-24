@@ -17,8 +17,8 @@ target_model = {
 
 # classes = ['115x200', '115x400', '150x300', '60x90', '85x150']
 # vid = os.path.join(ROOT_DIR, 'datasets/class_videos_10/60x90/camera_2/7.mp4')
-dataset = os.path.join(DATASET_DIR, 'datasets/train_class_videos')
-save_path = os.path.join(ROOT_DIR, f'temp/train_crop_frames')
+dataset = os.path.join(DATASET_DIR, 'datasets/class_videos_27')
+save_path = os.path.join(ROOT_DIR, f'temp/crop_frames_27')
 box_data = {}
 # box_data:
 #     - '115x200'
@@ -148,5 +148,5 @@ print(time_converter(time.time() - start))
 for k, v in stat.items():
     print(k, v)
 
-save_data(data=box_data, folder_path=os.path.join(ROOT_DIR, 'tests'), filename=f'train_crop_frames')
+save_data(data=box_data, folder_path=os.path.join(ROOT_DIR, 'temp'), filename=f'crop_frames_27')
 

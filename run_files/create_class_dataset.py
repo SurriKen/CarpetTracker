@@ -7,18 +7,18 @@ from parameters import ROOT_DIR, DATASET_DIR
 # all videos must have fps=25
 video_links = [
     # Test batch
-    # ['videos/classification_videos/video_sync/test 48_cam 1_sync.mp4',
-    #  'videos/classification_videos/video_sync/test 48_cam 2_sync.mp4',
-    #  'videos/classification_videos/csv/test 48.csv'],
-    # ['videos/classification_videos/video_sync/test 31_cam 1_sync.mp4',
-    #  'videos/classification_videos/video_sync/test 31_cam 2_sync.mp4',
-    #  'videos/classification_videos/csv/test 31.csv'],
-    # ['videos/classification_videos/video_sync/test 52_cam 1_sync.mp4',
-    #  'videos/classification_videos/video_sync/test 52_cam 2_sync.mp4',
-    #  'videos/classification_videos/csv/test 52.csv'],
-    # ['videos/classification_videos/video_sync/13-05 ВО_cam1_sync.mp4',
-    #  'videos/classification_videos/video_sync/13-05 ВО_cam2_sync.mp4',
-    #  'videos/classification_videos/csv/13-05 ВО.csv'],
+    ['videos/classification_videos/video_sync/test 48_cam 1_sync.mp4',
+     'videos/classification_videos/video_sync/test 48_cam 2_sync.mp4',
+     'videos/classification_videos/csv/test 48.csv'],
+    ['videos/classification_videos/video_sync/test 31_cam 1_sync.mp4',
+     'videos/classification_videos/video_sync/test 31_cam 2_sync.mp4',
+     'videos/classification_videos/csv/test 31.csv'],
+    ['videos/classification_videos/video_sync/test 52_cam 1_sync.mp4',
+     'videos/classification_videos/video_sync/test 52_cam 2_sync.mp4',
+     'videos/classification_videos/csv/test 52.csv'],
+    ['videos/classification_videos/video_sync/13-05 ВО_cam1_sync.mp4',
+     'videos/classification_videos/video_sync/13-05 ВО_cam2_sync.mp4',
+     'videos/classification_videos/csv/13-05 ВО.csv'],
 
     # Train, Val batch
     # ['videos/classification_videos/video_sync/16-10 ЦП_cam1_sync.mp4',
@@ -103,7 +103,7 @@ video_links = [
      'videos/classification_videos/video_sync/test 51_cam 2_sync.mp4',
      'videos/classification_videos/csv/test 51.csv'],
 ]
-save_folder = os.path.join(DATASET_DIR, f'datasets/train_class_videos')
+save_folder = os.path.join(DATASET_DIR, f'datasets/class_videos_{len(video_links)}')
 
 for links in video_links:
     for link in links:

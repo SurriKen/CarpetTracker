@@ -36,6 +36,8 @@ data = [
      os.path.join(DATASET_DIR, 'datasets/От разметчиков/150x300/150x300_boxes'), 1],
     [os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_07/img'),
      os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_07/boxes'), 1],
+    [os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_08/img'),
+     os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_08/boxes'), 1],
 ]
 
 split = 0.9
