@@ -26,7 +26,7 @@ for i in range(len(video_paths)):
     args = {
         'conf': 0.3, 'iou': 0., 'POLY_CAM1_IN': POLY_CAM1_IN, 'POLY_CA M1_OUT': POLY_CAM1_OUT,
         'POLY_CAM2_IN': POLY_CAM2_IN, 'POLY_CAM2_OUT': POLY_CAM2_OUT,
-        'start_frame': 0, 'end_frame': 0,
+        'start_frame': 300, 'end_frame': 360,
         'MIN_OBJ_SEQUENCE': MIN_OBJ_SEQUENCE, 'MIN_EMPTY_SEQUENCE': MIN_EMPTY_SEQUENCE,
     }
     st = time.time()
@@ -43,7 +43,7 @@ for i in range(len(video_paths)):
         finish=args['end_frame'],
         interactive_video=True,
         class_model=vc,
-        debug=False
+        debug=True
     )
     count = len(class_counter)
     class_dict = dict(Counter(class_counter))

@@ -12,10 +12,10 @@ DEAD_LIMIT_PERCENT = 0.005
 GLOBAL_STEP = 0.25
 CLASSES = sorted(['115x200', '115x400', '150x300', '60x90', '85x150'])
 YOLO_WEIGTHS = {
-    'model_1': os.path.join(ROOT_DIR, 'yolo/camera_1/weights/best.pt'),
-    'model_2': os.path.join(ROOT_DIR, 'yolo/camera_2/weights/best.pt')
+    'model_1': os.path.join(ROOT_DIR, 'runs/camera_1/weights/best.pt'),
+    'model_2': os.path.join(ROOT_DIR, 'runs/camera_2/weights/best.pt')
 }
-CLASSIFICATION_MODEL = os.path.join(ROOT_DIR, 'classification/class_model/best.pt')
+CLASSIFICATION_MODEL = os.path.join(ROOT_DIR, 'runs/classif_model/best.pt')
 
 
 POLY_CAM1_IN = [[0.0573, 0.0], [0.2135, 0.6019], [0.3776, 0.3843], [0.2839, 0.0]]
