@@ -1,5 +1,0 @@
-names:
-- carpet
-nc: 1
-train: datasets/yolov8_univ/train
-val: datasets/yolov8_univ/val

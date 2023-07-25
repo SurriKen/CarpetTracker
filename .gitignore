@@ -1,10 +1,8 @@
 /videos/
-/bin/
 /datasets/
 /predict/
-/yolov7/
 /train/
 /yolo8/
 /temp/
-/tests/mnist_videos/
 /video_class_train/
+/runs/

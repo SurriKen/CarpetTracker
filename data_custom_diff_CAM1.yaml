@@ -1,5 +1,0 @@
-names:
-- carpet
-nc: 1
-train: datasets/yolov8_red_camera_1/train
-val: datasets/yolov8_red_camera_1/val

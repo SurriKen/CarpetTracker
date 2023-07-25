@@ -1,5 +1,0 @@
-names:
-- carpet
-nc: 1
-train: yolov8/train
-val: yolov8/val
