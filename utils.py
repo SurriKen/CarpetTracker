@@ -1,5 +1,6 @@
 import colorsys
 import copy
+import csv
 import os
 import pickle
 import random
@@ -57,8 +58,20 @@ def save_dict_to_table_txt(data: dict, save_path: str) -> None:
 
 def save_data(data, folder_path: str, filename: str) -> None:
     """Save a dictionary to a file"""
+    if not os.path.isdir(folder_path):
+        os.mkdir(folder_path)
     with open(os.path.join(folder_path, f"{filename}.dict"), 'wb') as handle:
         pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def dict_to_csv(data: dict, folder_path: str, filename: str) -> None:
+    """Save a dictionary to a file"""
+    if not os.path.isdir(folder_path):
+        os.mkdir(folder_path)
+    with open(f'{folder_path}/{filename}.csv', 'w') as f:
+        w = csv.writer(f)
+        w.writerow(data.keys())
+        w.writerow(data.values())
 
 
 def load_data(pickle_path: str):
