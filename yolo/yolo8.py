@@ -1,6 +1,8 @@
 import copy
 import os
 from collections import Counter
+from datetime import datetime
+
 import cv2
 import numpy as np
 import wget
@@ -121,7 +123,8 @@ def detect_synchro_video_polygon(
         finish: int = 0,
         interactive_video: bool = False,
         debug: bool = False,
-        stream: bool = False
+        stream: bool = False,
+        save_predict_video: bool = False
 ) -> dict:
     """
     Detect two synchronized videos and save them as one video with boxes to save_path.
@@ -140,7 +143,7 @@ def detect_synchro_video_polygon(
     Returns:
         list of predicted classes ordered from start to finish of predicdion
     """
-
+    dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     def get_closest_id(x: float, data: list[tuple, ...]) -> int:
         dist = [(abs(data[i][1] - x), i) for i in range(len(data))]
         dist = sorted(dist)
@@ -151,60 +154,64 @@ def detect_synchro_video_polygon(
     colors = get_colors(names)
     w = 640
     h = 360
-    save_folder = save_path[:-(len(save_path.split('/')[-1]) + 1)]
-    filename = get_name_from_link(save_path)
+    vc1 = cv2.VideoCapture(video_paths.get("model_1"))
+    f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
+    w1 = int(vc1.get(cv2.CAP_PROP_FRAME_WIDTH))
+    h1 = int(vc1.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    vc2 = cv2.VideoCapture(video_paths.get("model_2"))
+    f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
+    w2 = int(vc2.get(cv2.CAP_PROP_FRAME_WIDTH))
+    h2 = int(vc2.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    polygon_in_1 = [[int(p[0] * w1), int(p[1] * h1)] for p in POLY_CAM1_IN]
+    polygon_out_1 = [[int(p[0] * w1), int(p[1] * h1)] for p in POLY_CAM1_OUT]
+    tracker_1 = PolyTracker(polygon_in=polygon_in_1, polygon_out=polygon_out_1, name='camera 1')
+    polygon_in_2 = [[int(p[0] * w2), int(p[1] * h2)] for p in POLY_CAM2_IN]
+    polygon_out_2 = [[int(p[0] * w2), int(p[1] * h2)] for p in POLY_CAM2_OUT]
+    tracker_2 = PolyTracker(polygon_in=polygon_in_2, polygon_out=polygon_out_2, name='camera 2')
+
+    if save_path and save_predict_video:
+        out = cv2.VideoWriter(os.path.join(save_path, f"{dt}.mp4"), cv2.VideoWriter_fourcc(*'DIVX'), 25, (w, h * 2))
+
+    count = 0
+    class_counter = []
+    last_track_seq = {'tr1': [], 'tr2': []}
+    tracks = []
+    frame_id = 0
+    cl_count = {cl: 0 for cl in CLASSES}
+    result = dict(total_count=count)
+    result.update(cl_count)
 
     if not stream:
-        vc1 = cv2.VideoCapture()
-        vc1.open(video_paths.get("model_1"))
-        f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
         fps1 = vc1.get(cv2.CAP_PROP_FPS)
-        w1 = int(vc1.get(cv2.CAP_PROP_FRAME_WIDTH))
-        h1 = int(vc1.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-        vc2 = cv2.VideoCapture()
-        vc2.open(video_paths.get("model_2"))
-        f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
         fps2 = vc2.get(cv2.CAP_PROP_FPS)
-        w2 = int(vc2.get(cv2.CAP_PROP_FRAME_WIDTH))
-        h2 = int(vc2.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         step = min([fps1, fps2])
-        range_1 = [(i, round(i * 1000 / fps1, 1)) for i in range(int(f1 * fps1 / step) + 1)]
-        range_2 = [(i, round(i * 1000 / fps2, 1)) for i in range(int(f2 * fps2 / step) + 1)]
+        range_1 = [(i, round(i * 1000 / fps1, 1)) for i in range(int(f1 * fps1 / step) * 2 + 1)]
+        range_2 = [(i, round(i * 1000 / fps2, 1)) for i in range(int(f2 * fps2 / step) * 2 + 1)]
         (min_range, max_range) = (range_1, range_2) if step == fps1 else (range_2, range_1)
         (min_vc, max_vc) = (vc1, vc2) if step == fps1 else (vc2, vc1)
 
-        polygon_in_1 = [[int(p[0] * w1), int(p[1] * h1)] for p in POLY_CAM1_IN]
-        polygon_out_1 = [[int(p[0] * w1), int(p[1] * h1)] for p in POLY_CAM1_OUT]
-        tracker_1 = PolyTracker(polygon_in=polygon_in_1, polygon_out=polygon_out_1, name='camera 1')
-        polygon_in_2 = [[int(p[0] * w2), int(p[1] * h2)] for p in POLY_CAM2_IN]
-        polygon_out_2 = [[int(p[0] * w2), int(p[1] * h2)] for p in POLY_CAM2_OUT]
-        tracker_2 = PolyTracker(polygon_in=polygon_in_2, polygon_out=polygon_out_2, name='camera 2')
-
-        out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), 25, (w, h * 2))
-
         f = f1 if step == fps1 else f2
         finish = int(f) - 1 if finish == 0 or finish < start else finish
-        count = 0
-        class_counter = []
-        last_track_seq = {'tr1': [], 'tr2': []}
         last_img_1, last_img_2 = [], []
-        tracks = []
-        cl_count = {cl: 0 for cl in CLASSES}
-        result = dict(total_count=count)
-        result.update(cl_count)
         stop_flag = False
+
         for i in range(0, finish):
             _, frame1 = min_vc.read()
-
             closest_id = get_closest_id(min_range[0][1], max_range[:10])
+            x = min_range[0]
             min_range.pop(0)
             ids = list(range(closest_id)) if closest_id else [0]
             ids = sorted(ids, reverse=True)
+            y = 0
             for id in ids:
+                y = max_range[id]
                 max_range.pop(id)
                 _, frame2 = max_vc.read()
+            if frame1 is None or frame2 is None:
+                break
 
             if i >= start and len(last_img_1) and len(last_img_2):
                 if i == finish - 1:
@@ -254,11 +261,12 @@ def detect_synchro_video_polygon(
                     cl_count.update(dict(Counter(class_counter)))
                     result['total_count'] = count
                     result.update(cl_count)
-                    dict_to_csv(data=result, folder_path=save_folder, filename=filename)
+                    if save_path:
+                        dict_to_csv(data=result, folder_path=save_path, filename=F"{dt}")
                 if end_track != {'tr1': [], 'tr2': []}:
                     tracks.append(end_track)
 
-                if save_path:
+                if save_path and save_predict_video:
                     frame_1 = PolyTracker.prepare_image(
                         image=frame1,
                         colors=colors,
@@ -299,40 +307,15 @@ def detect_synchro_video_polygon(
 
             last_img_1 = frame1
             last_img_2 = frame2
-        out.release()
-        cv2.destroyAllWindows()
-        if save_path:
+        if save_path and save_predict_video:
             out.release()
+            cv2.destroyAllWindows()
         result = dict(total_count=count)
         result.update(cl_count)
         return result
 
     else:
-        vc1 = cv2.VideoCapture(video_paths.get("model_1"))
-        w1 = int(vc1.get(cv2.CAP_PROP_FRAME_WIDTH))
-        h1 = int(vc1.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        vc2 = cv2.VideoCapture(video_paths.get("model_2"))
-        w2 = int(vc2.get(cv2.CAP_PROP_FRAME_WIDTH))
-        h2 = int(vc2.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        polygon_in_1 = [[int(p[0] * w1), int(p[1] * h1)] for p in POLY_CAM1_IN]
-        polygon_out_1 = [[int(p[0] * w1), int(p[1] * h1)] for p in POLY_CAM1_OUT]
-        tracker_1 = PolyTracker(polygon_in=polygon_in_1, polygon_out=polygon_out_1, name='camera 1')
-
-        polygon_in_2 = [[int(p[0] * w2), int(p[1] * h2)] for p in POLY_CAM2_IN]
-        polygon_out_2 = [[int(p[0] * w2), int(p[1] * h2)] for p in POLY_CAM2_OUT]
-        tracker_2 = PolyTracker(polygon_in=polygon_in_2, polygon_out=polygon_out_2, name='camera 2')
-
-        out = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'DIVX'), 25, (w, h * 2))
-
-        count = 0
-        class_counter = []
-        last_track_seq = {'tr1': [], 'tr2': []}
-        tracks = []
-        frame_id = 0
-        cl_count = {cl: 0 for cl in CLASSES}
-        result = dict(total_count=count)
-        result.update(cl_count)
 
         while vc1.isOpened() and vc2.isOpened():
             _, frame1 = vc1.read()
@@ -384,11 +367,12 @@ def detect_synchro_video_polygon(
                 cl_count.update(dict(Counter(class_counter)))
                 result['total_count'] = count
                 result.update(cl_count)
-                dict_to_csv(data=result, folder_path=save_folder, filename=filename)
+                if save_path:
+                    dict_to_csv(data=result, folder_path=save_path, filename=f"{dt}")
             if end_track != {'tr1': [], 'tr2': []}:
                 tracks.append(end_track)
 
-            if save_path:
+            if save_path and save_predict_video:
                 frame_1 = PolyTracker.prepare_image(
                     image=frame1,
                     colors=colors,
@@ -423,11 +407,9 @@ def detect_synchro_video_polygon(
                     cv2.waitKey(1)
 
                 out.write(img)
-
-        out.release()
-        cv2.destroyAllWindows()
-        if save_path:
+        if save_path and save_predict_video:
             out.release()
+            cv2.destroyAllWindows()
         return result
 
 

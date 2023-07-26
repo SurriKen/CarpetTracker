@@ -52,7 +52,7 @@ class PolyTracker:
         return img
 
     @staticmethod
-    def draw_polygons(polygons: list, image: np.ndarray, outline: tuple=(0, 200, 0), width: int = 5) -> np.ndarray:
+    def draw_polygons(polygons: list, image: np.ndarray, outline: tuple = (0, 200, 0), width: int = 5) -> np.ndarray:
         if type(polygons[0]) == list:
             xy = []
             for i in polygons:
@@ -208,12 +208,28 @@ class PolyTracker:
         shift_bottom_right = ((box1[2] - box2[2]) ** 2 + (box1[3] - box2[3]) ** 2) ** 0.5
         return shift_center, shift_top_left, shift_top_right, shift_bottom_left, shift_bottom_right
 
-    def move_boxes_from_track_to_dead(self, frame_idxs: list, boxes: list) -> None:
+    def move_boxes_from_track_to_dead(self, track: dict, depth: int, new: bool = False) -> dict:
         max_id = max(list(self.dead_boxes.keys())) if self.dead_boxes else 0
-        self.dead_boxes[max_id + 1] = {
-            'frame_id': frame_idxs,
-            'coords': boxes
-        }
+        if not new and depth:
+            self.dead_boxes[max_id + 1] = {
+                'frame_id': track['frame_id'][-depth:],
+                'coords': track['boxes'][-depth:]
+            }
+            track['frame_id'] = track['frame_id'][:-depth]
+            track['boxes'] = track['boxes'][:-depth]
+            track['check_in'] = track['check_in'][:-depth]
+            track['check_out'] = track['check_out'][:-depth]
+            track['shift_center'] = track['shift_center'][:-depth]
+            track['shift_top_left'] = track['shift_top_left'][:-depth]
+            track['shift_bottom_right'] = track['shift_bottom_right'][:-depth]
+            track['shift_top_right'] = track['shift_top_right'][:-depth]
+            track['shift_bottom_left'] = track['shift_bottom_left'][:-depth]
+        else:
+            self.dead_boxes[max_id + 1] = {
+                'frame_id': track['frame_id'],
+                'coords': track['boxes']
+            }
+        return track
 
     @staticmethod
     def predict_track_class(model: VideoClassifier, tracks: dict, classes: list, frame_size: tuple[int, int]) -> list:
@@ -330,19 +346,21 @@ class PolyTracker:
                             max(trck['shift_top_right'][-cut:]) < distance_limit or
                             max(trck['shift_bottom_left'][-cut:]) < distance_limit
                     ):
-                self.move_boxes_from_track_to_dead(
-                    frame_idxs=trck['frame_id'][-cut:],
-                    boxes=trck['boxes'][-cut:]
+                self.track_list[i] = self.move_boxes_from_track_to_dead(
+                    track=trck,
+                    depth=cut
+                    # frame_idxs=trck['frame_id'][-cut:],
+                    # boxes=trck['boxes'][-cut:]
                 )
-                trck['frame_id'] = trck['frame_id'][:-cut]
-                trck['boxes'] = trck['boxes'][:-cut]
-                trck['check_in'] = trck['check_in'][:-cut]
-                trck['check_out'] = trck['check_out'][:-cut]
-                trck['shift_center'] = trck['shift_center'][:-cut]
-                trck['shift_top_left'] = trck['shift_top_left'][:-cut]
-                trck['shift_bottom_right'] = trck['shift_bottom_right'][:-cut]
-                trck['shift_top_right'] = trck['shift_top_right'][:-cut]
-                trck['shift_bottom_left'] = trck['shift_bottom_left'][:-cut]
+                # trck['frame_id'] = trck['frame_id'][:-cut]
+                # trck['boxes'] = trck['boxes'][:-cut]
+                # trck['check_in'] = trck['check_in'][:-cut]
+                # trck['check_out'] = trck['check_out'][:-cut]
+                # trck['shift_center'] = trck['shift_center'][:-cut]
+                # trck['shift_top_left'] = trck['shift_top_left'][:-cut]
+                # trck['shift_bottom_right'] = trck['shift_bottom_right'][:-cut]
+                # trck['shift_top_right'] = trck['shift_top_right'][:-cut]
+                # trck['shift_bottom_left'] = trck['shift_bottom_left'][:-cut]
                 cut_idxs.append(i)
 
         if cut_idxs and self.track_list:
@@ -394,6 +412,15 @@ class PolyTracker:
                 ]
         self.track_list = [self.track_list[i] for i in rel]
 
+    @staticmethod
+    def get_two_boxes_stat(box1: list, box2: list) -> tuple[float, float, float]:
+        c1 = PolyTracker.get_center(box1)
+        c2 = PolyTracker.get_center(box2)
+        module_x = (c2[0] - c1[0]) / abs(c2[0] - c1[0]) if c2[0] - c1[0] else 0
+        module_y = (c2[1] - c1[1]) / abs(c2[1] - c1[1]) if c2[1] - c1[1] else 0
+        vector = ((c2[0] - c1[0]) ** 2 + (c2[1] - c1[1]) ** 2) ** 0.5
+        return module_x, module_y, vector
+
     def process(self, frame_id: int, boxes: list, img_shape: tuple, speed_limit_percent: float = SPEED_LIMIT_PERCENT,
                 stop_flag: bool = False, debug: bool = False) -> None:
         # check if boxes are relevant
@@ -434,11 +461,11 @@ class PolyTracker:
                         check_in=box[1],
                         check_out=box[2]
                     )
-
                     self.max_id += 1
                     self.track_list.append(track)
                 else:
-                    self.move_boxes_from_track_to_dead(frame_idxs=[frame_id], boxes=[box[0]])
+                    self.move_boxes_from_track_to_dead(
+                        track=dict(frame_id=[frame_id], boxes=[box[0]]), depth=0, new=True)
         else:
             tr_idxs = list(range(len(self.track_list)))
             box_idxs = list(range(len(self.current_boxes)))
@@ -446,44 +473,64 @@ class PolyTracker:
             pair = []
             for i in tr_idxs:
                 for b in box_idxs:
-                    c1 = self.get_center(self.track_list[i]['boxes'][-1])
-                    c2 = self.get_center(self.current_boxes[b][0])
-                    distance = self.get_distance(self.track_list[i]['boxes'][-1], self.current_boxes[b][0])
-                    module_x1 = (c2[0] - c1[0]) / abs(c2[0] - c1[0]) if c2[0] - c1[0] else 0
-                    module_y1 = (c2[1] - c1[1]) / abs(c2[1] - c1[1]) if c2[1] - c1[1] else 0
-                    vector1 = ((c2[0] - c1[0]) ** 2 + (c2[1] - c1[1]) ** 2) ** 0.5
+                    # stat between last track box and new box
+                    module_x_10, module_y_10, vector_10 = self.get_two_boxes_stat(
+                        box1=self.track_list[i]['boxes'][-1], box2=self.current_boxes[b][0]
+                    )
                     if len(self.track_list[i]['boxes']) > 1:
-                        c3 = self.get_center(self.track_list[i]['boxes'][-2])
-                        module_x2 = (c1[0] - c3[0]) / abs(c1[0] - c3[0]) if c1[0] - c3[0] else 0
-                        module_y2 = (c1[1] - c3[1]) / abs(c1[1] - c3[1]) if c1[1] - c3[1] else 0
-                        vector2 = ((c1[0] - c3[0]) ** 2 + (c1[1] - c3[1]) ** 2) ** 0.5
+                        # stat between second last track box and last track box
+                        module_x_21, module_y_21, vector_21 = self.get_two_boxes_stat(
+                            box1=self.track_list[i]['boxes'][-2], box2=self.track_list[i]['boxes'][-1]
+                        )
+                        # stat between second last track box and new box
+                        module_x_20, module_y_20, vector_20 = self.get_two_boxes_stat(
+                            box1=self.track_list[i]['boxes'][-2], box2=self.current_boxes[b][0]
+                        )
                     else:
-                        module_x2, module_y2, vector2 = 0, 0, 0
-                    vector = ((vector1, module_x1, module_y1), (vector2, module_x2, module_y2))
+                        module_x_21, module_y_21, vector_21 = 0, 0, 0
+                        module_x_20, module_y_20, vector_20 = 0, 0, 0
+                    vector = ((vector_10, module_x_10, module_y_10), (vector_21, module_x_21, module_y_21),
+                              (vector_20, module_x_20, module_y_20))
                     if (i, b) not in pair or (b, i) not in pair:
-                        dist.append((distance, i, b, vector))
+                        dist.append((vector_10, i, b, vector))
                         pair.append((i, b))
             dist = sorted(dist)
             if debug:
                 print('current boxes', self.current_boxes)
                 print('dist =', dist, 'speed_limit =', speed_limit, 'dist_limit =', dist_limit)
             for d in dist:
-                if not self.track_list[d[1]]['check_out'][-1] and self.current_boxes[d[2]][1]:
+                distance, i, b, vector = d
+                ((vector_10, module_x_10, module_y_10), (vector_21, module_x_21, module_y_21),
+                 (vector_20, module_x_20, module_y_20)) = vector
+                if not self.track_list[i]['check_out'][-1] and self.current_boxes[b][1]:
                     continue
-                elif tr_idxs and d[1] in tr_idxs and d[2] in box_idxs:
-                    if (d[3][0][1] * d[3][1][1] > 0 and d[3][0][2] * d[3][1][2] > 0) or \
-                            ((d[3][0][1] * d[3][1][1] <= 0 or d[3][0][2] * d[3][1][2] <= 0) and
-                             d[3][0][0] + d[3][1][0] < speed_limit):
-                        self.track_list[d[1]] = self.fill_track(
-                            track=self.track_list[d[1]],
-                            id=self.track_list[d[1]]['id'],
+                elif tr_idxs and i in tr_idxs and b in box_idxs:
+                    if (module_x_10 * module_x_21 > 0 and module_y_10 * module_y_21 > 0) or \
+                            ((module_x_10 * module_x_21 <= 0 or module_y_10 * module_y_21 <= 0) and
+                             vector_10 + vector_21 < speed_limit):
+                        self.track_list[i] = self.fill_track(
+                            track=self.track_list[i],
+                            id=self.track_list[i]['id'],
                             frame_id=frame_id,
-                            box=[int(c) for c in self.current_boxes[d[2]][0][:4]],
-                            check_in=self.current_boxes[d[2]][1],
-                            check_out=self.current_boxes[d[2]][2]
+                            box=[int(c) for c in self.current_boxes[b][0][:4]],
+                            check_in=self.current_boxes[b][1],
+                            check_out=self.current_boxes[b][2]
                         )
-                        tr_idxs.pop(tr_idxs.index(d[1]))
-                        box_idxs.pop(box_idxs.index(d[2]))
+                        tr_idxs.pop(tr_idxs.index(i))
+                        box_idxs.pop(box_idxs.index(b))
+                    elif (module_x_20 * module_x_21 > 0 and module_y_20 * module_y_21 > 0 and vector_20 < vector_21 and
+                          frame_id - self.track_list[i]['frame_id'][-1] <= 2):
+                        self.track_list[i] = self.move_boxes_from_track_to_dead(track=self.track_list[i], depth=1)
+                        self.track_list[i] = self.fill_track(
+                            track=self.track_list[i],
+                            id=self.track_list[i]['id'],
+                            frame_id=frame_id,
+                            box=[int(c) for c in self.current_boxes[b][0][:4]],
+                            check_in=self.current_boxes[b][1],
+                            check_out=self.current_boxes[b][2]
+                        )
+                        tr_idxs.pop(tr_idxs.index(i))
+                        box_idxs.pop(box_idxs.index(b))
             if box_idxs:
                 for b in box_idxs:
                     # add track if its first point is inside out-polygon

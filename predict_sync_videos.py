@@ -4,11 +4,11 @@ from ultralytics import YOLO
 
 from classification.nn_classificator import VideoClassifier
 from parameters import *
-from utils import time_converter, save_txt, get_name_from_link
+from utils import time_converter, save_txt
 from yolo.yolo8 import detect_synchro_video_polygon
 
 
-def predict(video_paths: dict, stream: bool = False) -> dict:
+def predict(video_paths: dict, stream: bool = False, save_predict_video: bool = False) -> dict:
     vc = VideoClassifier(num_classes=len(CLASSES), weights=CLASSIFICATION_MODEL)
     yolo_models = {
         'model_1': YOLO(YOLO_WEIGTHS.get('model_1')),
@@ -21,21 +21,17 @@ def predict(video_paths: dict, stream: bool = False) -> dict:
         'MIN_OBJ_SEQUENCE': MIN_OBJ_SEQUENCE, 'MIN_EMPTY_SEQUENCE': MIN_EMPTY_SEQUENCE,
     }
     st = time.time()
-    spf = ''
-    for x in video_paths.get('save_path').split('/')[:-1]:
-        spf = f"{spf}/{x}"
-    sp = f"{spf[1:]}/{get_name_from_link(video_paths.get('save_path'))}.mp4" \
-        if video_paths.get('save_path') else ''
     result = detect_synchro_video_polygon(
         models=yolo_models,
         video_paths=video_paths,
-        save_path=sp,
+        save_path=video_paths.get('save_path'),
         start=args['start_frame'],
         finish=args['end_frame'],
-        interactive_video=True,
+        interactive_video=False,
         class_model=vc,
         stream=stream,
-        debug=True
+        debug=False,
+        save_predict_video=save_predict_video
     )
     count = result.get('total_count')
     class_dict = result.get('class_distribution')
@@ -46,7 +42,6 @@ def predict(video_paths: dict, stream: bool = False) -> dict:
           f"- Predict count: '{count}'\n" \
           f"- Predict list: '{class_counter}'\n" \
           f"- Predict dict: '{class_dict}'\n" \
-          f"- Saves as '{sp}'\n" \
           f"- Predict args: {args}\n" \
           f"- Process time: {time_converter(time.time() - st)}\n"
     msg = f"{dt}   {txt}\n\n"
@@ -55,12 +50,4 @@ def predict(video_paths: dict, stream: bool = False) -> dict:
 
 
 if __name__ == '__main__':
-    video_paths = [
-        {
-            'model_1': os.path.join(DATASET_DIR, 'videos/sync_test/test 31_cam 1_sync.mp4'),
-            'model_2': os.path.join(DATASET_DIR, 'videos/sync_test/test 31_cam 2_sync.mp4'),
-            'save_path': os.path.join(ROOT_DIR, 'temp/test 31.mp4'),
-        },
-    ]
-    result = predict(video_paths=video_paths[0])
-    print(result)
+    pass
