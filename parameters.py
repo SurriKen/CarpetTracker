@@ -1,9 +1,6 @@
-
 import os
 
-# ROOT_DIR = '/Users/denyurchuck/Desktop/CarpetTracker'
 ROOT_DIR = '/home/deny/Рабочий стол/CarpetTracker'
-DATASET_DIR = '/media/deny/Новый том/AI/CarpetTracker'
 
 MIN_OBJ_SEQUENCE = 6
 MIN_EMPTY_SEQUENCE = 12

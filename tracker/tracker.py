@@ -247,7 +247,7 @@ class PolyTracker:
         if debug:
             print(f"combine_count: frame_id={frame_id}, count={count}, last_track_seq={last_track_seq}, "
                   f"tracker_1_count_frames={tracker_1_count_frames}, tracker_2_count_frames={tracker_2_count_frames}")
-
+        print("Tracking", tracker_1_count_frames, tracker_2_count_frames)
         last_state = [False, False]
         for p, key in enumerate(last_track_seq.keys()):
             if not last_track_seq[key]:
@@ -258,12 +258,14 @@ class PolyTracker:
         new_track_seq = {'tr1': [], 'tr2': []}
         new_state = [False, False]
         if tracker_1_count_frames:
-            new_track_seq['tr1'] = tracker_1_count_frames
-            new_state[0] = True
+            if len(tracker_1_count_frames[0]) > 2:
+                new_track_seq['tr1'] = tracker_1_count_frames
+                new_state[0] = True
 
         if tracker_2_count_frames:
-            new_track_seq['tr2'] = tracker_2_count_frames
-            new_state[1] = True
+            if len(tracker_2_count_frames[0]) > 2:
+                new_track_seq['tr2'] = tracker_2_count_frames
+                new_state[1] = True
 
         if new_state != [False, False] and debug:
             print(f"-- frame_id={frame_id}, count {count}, last_state={last_state}, new_state={new_state}, "
@@ -289,8 +291,15 @@ class PolyTracker:
         elif new_state == [False, False] and last_state != [False, False]:
             max_last_1 = max(last_track_seq['tr1'][0]) if last_track_seq['tr1'] else 0
             max_last_2 = max(last_track_seq['tr2'][0]) if last_track_seq['tr2'] else 0
+            max_len = 0
+            if last_track_seq['tr1'] and last_track_seq['tr2']:
+                max_len = max([len(last_track_seq['tr1'][0]), len(last_track_seq['tr2'][0])])
+            elif last_track_seq['tr1']:
+                max_len = len(last_track_seq['tr1'][0])
+            elif last_track_seq['tr2']:
+                max_len = len(last_track_seq['tr2'][0])
 
-            if (last_state == [True, True] and frame_id - max([max_last_1, max_last_2]) > limit) or \
+            if (last_state == [True, True] and frame_id - max([max_last_1, max_last_2]) > limit and max_len > 2) or \
                     (last_state != [False, False] and last_state != [True, True] and existing_tracks == [0, 0]):
                 predict_class = PolyTracker.predict_track_class(
                     model=class_model, tracks=last_track_seq, classes=class_list, frame_size=frame_size)

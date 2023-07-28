@@ -201,13 +201,10 @@ def detect_synchro_video_polygon(
         for i in range(0, finish):
             _, frame1 = min_vc.read()
             closest_id = get_closest_id(min_range[0][1], max_range[:10])
-            x = min_range[0]
             min_range.pop(0)
             ids = list(range(closest_id)) if closest_id else [0]
             ids = sorted(ids, reverse=True)
-            y = 0
             for id in ids:
-                y = max_range[id]
                 max_range.pop(id)
                 _, frame2 = max_vc.read()
             if frame1 is None or frame2 is None:
