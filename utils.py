@@ -1,54 +1,119 @@
 import colorsys
 import copy
-import io
 import os
 import pickle
 import random
 from copy import deepcopy
+import logging
+from typing import Optional
 
 import cv2
 import numpy as np
-import yaml
 from PIL import Image, ImageDraw, ImageFont
+from matplotlib import pyplot as plt
 from scipy import stats
-
-from parameters import MIN_OBJ_SEQUENCE
-
-
-def save_dict(dict_, file_path, filename):
-    with open(os.path.join(file_path, f"{filename}.dict"), 'wb') as handle:
-        pickle.dump(dict_, handle, protocol=pickle.HIGHEST_PROTOCOL)
+from skimage import measure
+from sklearn.metrics import confusion_matrix
 
 
-def load_dict(pickle_path):
+from parameters import MIN_OBJ_SEQUENCE, ROOT_DIR
+
+logging.basicConfig(
+    level=logging.DEBUG, filename="py_log.log", filemode="a", format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger("carpet tracker")
+logger.setLevel(logging.INFO)
+logger.addHandler(logging.StreamHandler())
+
+
+def time_converter(time_sec: float) -> str:
+    if time_sec < 1:
+        return f"{round(time_sec * 1000, 1)} ms"
+    time_sec = int(time_sec)
+    seconds = time_sec % 60
+    minutes = time_sec // 60
+    hours = minutes // 60
+    minutes = minutes % 60
+    if hours:
+        return f"{hours} h {minutes} min {seconds} sec"
+    if minutes:
+        return f"{minutes} min {seconds} sec"
+    if seconds:
+        return f"{seconds} sec"
+
+
+def plot_and_save_gragh(data: list, xlabel: str, ylabel: str, title: str, save_folder: str) -> None:
+    plt.plot(data)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.savefig(os.path.join(save_folder, f'{title}.jpg'))
+    plt.close()
+
+
+def save_dict_to_table_txt(data: dict, save_path: str) -> None:
+    keys = data.keys()
+    file = ''
+    n = 0
+    for k in keys:
+        file = f'{file}{"{:<10} ".format(k)}'
+        if len(data.get(k)) > n:
+            n = len(data.get(k))
+    file = f"{file}\n"
+
+    for i in range(n):
+        for k in data.keys():
+            file = f'{file}{"{:<10} ".format(data.get(k)[i])}'
+        file = f"{file}\n"
+    save_txt(txt=file[:-2], txt_path=save_path)
+
+
+def get_confusion_matrix(y_true, y_pred, get_percent=True) -> tuple:
+    cm = confusion_matrix(y_true, y_pred)
+    cm_percent = None
+    if get_percent:
+        cm_percent = np.zeros_like(cm).astype('float')
+        for i in range(len(cm)):
+            total = np.sum(cm[i])
+            for j in range(len(cm[i])):
+                cm_percent[i][j] = round(cm[i][j] * 100 / total, 1)
+    return cm.astype('float').tolist(), cm_percent.astype('float').tolist()
+
+
+def save_data(data, folder_path: str, filename: str) -> None:
+    """Save a dictionary to a file"""
+    with open(os.path.join(folder_path, f"{filename}.dict"), 'wb') as handle:
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def load_data(pickle_path: str):
+    """Load a dictionary from saved file"""
     with open(pickle_path, 'rb') as handle:
         b = pickle.load(handle)
     return b
 
 
-def save_txt(txt, txt_path):
-    with open(txt_path, 'w') as f:
+def save_txt(txt: str, txt_path: str, mode: str = 'w') -> None:
+    """Save a text to a file"""
+    with open(txt_path, mode) as f:
         f.write(txt)
 
 
-def load_txt(txt_path):
+def load_txt(txt_path: str) -> list[str]:
+    """Load a text from saved file"""
     with open(txt_path, 'r') as handle:
-        b = handle.readlines()
-    return b
+        text = handle.readlines()
+    return text
 
 
-def save_yaml(dict_, yaml_path):
-    with io.open(yaml_path, 'w', encoding='utf8') as outfile:
-        yaml.dump(dict_, outfile, default_flow_style=False, allow_unicode=True)
+def get_colors(name_classes: list) -> list[tuple]:
+    """
+    Get colors for a given label in list of labels
 
+    Args:
+        name_classes: list of labels
 
-def load_yaml(yaml_path):
-    with open(yaml_path, 'r') as stream:
-        data_loaded = yaml.safe_load(stream)
-    return data_loaded
-
-
-def get_colors(name_classes: list):
+    Returns: list of colors as RGB tuples
+    """
     length = 10 * len(name_classes)
     hsv_tuples = [(x / length, 1., 1.) for x in range(length)]
     colors = list(map(lambda x: colorsys.hsv_to_rgb(*x), hsv_tuples))
@@ -57,7 +122,17 @@ def get_colors(name_classes: list):
     return colors[:len(name_classes)]
 
 
-def get_distance(c1: list, c2: list):
+def get_distance(c1: list, c2: list) -> float:
+    """
+    Get distance between two 2D points
+
+    Args:
+        c1: (x, y) coordinates of point 1
+        c2: (x, y) coordinates of point 2
+
+    Returns: distance
+
+    """
     return ((c1[0] - c2[0]) ** 2 + (c1[1] - c2[1]) ** 2) ** 0.5
 
 
@@ -107,9 +182,9 @@ def add_headline_to_cv_image(image, headline: str):
     if headline:
         img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         im_pil = Image.fromarray(img)
-        font_size = int(im_pil.size[1] * 0.03)
+        font_size = int(im_pil.size[0] * 0.02)
         draw = ImageDraw.Draw(im_pil)
-        font = ImageFont.truetype("arial.ttf", font_size)
+        font = ImageFont.truetype(os.path.join(ROOT_DIR, "arial.ttf"), font_size)
         label_size = draw.textsize(headline, font)
         text_origin = np.array([int(im_pil.size[0] * 0.01), int(im_pil.size[1] * 0.01)])
         draw.rectangle(
@@ -222,9 +297,95 @@ def get_obj_box_squares(clust_coords):
         x = sorted(x, reverse=True)
         x = x[:MIN_OBJ_SEQUENCE]
         x = [i[1] for i in x]
-        # print(k, len(np.array(sq[k])[x]), np.mean(np.array(sq[k])[x]))
         vecs.append(np.array(sq[k])[x])
     return np.array(vecs)
+
+
+def read_xml(xml_path: str, shrink=False, new_width: int = 416, new_height: int = 416) -> dict:
+    with open(xml_path, 'r') as xml:
+        lines = xml.readlines()
+    xml = ''
+    for l in lines:
+        xml = f"{xml}{l}"
+    filename = xml.split("<filename>")[1].split("</filename>")[0]
+    size = xml.split("<size>")[1].split("</size>")[0]
+    width = int(size.split("<width>")[1].split("</width>")[0])
+    height = int(size.split("<height>")[1].split("</height>")[0])
+    objects = xml.split('<object>')[1:]
+    coords = []
+    for obj in objects:
+        name = obj.split("<name>")[1].split("</name>")[0]
+        if shrink:
+            xmin = int(int(obj.split("<xmin>")[1].split("</xmin>")[0]) / width * new_width)
+            ymin = int(int(obj.split("<ymin>")[1].split("</ymin>")[0]) / height * new_height)
+            xmax = int(int(obj.split("<xmax>")[1].split("</xmax>")[0]) / width * new_width)
+            ymax = int(int(obj.split("<ymax>")[1].split("</ymax>")[0]) / height * new_height)
+        else:
+            xmin = int(obj.split("<xmin>")[1].split("</xmin>")[0])
+            ymin = int(obj.split("<ymin>")[1].split("</ymin>")[0])
+            xmax = int(obj.split("<xmax>")[1].split("</xmax>")[0])
+            ymax = int(obj.split("<ymax>")[1].split("</ymax>")[0])
+        coords.append([xmin, ymin, xmax, ymax, name])
+    return {"width": width, "height": height, "coords": coords, "filename": filename}
+
+
+def remove_empty_xml(xml_folder):
+    xml_list = []
+    with os.scandir(xml_folder) as fold:
+        for f in fold:
+            xml_list.append(f.name)
+    for xml in xml_list:
+        box_info = read_xml(f"{xml_folder}/{xml}")
+        if not box_info['coords']:
+            os.remove(f"{xml_folder}/{xml}")
+
+
+def get_name_from_link(link: str):
+    vn = link.split('/')[-1].split('.')[:-1]
+    video_name = ''
+    for v in vn:
+        video_name = f"{video_name}.{v}"
+    return video_name[1:]
+
+
+def clean_mask_from_noise(input_mask):
+    labels_mask = measure.label(input_mask)
+    regions = measure.regionprops(labels_mask)
+    regions.sort(key=lambda x: x.area, reverse=True)
+    sum_area = input_mask.shape[0] * input_mask.shape[1]
+
+    if len(regions) > 1:
+        for rg in regions:
+            if rg.area / sum_area < 0.0001:
+                labels_mask[rg.coords[:, 0], rg.coords[:, 1]] = 0
+    labels_mask[labels_mask != 0] = 1
+    labels_mask = measure.label(1 - labels_mask)
+    regions = measure.regionprops(labels_mask)
+    regions.sort(key=lambda x: x.area, reverse=True)
+    if len(regions) > 1:
+        for rg in regions:
+            if rg.area / sum_area < 0.0001:
+                labels_mask[rg.coords[:, 0], rg.coords[:, 1]] = 0
+    labels_mask[labels_mask != 0] = 1
+    return labels_mask
+
+
+def clean_diff_image(image, low_color=0, high_color=255):
+    COLOR_LVL = (0, 245)
+    min_img = np.min(image, axis=-1)
+    min_img = np.expand_dims(min_img, axis=-1)
+    max_img = np.min(image, axis=-1)
+    max_img = np.expand_dims(max_img, axis=-1)
+    img = np.where(max_img < COLOR_LVL[1], image, (255, 0, 0))
+    img = np.where(min_img > COLOR_LVL[0], img, (255, 0, 0))
+    gray_mask = np.max(img, axis=-1) - np.min(img, axis=-1)
+    mask = np.where(low_color < gray_mask, 1, 0)
+    mask = np.where(high_color > gray_mask, mask, 0)
+    mask = clean_mask_from_noise(mask)
+    mask = np.expand_dims(mask, axis=-1)
+    cleaned_image = np.where(mask == 0, image, (0, 0, 0))
+    cleaned_image = cleaned_image.astype(np.uint8)
+    return cleaned_image, mask
 
 
 if __name__ == '__main__':

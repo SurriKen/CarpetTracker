@@ -1,0 +1,9 @@
+ultralytics
+wget
+sk-video
+torch
+torchvision
+moviepy
+opencv-python
+
+# pip install -r requirements.txt

@@ -6,5 +6,5 @@
 /train/
 /yolo8/
 /temp/
-/runs/
-/models/
+/tests/mnist_videos/
+/video_class_train/
