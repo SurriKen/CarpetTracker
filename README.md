@@ -18,11 +18,11 @@
         <p>&nbsp;&nbsp;&nbsp;&nbsp; 'save_path': папка для сохранения результатов,<br>
         }</i><br><br>
 
-   пример вида с камеры 1 (угловая)
+   пример вида с камеры 1 (угловая)<br>
    ![0.jpg](dataset_process%2F0.jpg)
 
-   пример вида с камеры 2 (центральная)
+   пример вида с камеры 2 (центральная)<br>
    ![7302.jpg](dataset_process%2F7302.jpg)
 
-   пример вида результатов работы на видео при save_predict_video = True
+   пример вида результатов работы на видео при save_predict_video = True<br>
    ![5.png](dataset_process%2F5.png)

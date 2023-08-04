@@ -40,7 +40,7 @@ def detect_mono_video_polygon(
         start: int = 0,
         finish: int = 0,
         interactive_video: bool = False
-) -> int:
+) -> dict:
     """
     Args:
         model: YOLO, trained YOLO model,
@@ -75,7 +75,7 @@ def detect_mono_video_polygon(
 
     finish = int(f) if finish == 0 or finish < start else finish
     frames = []
-
+    true_bb = {}
     for i in range(0, finish):
         _, frame = vc.read()
         frames.append(frame)
@@ -83,7 +83,8 @@ def detect_mono_video_polygon(
         if i >= start:
             res = model.predict(frame, iou=0, conf=0.3)
             tracker.process(frame_id=i, boxes=res[0].boxes.data.tolist(), img_shape=res[0].orig_shape[:2])
-
+            for track in tracker.track_list:
+                true_bb[track.get('id')] = [track.get('boxes'), track.get('frame_id')]
             frame = PolyTracker.prepare_image(
                 image=frame,
                 colors=colors,
@@ -111,7 +112,7 @@ def detect_mono_video_polygon(
 
     vc.release()
     cv2.destroyAllWindows()
-    return tracker.count
+    return true_bb
 
 
 def detect_synchro_video_polygon(
@@ -139,11 +140,14 @@ def detect_synchro_video_polygon(
         finish: int, frame to end prediction (0 by default),
         interactive_video: bool, show video in interactive mode (False by default)
         debug: bool = False
+        stream: bool = False,
+        save_predict_video: bool = False
 
     Returns:
         list of predicted classes ordered from start to finish of predicdion
     """
     dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     def get_closest_id(x: float, data: list[tuple, ...]) -> int:
         dist = [(abs(data[i][1] - x), i) for i in range(len(data))]
         dist = sorted(dist)
@@ -224,7 +228,8 @@ def detect_synchro_video_polygon(
                 if debug:
                     print('================================================================')
                     print(f"Current_frame = {i}, current count = {count}, stop_flag={stop_flag}")
-                    print(f"Input boxes, tracker 1 = {res1[0].boxes.data.tolist()}, tracker 2 = {res2[0].boxes.data.tolist()}")
+                    print(
+                        f"Input boxes, tracker 1 = {res1[0].boxes.data.tolist()}, tracker 2 = {res2[0].boxes.data.tolist()}")
                     print(f'tracker_1.track_list. Track num = {len(tracker_1.track_list)}')
                     for tr in tracker_1.track_list:
                         print(f"--ID={tr['id']}, frames={tr['frame_id']}, check_out={tr['check_out']}, "
@@ -234,6 +239,7 @@ def detect_synchro_video_polygon(
                     for tr in tracker_2.track_list:
                         print(f"--ID={tr['id']}, frames={tr['frame_id']}, check_out={tr['check_out']}, "
                               f"boxes={tr['boxes']}")
+                    print('tracker_2.dead_boxes', tracker_2.dead_boxes)
 
                 existing_tracks = [len(tracker_1.track_list), len(tracker_2.track_list)]
                 class_counter, last_track_seq, end_track = PolyTracker.combine_count(
@@ -312,8 +318,6 @@ def detect_synchro_video_polygon(
         return result
 
     else:
-
-
         while vc1.isOpened() and vc2.isOpened():
             _, frame1 = vc1.read()
             _, frame2 = vc2.read()
@@ -334,11 +338,12 @@ def detect_synchro_video_polygon(
                 for tr in tracker_1.track_list:
                     print(f"--ID={tr['id']}, frames={tr['frame_id']}, check_out={tr['check_out']}, "
                           f"boxes={tr['boxes']}")
-                print('tracker_1.dead_boxes', tracker_1.dead_boxes)
+                # print('tracker_1.dead_boxes', tracker_1.dead_boxes)
                 print(f'tracker_2.track_list. Track num = {len(tracker_2.track_list)}')
                 for tr in tracker_2.track_list:
                     print(f"--ID={tr['id']}, frames={tr['frame_id']}, check_out={tr['check_out']}, "
                           f"boxes={tr['boxes']}")
+                # print('tracker_2.dead_boxes', tracker_2.dead_boxes)
 
             existing_tracks = [len(tracker_1.track_list), len(tracker_2.track_list)]
             class_counter, last_track_seq, end_track = PolyTracker.combine_count(

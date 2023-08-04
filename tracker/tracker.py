@@ -158,13 +158,12 @@ class PolyTracker:
         :return: initial box, ex. [x1, y1, x2, y2] if not match to any dead tracks
                 or empty list if box is in dead track
         """
-        # new_box = [int(x) for x in new_box[:4]]
         drop_keys = []
         find = False
         for k in self.dead_boxes.keys():
             shift_center, shift_top_left, shift_top_right, shift_bottom_left, shift_bottom_right = \
                 self.get_full_distance(box1=self.dead_boxes.get(k).get('coords')[-1], box2=new_box)
-            if frame_id - self.dead_boxes.get(k).get('frame_id')[-1] > MIN_EMPTY_SEQUENCE:
+            if frame_id - self.dead_boxes.get(k).get('frame_id')[-1] > 1000:
                 drop_keys.append(k)
             elif shift_center < distance_limit or shift_top_left < distance_limit or \
                     shift_top_right < distance_limit or shift_bottom_left < distance_limit or \
@@ -247,7 +246,7 @@ class PolyTracker:
         if debug:
             print(f"combine_count: frame_id={frame_id}, count={count}, last_track_seq={last_track_seq}, "
                   f"tracker_1_count_frames={tracker_1_count_frames}, tracker_2_count_frames={tracker_2_count_frames}")
-        print("Tracking", tracker_1_count_frames, tracker_2_count_frames)
+            print("Tracking", tracker_1_count_frames, tracker_2_count_frames)
         last_state = [False, False]
         for p, key in enumerate(last_track_seq.keys()):
             if not last_track_seq[key]:
@@ -358,18 +357,7 @@ class PolyTracker:
                 self.track_list[i] = self.move_boxes_from_track_to_dead(
                     track=trck,
                     depth=cut
-                    # frame_idxs=trck['frame_id'][-cut:],
-                    # boxes=trck['boxes'][-cut:]
                 )
-                # trck['frame_id'] = trck['frame_id'][:-cut]
-                # trck['boxes'] = trck['boxes'][:-cut]
-                # trck['check_in'] = trck['check_in'][:-cut]
-                # trck['check_out'] = trck['check_out'][:-cut]
-                # trck['shift_center'] = trck['shift_center'][:-cut]
-                # trck['shift_top_left'] = trck['shift_top_left'][:-cut]
-                # trck['shift_bottom_right'] = trck['shift_bottom_right'][:-cut]
-                # trck['shift_top_right'] = trck['shift_top_right'][:-cut]
-                # trck['shift_bottom_left'] = trck['shift_bottom_left'][:-cut]
                 cut_idxs.append(i)
 
         if cut_idxs and self.track_list:
@@ -446,9 +434,12 @@ class PolyTracker:
         for box in boxes:
             box = [int(x) for x in box[:4]]
             center = self.get_center(box)
+            # print(self.name, box, self.empty_space, rel)
+
             if self.point_in_polygon(center, limit_out):
                 check_in = self.point_in_polygon(center, limit_in)
                 check_out = self.point_in_polygon(center, self.polygon_out)
+                # print(box, check_out)
 
                 # Check in dead boxes list and update it
                 if self.dead_boxes:
@@ -514,7 +505,7 @@ class PolyTracker:
                 if not self.track_list[i]['check_out'][-1] and self.current_boxes[b][1]:
                     continue
                 elif tr_idxs and i in tr_idxs and b in box_idxs:
-                    if (module_x_10 * module_x_21 > 0 and module_y_10 * module_y_21 > 0) or \
+                    if (module_x_10 * module_x_21 > 0 or module_y_10 * module_y_21 > 0) or \
                             ((module_x_10 * module_x_21 <= 0 or module_y_10 * module_y_21 <= 0) and
                              vector_10 + vector_21 < speed_limit):
                         self.track_list[i] = self.fill_track(
@@ -527,8 +518,11 @@ class PolyTracker:
                         )
                         tr_idxs.pop(tr_idxs.index(i))
                         box_idxs.pop(box_idxs.index(b))
-                    elif (module_x_20 * module_x_21 > 0 and module_y_20 * module_y_21 > 0 and vector_20 < vector_21 and
-                          frame_id - self.track_list[i]['frame_id'][-1] <= 2):
+                    elif (
+                            # module_x_20 * module_x_21 > 0 or module_y_20 * module_y_21 > 0 and
+                            vector_20 < vector_10 and
+                            frame_id - self.track_list[i]['frame_id'][-1] <= 2
+                    ):
                         self.track_list[i] = self.move_boxes_from_track_to_dead(track=self.track_list[i], depth=1)
                         self.track_list[i] = self.fill_track(
                             track=self.track_list[i],

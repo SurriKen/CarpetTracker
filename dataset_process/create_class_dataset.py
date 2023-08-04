@@ -1,8 +1,8 @@
 import os.path
 
 from dataset_process.dataset_processing import DatasetProcessing
-from parameters import DATASET_DIR
-
+from parameters import *
+DATASET_DIR = '/media/deny/Новый том/AI/CarpetTracker'
 # List of links for both cameras and csv file with classes
 # all videos must have fps=25
 video_links = [
@@ -19,7 +19,6 @@ video_links = [
     ['videos/classification_videos/video_sync/13-05 ВО_cam1_sync.mp4',
      'videos/classification_videos/video_sync/13-05 ВО_cam2_sync.mp4',
      'videos/classification_videos/csv/13-05 ВО.csv'],
-
     # Train, Val batch
     # ['videos/classification_videos/video_sync/16-10 ЦП_cam1_sync.mp4',
     #  'videos/classification_videos/video_sync/16-10 ЦП_cam2_sync.mp4',
@@ -104,7 +103,7 @@ video_links = [
      'videos/classification_videos/csv/test 51.csv'],
 ]
 save_folder = os.path.join(DATASET_DIR, f'datasets/class_videos_{len(video_links)}')
-
+print(save_folder)
 for links in video_links:
     for link in links:
         links[links.index(link)] = os.path.join(DATASET_DIR, link)

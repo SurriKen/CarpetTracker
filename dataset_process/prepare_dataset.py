@@ -1,8 +1,8 @@
 import os
 
 from dataset_process.dataset_processing import DatasetProcessing
-from parameters import ROOT_DIR, DATASET_DIR
-
+from parameters import ROOT_DIR
+DATASET_DIR = '/media/deny/Новый том/AI/CarpetTracker'
 # List of links:
 # index 0 - link to image folder,
 # index 1 - link to txt label folder,
@@ -38,6 +38,8 @@ data = [
      os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_07/boxes'), 1],
     [os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_08/img'),
      os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_08/boxes'), 1],
+    [os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_09/img'),
+     os.path.join(DATASET_DIR, 'datasets/От разметчиков/batch_09/boxes'), 1],
 ]
 
 split = 0.9
