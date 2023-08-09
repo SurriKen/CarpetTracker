@@ -17,7 +17,7 @@ def predict(video_paths: dict, stream: bool = False, save_predict_video: bool = 
     args = {
         'conf': 0.3, 'iou': 0., 'POLY_CAM1_IN': POLY_CAM1_IN, 'POLY_CA M1_OUT': POLY_CAM1_OUT,
         'POLY_CAM2_IN': POLY_CAM2_IN, 'POLY_CAM2_OUT': POLY_CAM2_OUT,
-        'start_frame': (4*60+30)*0, 'end_frame': (4*60+34)*0,
+        'start_frame': (0 * 60 + 30) * 0, 'end_frame': (0 * 60 + 31) * 0,
         'MIN_OBJ_SEQUENCE': MIN_OBJ_SEQUENCE, 'MIN_EMPTY_SEQUENCE': MIN_EMPTY_SEQUENCE,
     }
     st = time.time()
@@ -27,6 +27,8 @@ def predict(video_paths: dict, stream: bool = False, save_predict_video: bool = 
         save_path=video_paths.get('save_path'),
         start=args['start_frame'],
         finish=args['end_frame'],
+        conf=args['conf'],
+        iou=args['iou'],
         interactive_video=False,
         class_model=vc,
         stream=stream,

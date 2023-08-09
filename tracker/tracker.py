@@ -110,14 +110,16 @@ class PolyTracker:
     @staticmethod
     def add_track() -> dict:
         return dict(id=None, boxes=[], frame_id=[], check_in=[], check_out=[], shift_center=[], speed=[],
-                    shift_top_left=[], shift_top_right=[], shift_bottom_left=[], shift_bottom_right=[])
+                    shift_top_left=[], shift_top_right=[], shift_bottom_left=[], shift_bottom_right=[], images=[])
 
     @staticmethod
-    def fill_track(track: dict, id: int, frame_id: int, box: list, check_in: bool, check_out: bool) -> dict:
+    def fill_track(track: dict, id: int, frame_id: int, box: list, check_in: bool, check_out: bool,
+                   image: np.ndarray) -> dict:
         track['id'] = id
         track['frame_id'].append(frame_id)
         track['check_in'].append(check_in)
         track['check_out'].append(check_out)
+        track['images'].append(image)
         if track['boxes']:
             shift_center, shift_top_left, shift_top_right, shift_bottom_left, shift_bottom_right = \
                 PolyTracker.get_full_distance(track['boxes'][-1], box)
@@ -214,15 +216,20 @@ class PolyTracker:
                 'frame_id': track['frame_id'][-depth:],
                 'coords': track['boxes'][-depth:]
             }
-            track['frame_id'] = track['frame_id'][:-depth]
-            track['boxes'] = track['boxes'][:-depth]
-            track['check_in'] = track['check_in'][:-depth]
-            track['check_out'] = track['check_out'][:-depth]
-            track['shift_center'] = track['shift_center'][:-depth]
-            track['shift_top_left'] = track['shift_top_left'][:-depth]
-            track['shift_bottom_right'] = track['shift_bottom_right'][:-depth]
-            track['shift_top_right'] = track['shift_top_right'][:-depth]
-            track['shift_bottom_left'] = track['shift_bottom_left'][:-depth]
+            for key in track.keys():
+                # print(key, depth, track[key])
+                if key != 'id':
+                    track[key] = track[key][:-depth]
+            # track['frame_id'] = track['frame_id'][:-depth]
+            # track['boxes'] = track['boxes'][:-depth]
+            # track['images'] = track['images'][:-depth]
+            # track['check_in'] = track['check_in'][:-depth]
+            # track['check_out'] = track['check_out'][:-depth]
+            # track['shift_center'] = track['shift_center'][:-depth]
+            # track['shift_top_left'] = track['shift_top_left'][:-depth]
+            # track['shift_bottom_right'] = track['shift_bottom_right'][:-depth]
+            # track['shift_top_right'] = track['shift_top_right'][:-depth]
+            # track['shift_bottom_left'] = track['shift_bottom_left'][:-depth]
         else:
             self.dead_boxes[max_id + 1] = {
                 'frame_id': track['frame_id'],
@@ -245,7 +252,8 @@ class PolyTracker:
                       debug: bool = False, stop_flag: bool = False) -> (list, dict, list):
         if debug:
             print(f"combine_count: frame_id={frame_id}, count={count}, last_track_seq={last_track_seq}, "
-                  f"tracker_1_count_frames={tracker_1_count_frames}, tracker_2_count_frames={tracker_2_count_frames}")
+                  f"tracker_1_count_frames={tracker_1_count_frames[:2]}, "
+                  f"tracker_2_count_frames={tracker_2_count_frames[:2]}")
             print("Tracking", tracker_1_count_frames, tracker_2_count_frames)
         last_state = [False, False]
         for p, key in enumerate(last_track_seq.keys()):
@@ -354,6 +362,7 @@ class PolyTracker:
                             max(trck['shift_top_right'][-cut:]) < distance_limit or
                             max(trck['shift_bottom_left'][-cut:]) < distance_limit
                     ):
+                # print(i, trck)
                 self.track_list[i] = self.move_boxes_from_track_to_dead(
                     track=trck,
                     depth=cut
@@ -403,10 +412,13 @@ class PolyTracker:
         max_len = 0
         for i in deleted:
             if max_len < len(self.track_list[i]['frame_id']):
+                max_len = len(self.track_list[i]['frame_id'])
                 self.count_frames = [
                     self.track_list[i]['frame_id'],
-                    [[b / img_shape[i % 2] for i, b in enumerate(bb)] for bb in self.track_list[i]['boxes']]
+                    [[b / img_shape[i % 2] for i, b in enumerate(bb)] for bb in self.track_list[i]['boxes']],
+                    self.track_list[i]['images']
                 ]
+                # print('self.count_frames', self.count_frames[2][0].shape, img_shape, self.track_list[i]['boxes'])
         self.track_list = [self.track_list[i] for i in rel]
 
     @staticmethod
@@ -418,12 +430,12 @@ class PolyTracker:
         vector = ((c2[0] - c1[0]) ** 2 + (c2[1] - c1[1]) ** 2) ** 0.5
         return module_x, module_y, vector
 
-    def process(self, frame_id: int, boxes: list, img_shape: tuple, speed_limit_percent: float = SPEED_LIMIT_PERCENT,
+    def process(self, frame_id: int, boxes: list, image: np.ndarray, speed_limit_percent: float = SPEED_LIMIT_PERCENT,
                 stop_flag: bool = False, debug: bool = False) -> None:
         # check if boxes are relevant
         self.current_boxes = []
         self.frame_id = frame_id
-        diagonal = ((img_shape[0]) ** 2 + (img_shape[1]) ** 2) ** 0.5
+        diagonal = ((image.shape[0]) ** 2 + (image.shape[1]) ** 2) ** 0.5
         speed_limit = speed_limit_percent * diagonal * 0.8
         dist_limit = DEAD_LIMIT_PERCENT * diagonal
         limit_in = self.expand_poly(self.polygon_in, -1 * diagonal * 0.0)
@@ -453,13 +465,16 @@ class PolyTracker:
             for box in self.current_boxes:
                 if box[-1]:
                     track = self.add_track()
+                    bbox = [int(c) for c in box[0][:4]]
+                    crop_img = image[bbox[1]:bbox[3], bbox[0]:bbox[2], :]
                     track = self.fill_track(
                         track=track,
                         id=self.max_id + 1,
                         frame_id=frame_id,
-                        box=[int(c) for c in box[0][:4]],
+                        box=bbox,
                         check_in=box[1],
-                        check_out=box[2]
+                        check_out=box[2],
+                        image=crop_img
                     )
                     self.max_id += 1
                     self.track_list.append(track)
@@ -508,13 +523,16 @@ class PolyTracker:
                     if (module_x_10 * module_x_21 > 0 or module_y_10 * module_y_21 > 0) or \
                             ((module_x_10 * module_x_21 <= 0 or module_y_10 * module_y_21 <= 0) and
                              vector_10 + vector_21 < speed_limit):
+                        bbox = [int(c) for c in self.current_boxes[b][0][:4]]
+                        crop_img = image[bbox[1]:bbox[3], bbox[0]:bbox[2], :]
                         self.track_list[i] = self.fill_track(
                             track=self.track_list[i],
                             id=self.track_list[i]['id'],
                             frame_id=frame_id,
-                            box=[int(c) for c in self.current_boxes[b][0][:4]],
+                            box=bbox,
                             check_in=self.current_boxes[b][1],
-                            check_out=self.current_boxes[b][2]
+                            check_out=self.current_boxes[b][2],
+                            image=crop_img
                         )
                         tr_idxs.pop(tr_idxs.index(i))
                         box_idxs.pop(box_idxs.index(b))
@@ -524,13 +542,16 @@ class PolyTracker:
                             frame_id - self.track_list[i]['frame_id'][-1] <= 2
                     ):
                         self.track_list[i] = self.move_boxes_from_track_to_dead(track=self.track_list[i], depth=1)
+                        bbox = [int(c) for c in self.current_boxes[b][0][:4]]
+                        crop_img = image[bbox[1]:bbox[3], bbox[0]:bbox[2], :]
                         self.track_list[i] = self.fill_track(
                             track=self.track_list[i],
                             id=self.track_list[i]['id'],
                             frame_id=frame_id,
-                            box=[int(c) for c in self.current_boxes[b][0][:4]],
+                            box=bbox,
                             check_in=self.current_boxes[b][1],
-                            check_out=self.current_boxes[b][2]
+                            check_out=self.current_boxes[b][2],
+                            image=crop_img
                         )
                         tr_idxs.pop(tr_idxs.index(i))
                         box_idxs.pop(box_idxs.index(b))
@@ -539,13 +560,16 @@ class PolyTracker:
                     # add track if its first point is inside out-polygon
                     if self.current_boxes[b][2]:
                         track = self.add_track()
+                        bbox = [int(c) for c in self.current_boxes[b][0][:4]]
+                        crop_img = image[bbox[1]:bbox[3], bbox[0]:bbox[2], :]
                         track = self.fill_track(
                             track=track,
                             id=self.max_id + 1,
                             frame_id=frame_id,
-                            box=[int(c) for c in self.current_boxes[b][0][:4]],
+                            box=bbox,
                             check_in=self.current_boxes[b][1],
-                            check_out=self.current_boxes[b][2]
+                            check_out=self.current_boxes[b][2],
+                            image=crop_img
                         )
                         self.max_id += 1
                         self.track_list.append(track)
@@ -557,6 +581,7 @@ class PolyTracker:
                         }
                         self.fill_dead_box_form(key=key, frame_id=frame_id, box=self.current_boxes[b][0])
 
-        self.update_track_list(distance_limit=dist_limit, img_shape=img_shape, debug=debug, stop_flag=stop_flag)
+        self.update_track_list(distance_limit=dist_limit, img_shape=(image.shape[1], image.shape[0]), debug=debug,
+                               stop_flag=stop_flag)
         if debug:
             print('self.dead_boxes', self.dead_boxes)

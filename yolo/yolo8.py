@@ -82,7 +82,7 @@ def detect_mono_video_polygon(
 
         if i >= start:
             res = model.predict(frame, iou=0, conf=0.3)
-            tracker.process(frame_id=i, boxes=res[0].boxes.data.tolist(), img_shape=res[0].orig_shape[:2])
+            tracker.process(frame_id=i, boxes=res[0].boxes.data.tolist(), image=frame)
             for track in tracker.track_list:
                 true_bb[track.get('id')] = [track.get('boxes'), track.get('frame_id')]
             frame = PolyTracker.prepare_image(
@@ -122,6 +122,8 @@ def detect_synchro_video_polygon(
         class_model: VideoClassifier = None,
         start: int = 0,
         finish: int = 0,
+        conf: float = 0.3,
+        iou: float = 0.,
         interactive_video: bool = False,
         debug: bool = False,
         stream: bool = False,
@@ -218,12 +220,12 @@ def detect_synchro_video_polygon(
                 if i == finish - 1:
                     stop_flag = True
 
-                res1 = models.get('model_1').predict(frame1, iou=0, conf=0.3)
-                tracker_1.process(frame_id=i, boxes=res1[0].boxes.data.tolist(), img_shape=res1[0].orig_shape[:2],
+                res1 = models.get('model_1').predict(frame1, iou=iou, conf=conf)
+                tracker_1.process(frame_id=i, boxes=res1[0].boxes.data.tolist(), image=frame1,
                                   debug=False, stop_flag=stop_flag)
 
-                res2 = models.get('model_2').predict(frame2, iou=0, conf=0.3)
-                tracker_2.process(frame_id=i, boxes=res2[0].boxes.data.tolist(), img_shape=res2[0].orig_shape[:2],
+                res2 = models.get('model_2').predict(frame2, iou=iou, conf=conf)
+                tracker_2.process(frame_id=i, boxes=res2[0].boxes.data.tolist(), image=frame2,
                                   debug=False, stop_flag=stop_flag)
                 if debug:
                     print('================================================================')
@@ -323,12 +325,10 @@ def detect_synchro_video_polygon(
             _, frame2 = vc2.read()
 
             res1 = models.get('model_1').predict(frame1, iou=0, conf=0.3)
-            tracker_1.process(frame_id=frame_id, boxes=res1[0].boxes.data.tolist(), img_shape=res1[0].orig_shape[:2],
-                              debug=False)
+            tracker_1.process(frame_id=frame_id, boxes=res1[0].boxes.data.tolist(), image=frame1, debug=False)
 
             res2 = models.get('model_2').predict(frame2, iou=0, conf=0.3)
-            tracker_2.process(frame_id=frame_id, boxes=res2[0].boxes.data.tolist(), img_shape=res2[0].orig_shape[:2],
-                              debug=False)
+            tracker_2.process(frame_id=frame_id, boxes=res2[0].boxes.data.tolist(), image=frame2, debug=False)
             if debug:
                 print('================================================================')
                 print(f"Current_frame = {frame_id}, current count = {count}")
