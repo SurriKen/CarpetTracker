@@ -57,7 +57,7 @@ class Net(nn.Module):
 device = 'cuda:0'
 frame_size = (128, 128)
 num_frames = 16
-concat_axis = 2
+concat_axis = -1
 start_channels = 32
 kernel_size = 3
 dense_out = 256
@@ -86,8 +86,8 @@ dataset = VideoClassifier.create_box_video_dataset(
     test_split=0.05,
     frame_size=frame_size,
 )
-for k, v in dataset.params.items():
-    print(k, v)
+# for k, v in dataset.params.items():
+#     print(k, v)
 
 inp = [1, num_frames, *dataset.x_val[0][0][0].shape]
 inp[concat_axis] = inp[concat_axis] * 2
@@ -99,13 +99,18 @@ model = Net(
 vc = VideoClassifier(num_classes=len(dataset.classes), weights='', input_size=tuple(inp[1:]), name=name, device=device)
 vc.model = model
 
-print("Training is started")
-vc.train(
-    dataset=dataset,
-    epochs=10,
-    batch_size=4,
-    lr=0.00005,
-    num_frames=num_frames,
-    concat_axis=concat_axis,
-    save_dataset=True
-)
+x_batch = [dataset.x_train[i] for i in [0, 1, 2, 3]]
+print(len(x_batch[0]))
+x_train = vc.get_x_batch(x_train=x_batch, num_frames=num_frames, concat_axis=concat_axis)
+print(x_train.size())
+
+# print("Training is started")
+# vc.train(
+#     dataset=dataset,
+#     epochs=10,
+#     batch_size=4,
+#     lr=0.00005,
+#     num_frames=num_frames,
+#     concat_axis=concat_axis,
+#     save_dataset=True
+# )

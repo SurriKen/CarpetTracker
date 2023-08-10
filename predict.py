@@ -2,8 +2,8 @@ from parameters import *
 from predict_sync_videos import predict
 
 # for i in [5, 8, 10, 11, 15, 17, 18, 22, 23, 24, 25, 27, 29, 30, 31, 32, 53]:
-i = 52
-save_folder = os.path.join(ROOT_DIR, f'temp/test')
+i = 54
+save_folder = os.path.join(ROOT_DIR, f'temp/test {i}')
 if not os.path.isdir(save_folder):
     os.mkdir(save_folder)
 video_paths = {

@@ -87,13 +87,28 @@ class VideoClassifier:
             x1, x2 = [], []
             for batch in x_train:
                 b1, b2 = batch[0], batch[1]
+                # seq_1, seq_2 = [b1[0]], [b2[0]]
                 sequence = list(range(len(b1)))
                 idx = VideoClassifier.resize_list(sequence, num_frames)
+                # seq_1.extend(b1[idx])
+                # seq_1.append(b1[-1])
+                # seq_2.extend(b2[idx])
+                # seq_2.append(b2[-1])
                 b1, b2 = b1[idx], b2[idx]
                 x1.append(b1)
                 x2.append(b2)
             if concat_axis in [1, 2, 3, -1]:
+                # if concat_axis in [1, 2]:
                 x_train = np.concatenate([x1, x2], axis=concat_axis)
+                # target_shape = [len(x_train), x_train[0][0].shape]
+                # target_shape[concat_axis] = target_shape[concat_axis] * 2
+                # target_shape[-1] = num_frames
+                # x_tr = np.zeros(target_shape)
+                # for i in range(len(x1)):
+                #     for j in range(len(x1[0])):
+                #         x_tr[i, :, :, j:j + 1] = np.concatenate([x1[i], x2[i]], axis=concat_axis - 1)
+                #     # x_train = np.concatenate([x, x2[0]], axis=concat_axis - 1)
+                # x_train = np.array(x_train)
             else:
                 x_train = np.concatenate([x1, x2], axis=1)
                 print("Concat_axis is our of range. Choose from None, 0, 1, 2 or -1. "
@@ -214,7 +229,8 @@ class VideoClassifier:
 
     @staticmethod
     def create_box_video_dataset(
-            dataset: dict,  split: float, dataset_path: str = '', test_split: float = 0.05, frame_size: tuple = (128, 128)
+            dataset: dict, split: float, dataset_path: str = '', test_split: float = 0.05,
+            frame_size: tuple = (128, 128)
     ) -> VideoClass:
         if dataset_path:
             dataset = load_data(dataset_path)
