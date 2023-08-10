@@ -29,7 +29,7 @@ def predict(video_paths: dict, stream: bool = False, save_predict_video: bool = 
         finish=args['end_frame'],
         conf=args['conf'],
         iou=args['iou'],
-        interactive_video=False,
+        interactive_video=True,
         class_model=vc,
         stream=stream,
         debug=False,

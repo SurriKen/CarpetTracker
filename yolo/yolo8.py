@@ -161,12 +161,10 @@ def detect_synchro_video_polygon(
     w = 640
     h = 360
     vc1 = cv2.VideoCapture(video_paths.get("model_1"))
-    f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
     w1 = int(vc1.get(cv2.CAP_PROP_FRAME_WIDTH))
     h1 = int(vc1.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     vc2 = cv2.VideoCapture(video_paths.get("model_2"))
-    f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
     w2 = int(vc2.get(cv2.CAP_PROP_FRAME_WIDTH))
     h2 = int(vc2.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
@@ -190,6 +188,9 @@ def detect_synchro_video_polygon(
     result.update(cl_count)
 
     if not stream:
+        f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
+        f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
+
         fps1 = vc1.get(cv2.CAP_PROP_FPS)
         fps2 = vc2.get(cv2.CAP_PROP_FPS)
 
@@ -221,11 +222,11 @@ def detect_synchro_video_polygon(
                     stop_flag = True
 
                 res1 = models.get('model_1').predict(frame1, iou=iou, conf=conf)
-                tracker_1.process(frame_id=i, boxes=res1[0].boxes.data.tolist(), image=frame1,
+                tracker_1.process(frame_id=i, boxes=res1[0].boxes.data.tolist(), img_shape=res1[0].orig_shape[:2],
                                   debug=False, stop_flag=stop_flag)
 
                 res2 = models.get('model_2').predict(frame2, iou=iou, conf=conf)
-                tracker_2.process(frame_id=i, boxes=res2[0].boxes.data.tolist(), image=frame2,
+                tracker_2.process(frame_id=i, boxes=res2[0].boxes.data.tolist(), img_shape=res2[0].orig_shape[:2],
                                   debug=False, stop_flag=stop_flag)
                 if debug:
                     print('================================================================')
@@ -317,6 +318,7 @@ def detect_synchro_video_polygon(
             cv2.destroyAllWindows()
         result = dict(total_count=count)
         result.update(cl_count)
+        print('class_counter', class_counter)
         return result
 
     else:
@@ -325,10 +327,12 @@ def detect_synchro_video_polygon(
             _, frame2 = vc2.read()
 
             res1 = models.get('model_1').predict(frame1, iou=0, conf=0.3)
-            tracker_1.process(frame_id=frame_id, boxes=res1[0].boxes.data.tolist(), image=frame1, debug=False)
+            tracker_1.process(frame_id=frame_id, boxes=res1[0].boxes.data.tolist(), img_shape=res1[0].orig_shape[:2],
+                              debug=False)
 
             res2 = models.get('model_2').predict(frame2, iou=0, conf=0.3)
-            tracker_2.process(frame_id=frame_id, boxes=res2[0].boxes.data.tolist(), image=frame2, debug=False)
+            tracker_2.process(frame_id=frame_id, boxes=res2[0].boxes.data.tolist(), img_shape=res2[0].orig_shape[:2],
+                              debug=False)
             if debug:
                 print('================================================================')
                 print(f"Current_frame = {frame_id}, current count = {count}")
@@ -409,6 +413,7 @@ def detect_synchro_video_polygon(
                     cv2.waitKey(1)
 
                 out.write(img)
+
         if save_path and save_predict_video:
             out.release()
             cv2.destroyAllWindows()
