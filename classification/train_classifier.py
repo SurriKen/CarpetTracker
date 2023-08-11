@@ -81,9 +81,9 @@ dataset_path = os.path.join(ROOT_DIR, 'temp/crop_frames_28.dict')
 
 dataset = VideoClassifier.create_box_video_dataset(
     dataset={},
-    dataset_path=dataset_path,
-    split=0.85,
-    test_split=0.05,
+    # dataset_path=dataset_path,
+    split=0.90,
+    # test_split=0.05,
     frame_size=frame_size,
 )
 # for k, v in dataset.params.items():

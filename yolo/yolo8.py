@@ -123,11 +123,13 @@ def detect_synchro_video_polygon(
         class_model: VideoClassifier = None,
         start: int = 0,
         finish: int = 0,
+        conf: float = 0.3,
+        iou: float = 0.,
         interactive_video: bool = False,
         debug: bool = False,
         stream: bool = False,
         save_predict_video: bool = False
-) -> dict:
+) -> tuple[dict, list]:
     """
     Detect two synchronized videos and save them as one video with boxes to save_path.
 
@@ -146,6 +148,7 @@ def detect_synchro_video_polygon(
         list of predicted classes ordered from start to finish of predicdion
     """
     dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     def get_closest_id(x: float, data: list[tuple, ...]) -> int:
         dist = [(abs(data[i][1] - x), i) for i in range(len(data))]
         dist = sorted(dist)
@@ -157,12 +160,10 @@ def detect_synchro_video_polygon(
     w = 640
     h = 360
     vc1 = cv2.VideoCapture(video_paths.get("model_1"))
-    f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
     w1 = int(vc1.get(cv2.CAP_PROP_FRAME_WIDTH))
     h1 = int(vc1.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     vc2 = cv2.VideoCapture(video_paths.get("model_2"))
-    f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
     w2 = int(vc2.get(cv2.CAP_PROP_FRAME_WIDTH))
     h2 = int(vc2.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
@@ -187,6 +188,9 @@ def detect_synchro_video_polygon(
     parameters.latest_results = result  # resetting results
 
     if not stream:
+        f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
+        f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
+
         fps1 = vc1.get(cv2.CAP_PROP_FPS)
         fps2 = vc2.get(cv2.CAP_PROP_FPS)
 
@@ -222,17 +226,18 @@ def detect_synchro_video_polygon(
                 if i == finish - 1:
                     stop_flag = True
 
-                res1 = models.get('model_1').predict(frame1, iou=0, conf=0.3)
+                res1 = models.get('model_1').predict(frame1, iou=iou, conf=conf)
                 tracker_1.process(frame_id=i, boxes=res1[0].boxes.data.tolist(), img_shape=res1[0].orig_shape[:2],
                                   debug=False, stop_flag=stop_flag)
 
-                res2 = models.get('model_2').predict(frame2, iou=0, conf=0.3)
+                res2 = models.get('model_2').predict(frame2, iou=iou, conf=conf)
                 tracker_2.process(frame_id=i, boxes=res2[0].boxes.data.tolist(), img_shape=res2[0].orig_shape[:2],
                                   debug=False, stop_flag=stop_flag)
                 if debug:
                     print('================================================================')
                     print(f"Current_frame = {i}, current count = {count}, stop_flag={stop_flag}")
-                    print(f"Input boxes, tracker 1 = {res1[0].boxes.data.tolist()}, tracker 2 = {res2[0].boxes.data.tolist()}")
+                    print(
+                        f"Input boxes, tracker 1 = {res1[0].boxes.data.tolist()}, tracker 2 = {res2[0].boxes.data.tolist()}")
                     print(f'tracker_1.track_list. Track num = {len(tracker_1.track_list)}')
                     for tr in tracker_1.track_list:
                         print(f"--ID={tr['id']}, frames={tr['frame_id']}, check_out={tr['check_out']}, "
@@ -320,7 +325,7 @@ def detect_synchro_video_polygon(
         result.update(cl_count)
         parameters.latest_results = result  # saving the final results
 
-        return result
+        return result, class_counter
 
     else:
 
@@ -328,11 +333,11 @@ def detect_synchro_video_polygon(
             _, frame1 = vc1.read()
             _, frame2 = vc2.read()
 
-            res1 = models.get('model_1').predict(frame1, iou=0, conf=0.3)
+            res1 = models.get('model_1').predict(frame1, iou=iou, conf=conf)
             tracker_1.process(frame_id=frame_id, boxes=res1[0].boxes.data.tolist(), img_shape=res1[0].orig_shape[:2],
                               debug=False)
 
-            res2 = models.get('model_2').predict(frame2, iou=0, conf=0.3)
+            res2 = models.get('model_2').predict(frame2, iou=iou, conf=conf)
             tracker_2.process(frame_id=frame_id, boxes=res2[0].boxes.data.tolist(), img_shape=res2[0].orig_shape[:2],
                               debug=False)
             if debug:
@@ -417,7 +422,7 @@ def detect_synchro_video_polygon(
         if save_path and save_predict_video:
             out.release()
             cv2.destroyAllWindows()
-        return result
+        return result, class_counter
 
 
 def train(weights, config, epochs=50, batch_size=4, name=None):

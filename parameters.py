@@ -26,7 +26,7 @@ POLY_CAM2_IN = [[0.2187, 0.0], [0.2187, 0.4167], [0.4062, 0.5139], [0.4062, 0.0]
 POLY_CAM2_OUT = [[0.0938, 0.0], [0.1406, 0.5], [0.25, 0.6667],
                  [0.3906, 0.6944], [0.5156, 0.5277], [0.6718, 0.0]]
 
-started = False    # service start flag
+started = True    # service start flag
 start_time = None  # start date/time
 stop_time = None   # end date/time
 

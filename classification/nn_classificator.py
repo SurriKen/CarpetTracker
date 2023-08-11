@@ -217,10 +217,15 @@ class VideoClassifier:
 
     @staticmethod
     def create_box_video_dataset(
-            dataset: dict, split: float, frame_size: tuple = (128, 128)) -> VideoClass:
+            dataset: dict, split: float, dataset_path: str = '', test_split: float = 0.05,
+            frame_size: tuple = (128, 128)) -> VideoClass:
+        if dataset_path:
+            dataset = load_data(dataset_path)
         vc = VideoClass()
+        vc.dataset = dataset
         vc.params['split'] = split
-        vc.params['box_path'] = dataset
+        vc.params['test_split'] = test_split
+        vc.params['box_path'] = dataset_path
         vc.classes = sorted(list(dataset.keys()))
 
         data = []
@@ -254,21 +259,27 @@ class VideoClassifier:
 
                     seq_frame_1 = np.array(seq_frame_1)
                     seq_frame_2 = np.array(seq_frame_2)
-                    batch = [[seq_frame_1, seq_frame_2], cl_id]
+                    batch = [[seq_frame_1, seq_frame_2], cl_id, (class_, vid)]
                     data.append(batch)
 
         random.shuffle(data)
-        x, y = list(zip(*data))
+        x, y, ref = list(zip(*data))
         y = np.array(y)
 
         vc.x_train = x[:int(vc.params['split'] * len(x))]
-        vc.y_train = y[:int(vc.params['split'] * len(y))]
-        tr_stat = dict(Counter(vc.y_train))
-        vc.train_stat = tr_stat
-        vc.x_val = x[int(vc.params['split'] * len(x)):]
-        vc.y_val = y[int(vc.params['split'] * len(y)):]
-        v_stat = dict(Counter(vc.y_val))
-        vc.val_stat = v_stat
+        vc.y_train = y[:int(vc.params['split'] * len(x))]
+        vc.params['train_ref'] = ref[:int(vc.params['split'] * len(x))]
+        vc.params['train_stat'] = dict(Counter(vc.y_train))
+
+        vc.x_val = x[int(vc.params['split'] * len(x)):int((1 - test_split) * len(x))]
+        vc.y_val = y[int(vc.params['split'] * len(x)):int((1 - test_split) * len(x))]
+        vc.params['val_ref'] = ref[int(vc.params['split'] * len(x)):int((1 - test_split) * len(x))]
+        vc.params['val_stat'] = dict(Counter(vc.y_val))
+
+        vc.x_test = x[int(int((1 - test_split) * len(x))):]
+        vc.y_test = y[int(int((1 - test_split) * len(x))):]
+        vc.params['test_ref'] = ref[int(int((1 - test_split) * len(x))):]
+        vc.params['test_stat'] = dict(Counter(vc.y_test))
         return vc
 
     def train(self, dataset: VideoClass, epochs: int, batch_size: int = 1, weights: str = '',
@@ -298,12 +309,13 @@ class VideoClassifier:
                 os.mkdir(os.path.join(ROOT_DIR, 'video_class_train', name))
                 stop = True
         print(os.path.join(ROOT_DIR, 'video_class_train', name))
-        if load_dataset_path:
-            dataset = self.load_dataset(load_dataset_path)
+        # if load_dataset_path:
+        #     dataset = self.load_dataset(load_dataset_path)
 
         if save_dataset:
             self.save_dataset(dataset, os.path.join(ROOT_DIR, 'video_class_train', name))
-
+        st = time.time()
+        print("Training is started\n")
         num_classes = len(dataset.classes)
         num_train_batches = int(len(dataset.x_train) / batch_size)
         train_seq = list(np.arange(len(dataset.x_train)))
@@ -323,13 +335,14 @@ class VideoClassifier:
 
         txt = f"training parameters:\n" \
               f"- name: {name},\n" \
-              f"- save path: {os.path.join(ROOT_DIR, '../video_class_train', name)}\n" \
+              f"- save path: {os.path.join(ROOT_DIR, 'video_class_train', name)}\n" \
               f"- optimizer: {optimizer.__dict__.get('_zero_grad_profile_name')}\n" \
               f"- optimizr params: {optimizer.state_dict().get('param_groups')[0]}\n" \
               f"\n- Model structure:\n" \
               f"{inspect.getsource(self.model.__init__) if not weights and not self.weights else ''}\n" \
               f"{inspect.getsource(self.model.forward) if not weights and not self.weights else ''}\n"
-        save_txt(txt, os.path.join(ROOT_DIR, '../video_class_train', name, f"model_info.txt"))
+        save_txt(txt, os.path.join(ROOT_DIR, 'video_class_train', name, f"model_info.txt"))
+        print(txt)
 
         train_loss_hist, val_loss_hist, train_acc_hist, val_acc_hist = [], [], [], []
         self.fill_history(status='create')
@@ -357,9 +370,21 @@ class VideoClassifier:
                     save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, 'Train_Confusion Matrix.jpg')
                     cm = self.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
                     train_acc = self.accuracy(cm)
+                    print(
+                        f"  -- Epoch {epoch + 1}, batch {batch + 1} / {num_train_batches}, "
+                        f"train_loss= {round(train_loss / (batch + 1), 4)}, "
+                        f"train_accuracy= {train_acc}, "
+                        f"average batch time = {round((time.time() - st_ep) * 1000 / (batch + 1), 1)} ms, "
+                        f"time passed = {time_converter(int(time.time() - st))}"
+                    )
 
-                optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr'] / 2
+                # optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr'] / 2
 
+            # if epoch + 1 in lr_steps and epoch + 1 != epochs:
+            #     print(
+            #         f"  -- Epoch {epoch + 1}, lr was reduced from  {optimizer.param_groups[0]['lr']} "
+            #         f"to {optimizer.param_groups[0]['lr'] / 2}"
+            #     )
             save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, 'Train_Confusion Matrix.jpg')
             cm = self.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
             train_acc = self.accuracy(cm)
@@ -409,6 +434,28 @@ class VideoClassifier:
             if val_acc >= best_acc:
                 self.save_model(name=name, mode='best')
                 best_acc = val_acc
+                print('\nBest weights were saved')
+
+            print(f"\nEpoch {epoch + 1}, train_loss= {round(train_loss / num_train_batches, 4)}, "
+                  f"val_loss = {round(val_loss / num_val_batches, 4)}, "
+                  f"train_accuracy= {train_acc}, val_accuracy = {val_acc}, "
+                  f"epoch time = {time_converter(int(time.time() - st_ep))}\n")
+
+        y_true, y_pred = [], []
+        num_test_batches = len(dataset.x_test)
+        with torch.no_grad():
+            for test_batch in range(num_test_batches):
+                x_test = self.get_x_batch(x_train=dataset.x_test[test_batch: test_batch + 1],
+                                          num_frames=num_frames, concat_axis=concat_axis)
+                y_true.append(dataset.classes[dataset.y_test[test_batch]])
+                output = self.model(x_test)
+                y_pred.append(dataset.classes[np.argmax(output.cpu().detach().numpy(), axis=-1)[0]])
+
+        save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, 'Test_Confusion Matrix.jpg')
+        cm = self.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
+        test_acc = self.accuracy(cm)
+        print(f'Training is finished, test_acc = {test_acc}, '
+              f'train time = {time_converter(int(time.time() - st))}\n')
 
     def predict(self, array, model: nn.Module, classes: list = None) -> list:
         if classes is None:
@@ -419,6 +466,7 @@ class VideoClassifier:
             output = model(array)
         output = output.cpu().detach().numpy() if self.device != 'cpu' else output.detach().numpy()
         if classes:
+            classes = sorted(classes)
             return [classes[i] for i in list(np.argmax(output, axis=-1))]
         return list(np.argmax(output, axis=-1))
 
@@ -454,4 +502,3 @@ class VideoClassifier:
 
 if __name__ == "__main__":
     pass
-
