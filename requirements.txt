@@ -1,9 +1,14 @@
-ultralytics
-wget
+ultralytics~=8.0.147
+wget~=3.2
 sk-video
-torch
-torchvision
-moviepy
-opencv-python
-
-# pip install -r requirements.txt
+torch~=2.0.1
+torchvision~=0.15.2
+moviepy~=1.0.3
+opencv-python~=4.8.0.74
+numpy~=1.25.2
+fastapi~=0.100.1
+starlette~=0.27.0
+matplotlib~=3.7.2
+Pillow~=9.3.0
+pandas~=2.0.3
+scikit-learn~=1.3.0
