@@ -7,6 +7,8 @@ import cv2
 import numpy as np
 import wget
 from ultralytics import YOLO
+
+import parameters
 from classification.nn_classificator import VideoClassifier
 from tracker.tracker import PolyTracker
 from parameters import *
@@ -40,7 +42,7 @@ def detect_mono_video_polygon(
         start: int = 0,
         finish: int = 0,
         interactive_video: bool = False
-) -> dict:
+) -> int:
     """
     Args:
         model: YOLO, trained YOLO model,
@@ -75,16 +77,15 @@ def detect_mono_video_polygon(
 
     finish = int(f) if finish == 0 or finish < start else finish
     frames = []
-    true_bb = {}
+
     for i in range(0, finish):
         _, frame = vc.read()
         frames.append(frame)
 
         if i >= start:
             res = model.predict(frame, iou=0, conf=0.3)
-            tracker.process(frame_id=i, boxes=res[0].boxes.data.tolist(), image=frame)
-            for track in tracker.track_list:
-                true_bb[track.get('id')] = [track.get('boxes'), track.get('frame_id')]
+            tracker.process(frame_id=i, boxes=res[0].boxes.data.tolist(), img_shape=res[0].orig_shape[:2])
+
             frame = PolyTracker.prepare_image(
                 image=frame,
                 colors=colors,
@@ -112,7 +113,7 @@ def detect_mono_video_polygon(
 
     vc.release()
     cv2.destroyAllWindows()
-    return true_bb
+    return tracker.count
 
 
 def detect_synchro_video_polygon(
@@ -122,13 +123,11 @@ def detect_synchro_video_polygon(
         class_model: VideoClassifier = None,
         start: int = 0,
         finish: int = 0,
-        conf: float = 0.3,
-        iou: float = 0.,
         interactive_video: bool = False,
         debug: bool = False,
         stream: bool = False,
         save_predict_video: bool = False
-) -> tuple[dict, list]:
+) -> dict:
     """
     Detect two synchronized videos and save them as one video with boxes to save_path.
 
@@ -142,14 +141,11 @@ def detect_synchro_video_polygon(
         finish: int, frame to end prediction (0 by default),
         interactive_video: bool, show video in interactive mode (False by default)
         debug: bool = False
-        stream: bool = False,
-        save_predict_video: bool = False
 
     Returns:
         list of predicted classes ordered from start to finish of predicdion
     """
     dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
     def get_closest_id(x: float, data: list[tuple, ...]) -> int:
         dist = [(abs(data[i][1] - x), i) for i in range(len(data))]
         dist = sorted(dist)
@@ -161,10 +157,12 @@ def detect_synchro_video_polygon(
     w = 640
     h = 360
     vc1 = cv2.VideoCapture(video_paths.get("model_1"))
+    f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
     w1 = int(vc1.get(cv2.CAP_PROP_FRAME_WIDTH))
     h1 = int(vc1.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
     vc2 = cv2.VideoCapture(video_paths.get("model_2"))
+    f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
     w2 = int(vc2.get(cv2.CAP_PROP_FRAME_WIDTH))
     h2 = int(vc2.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
@@ -186,11 +184,9 @@ def detect_synchro_video_polygon(
     cl_count = {cl: 0 for cl in CLASSES}
     result = dict(total_count=count)
     result.update(cl_count)
+    parameters.latest_results = result  # resetting results
 
     if not stream:
-        f1 = vc1.get(cv2.CAP_PROP_FRAME_COUNT)
-        f2 = vc2.get(cv2.CAP_PROP_FRAME_COUNT)
-
         fps1 = vc1.get(cv2.CAP_PROP_FPS)
         fps2 = vc2.get(cv2.CAP_PROP_FPS)
 
@@ -206,6 +202,11 @@ def detect_synchro_video_polygon(
         stop_flag = False
 
         for i in range(0, finish):
+
+            # stop the process if parameters.started equal False
+            if not parameters.started:
+                break
+
             _, frame1 = min_vc.read()
             closest_id = get_closest_id(min_range[0][1], max_range[:10])
             min_range.pop(0)
@@ -221,18 +222,17 @@ def detect_synchro_video_polygon(
                 if i == finish - 1:
                     stop_flag = True
 
-                res1 = models.get('model_1').predict(frame1, iou=iou, conf=conf)
+                res1 = models.get('model_1').predict(frame1, iou=0, conf=0.3)
                 tracker_1.process(frame_id=i, boxes=res1[0].boxes.data.tolist(), img_shape=res1[0].orig_shape[:2],
                                   debug=False, stop_flag=stop_flag)
 
-                res2 = models.get('model_2').predict(frame2, iou=iou, conf=conf)
+                res2 = models.get('model_2').predict(frame2, iou=0, conf=0.3)
                 tracker_2.process(frame_id=i, boxes=res2[0].boxes.data.tolist(), img_shape=res2[0].orig_shape[:2],
                                   debug=False, stop_flag=stop_flag)
                 if debug:
                     print('================================================================')
                     print(f"Current_frame = {i}, current count = {count}, stop_flag={stop_flag}")
-                    print(
-                        f"Input boxes, tracker 1 = {res1[0].boxes.data.tolist()}, tracker 2 = {res2[0].boxes.data.tolist()}")
+                    print(f"Input boxes, tracker 1 = {res1[0].boxes.data.tolist()}, tracker 2 = {res2[0].boxes.data.tolist()}")
                     print(f'tracker_1.track_list. Track num = {len(tracker_1.track_list)}')
                     for tr in tracker_1.track_list:
                         print(f"--ID={tr['id']}, frames={tr['frame_id']}, check_out={tr['check_out']}, "
@@ -242,7 +242,6 @@ def detect_synchro_video_polygon(
                     for tr in tracker_2.track_list:
                         print(f"--ID={tr['id']}, frames={tr['frame_id']}, check_out={tr['check_out']}, "
                               f"boxes={tr['boxes']}")
-                    print('tracker_2.dead_boxes', tracker_2.dead_boxes)
 
                 existing_tracks = [len(tracker_1.track_list), len(tracker_2.track_list)]
                 class_counter, last_track_seq, end_track = PolyTracker.combine_count(
@@ -267,6 +266,7 @@ def detect_synchro_video_polygon(
                     cl_count.update(dict(Counter(class_counter)))
                     result['total_count'] = count
                     result.update(cl_count)
+                    parameters.latest_results = result  # saving intermediate results
                     if save_path:
                         dict_to_csv(data=result, folder_path=save_path, filename=F"{dt}")
                 if end_track != {'tr1': [], 'tr2': []}:
@@ -318,10 +318,12 @@ def detect_synchro_video_polygon(
             cv2.destroyAllWindows()
         result = dict(total_count=count)
         result.update(cl_count)
-        print('class_counter', class_counter)
-        return result, class_counter
+        parameters.latest_results = result  # saving the final results
+
+        return result
 
     else:
+
         while vc1.isOpened() and vc2.isOpened():
             _, frame1 = vc1.read()
             _, frame2 = vc2.read()
@@ -342,12 +344,11 @@ def detect_synchro_video_polygon(
                 for tr in tracker_1.track_list:
                     print(f"--ID={tr['id']}, frames={tr['frame_id']}, check_out={tr['check_out']}, "
                           f"boxes={tr['boxes']}")
-                # print('tracker_1.dead_boxes', tracker_1.dead_boxes)
+                print('tracker_1.dead_boxes', tracker_1.dead_boxes)
                 print(f'tracker_2.track_list. Track num = {len(tracker_2.track_list)}')
                 for tr in tracker_2.track_list:
                     print(f"--ID={tr['id']}, frames={tr['frame_id']}, check_out={tr['check_out']}, "
                           f"boxes={tr['boxes']}")
-                # print('tracker_2.dead_boxes', tracker_2.dead_boxes)
 
             existing_tracks = [len(tracker_1.track_list), len(tracker_2.track_list)]
             class_counter, last_track_seq, end_track = PolyTracker.combine_count(
@@ -413,11 +414,10 @@ def detect_synchro_video_polygon(
                     cv2.waitKey(1)
 
                 out.write(img)
-
         if save_path and save_predict_video:
             out.release()
             cv2.destroyAllWindows()
-        return result, class_counter
+        return result
 
 
 def train(weights, config, epochs=50, batch_size=4, name=None):
