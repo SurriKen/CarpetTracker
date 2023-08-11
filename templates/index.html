@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Распознавание и классификация ковров</title>
+        <!-- Favicon-->
+        <!--<link rel="icon" type="image/x-icon" href="static/assets/favicon.ico" />-->
+        <!-- Bootstrap icons-->
+        <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" type="text/css" />-->
+        <!-- Google fonts-->
+        <!-- <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css" /> -->
+        <!-- <link href="static/css/fonts.css" rel="stylesheet" />-->
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="static/css/styles.css" rel="stylesheet" />
+    </head>
+    <body>
+        <!-- Navigation-->
+        <nav class="navbar navbar-light bg-light static-top">
+            <div class="container">
+                <a class="navbar-brand" href="/">Распознавание и классификация ковров</a>
+            </div>
+        </nav>
+        <!-- Masthead-->
+        <header>
+            
+        </header>
+        <!-- Icons Grid-->
+        <section class="features-icons text-center">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="container form-control">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <br>
+                                    <div class="col-md-6 mx-auto text-center">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th class="col-auto">Состояние сервиса</th>
+                                                <th class="col-sm-5"><span id="statusSrv" class="{{ service_class }}">{{ service_status }}</span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Время запуска</td>
+                                                <td><b><span id="start_time">{{ start_time }}</span></b></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Время остановки</td>
+                                                <td><b><span id="stop_time">{{ stop_time }}</span></b></td>
+                                            </tr>
+                                            {% for key, value in latest_results.items() %}
+                                                {% if key != 'total_count' %}
+                                            <tr>
+                                                <td>Количество ковров {{ key }}</td>
+                                                <td><b><span id="count{{key}}">{{ value }}</span></b></td>
+                                            </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                            <tr>
+                                                <td>Общее количество</td>
+                                                <td><b><span id="total_count">{{ latest_results.total_count }}</span></b></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <br>
+                                    <button id="toggleBtn" class="btn {{ btn_class }} btn-sm">{{ btn_label }}</button>
+                                </div>
+                            </div>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Footer-->
+        <footer class="footer bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 h-100 text-center text-lg-start my-auto">
+                        <p class="text-muted small mb-4 mb-lg-0">&copy; Carpet Tracker 2023. All Rights Reserved.</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <!-- Bootstrap core JS-->
+        <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>-->
+        <script src="static/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="static/js/scripts.js"></script>
+        <!-- JQuery-->
+        <script src="static/js/jquery-3.7.0.min.js"></script>
+        <script src="static/js/script.api.js"></script>
+    </body>
+</html>
