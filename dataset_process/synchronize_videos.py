@@ -7,8 +7,8 @@ from parameters import ROOT_DIR
 # List of dicts, each dict in formate {'camera 1': 'link to video from camera 1', 'camera 2': 'link to video from camera 2'}
 # all videos must have fps=25
 sync_videos = [
-    {'camera 1': [os.path.join(ROOT_DIR, 'videos/init/test 54_cam 1.mp4'), 627],
-     'camera 2': [os.path.join(ROOT_DIR, 'videos/init/test 54_cam 2.mp4'), 2442]},
+    {'camera 1': [os.path.join(ROOT_DIR, 'videos/init/test 55_cam 1.mp4'), 393],
+     'camera 2': [os.path.join(ROOT_DIR, 'videos/init/test 55_cam 2.mp4'), 744]},
 ]
 save_folder = os.path.join(ROOT_DIR, 'videos/sync_test')
 

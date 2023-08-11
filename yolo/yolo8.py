@@ -128,7 +128,7 @@ def detect_synchro_video_polygon(
         debug: bool = False,
         stream: bool = False,
         save_predict_video: bool = False
-) -> dict:
+) -> tuple[dict, list]:
     """
     Detect two synchronized videos and save them as one video with boxes to save_path.
 
@@ -319,7 +319,7 @@ def detect_synchro_video_polygon(
         result = dict(total_count=count)
         result.update(cl_count)
         print('class_counter', class_counter)
-        return result
+        return result, class_counter
 
     else:
         while vc1.isOpened() and vc2.isOpened():
@@ -417,7 +417,7 @@ def detect_synchro_video_polygon(
         if save_path and save_predict_video:
             out.release()
             cv2.destroyAllWindows()
-        return result
+        return result, class_counter
 
 
 def train(weights, config, epochs=50, batch_size=4, name=None):

@@ -173,7 +173,7 @@ class VideoClassifier:
             if save_path:
                 disp = ConfusionMatrixDisplay(confusion_matrix=cm_percent, display_labels=classes)
                 disp.plot()
-                plt.savefig(f"{save_path[:-4]}_%.jpg")
+                plt.savefig(f"{save_path[:-4]}_%.png")
                 plt.close()
         return cm
 

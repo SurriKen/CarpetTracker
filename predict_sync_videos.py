@@ -21,7 +21,7 @@ def predict(video_paths: dict, stream: bool = False, save_predict_video: bool = 
         'MIN_OBJ_SEQUENCE': MIN_OBJ_SEQUENCE, 'MIN_EMPTY_SEQUENCE': MIN_EMPTY_SEQUENCE,
     }
     st = time.time()
-    result = detect_synchro_video_polygon(
+    result, class_counter = detect_synchro_video_polygon(
         models=yolo_models,
         video_paths=video_paths,
         save_path=video_paths.get('save_path'),
@@ -29,7 +29,7 @@ def predict(video_paths: dict, stream: bool = False, save_predict_video: bool = 
         finish=args['end_frame'],
         conf=args['conf'],
         iou=args['iou'],
-        interactive_video=True,
+        interactive_video=False,
         class_model=vc,
         stream=stream,
         debug=False,
@@ -37,7 +37,7 @@ def predict(video_paths: dict, stream: bool = False, save_predict_video: bool = 
     )
     count = result.get('total_count')
     class_dict = result.get('class_distribution')
-    class_counter = result.get('class_aequence')
+    # class_counter = result.get('class_aequence')
     dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     txt = f"{dt} =========== Predict is finished ===========\n" \
           f"- Video '{video_paths}'\n" \
