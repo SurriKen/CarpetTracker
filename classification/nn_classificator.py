@@ -62,12 +62,17 @@ class VideoClassifier:
 
     def load_model(self, weights: str = '') -> nn.Module:
         if weights and weights.split('.')[-1] == 'pt':
-            self.model = torch.jit.load(weights)
-            self.input_size = self.model.input_size
-            try:
+
+            # loading model with different parameters depending on CUDA availability
+            if torch.cuda.is_available():
+                # for server with GPU
+                self.model = torch.jit.load(weights)
+                self.input_size = self.model.input_size
                 self.model.cuda(torch.device('cuda:0'))
-            except:
-                pass
+            else:
+                # for server without GPU
+                self.model = torch.jit.load(weights, map_location=torch.device('cpu'))
+                self.input_size = self.model.input_size
         else:
             self.model = Net(device=self.device, num_classes=self.num_classes, input_size=self.input_size,
                              frame_size=self.frame_size, concat_axis=self.concat_axis)
@@ -75,7 +80,7 @@ class VideoClassifier:
 
     def save_model(self, name, mode: str = 'last') -> None:
         model_scripted = torch.jit.script(self.model)  # Export to TorchScript
-        model_scripted.save(os.path.join(ROOT_DIR, 'video_class_train', name, f"{mode}.pt"))  # Save
+        model_scripted.save(os.path.join(ROOT_DIR, 'classification', name, f"{mode}.pt"))  # Save
 
     def get_x_batch(self, x_train: list, num_frames: int = None, concat_axis: int = None) -> torch.Tensor:
         if num_frames and 3 < num_frames:
@@ -94,21 +99,24 @@ class VideoClassifier:
                 print("Concat_axis is our of range. Choose from None, 0, 1, 2 or -1. "
                       "Used default value concat_axis=None")
         x_train = torch.from_numpy(np.array(x_train))
-        if 'cuda' in self.device:
+
+        if torch.cuda.is_available():
             return x_train.to(self.torch_device, dtype=torch.float)
         else:
             return x_train.type(torch.FloatTensor)
 
     def numpy_to_torch(self, array: np.ndarray) -> torch.Tensor:
         array = torch.from_numpy(array)
-        if 'cuda' in self.device:
+
+        if torch.cuda.is_available():
             return array.to(self.torch_device, dtype=torch.float)
         else:
             return array
 
     def get_y_batch(self, label: list[int, ...], num_labels: int) -> torch.Tensor:
         lbl = DatasetProcessing.ohe_from_list(label, num_labels)
-        if 'cuda' in self.device:
+
+        if torch.cuda.is_available():
             return torch.tensor(lbl, dtype=torch.float, device=self.torch_device)
         else:
             return torch.tensor(lbl, dtype=torch.float)
@@ -132,7 +140,7 @@ class VideoClassifier:
             if save_path:
                 disp = ConfusionMatrixDisplay(confusion_matrix=cm_percent, display_labels=classes)
                 disp.plot()
-                plt.savefig(f"{save_path[:-4]}_%.png")
+                plt.savefig(f"{save_path[:-4]}_%.jpg")
                 plt.close()
         return cm
 
@@ -156,40 +164,7 @@ class VideoClassifier:
         return round(acc, 4)
 
     @staticmethod
-    def create_class_dataset(x_path: str, y_path: str, split: float, classes: list,
-                             shuffle: bool = False, remove_coords: bool = False) -> VideoClass:
-        vc = VideoClass()
-        vc.params['split'] = split
-        vc.params['x_path'] = x_path
-        vc.params['y_path'] = y_path
-        classes = sorted(classes)
-        vc.classes = classes
-        data = np.load(x_path)
-        lbl = np.load(y_path)
-        if remove_coords:
-            data = data[:, :, 11:]
-        if shuffle:
-            data = data.tolist()
-            lbl = lbl.tolist()
-            zip_data = list(zip(data, lbl))
-            random.shuffle(zip_data)
-            train, val = zip_data[:int(split * len(lbl))], zip_data[int(split * len(lbl)):]
-            vc.x_train, vc.y_train = list(zip(*train))
-            vc.x_val, vc.y_val = list(zip(*val))
-            vc.x_train = np.array(vc.x_train)
-            vc.y_train = np.array(vc.y_train)
-            vc.x_val = np.array(vc.x_val)
-            vc.y_val = np.array(vc.y_val)
-        else:
-            vc.x_train, vc.x_val = data[:int(split * len(data))], data[int(split * len(data)):]
-            vc.y_train, vc.y_val = lbl[:int(split * len(lbl))], lbl[int(split * len(lbl)):]
-
-        vc.train_stat = dict(Counter(vc.y_train.tolist()))
-        vc.val_stat = dict(Counter(vc.y_val.tolist()))
-        return vc
-
-    @staticmethod
-    def resize_list(sequence, length):
+    def resize_list(sequence: list, length: int) -> list:
         if len(sequence) >= length:
             idx = list(range(len(sequence)))
             x2 = sorted(np.random.choice(idx, size=length, replace=False).tolist())
@@ -296,64 +271,6 @@ class VideoClassifier:
         vc.val_stat = v_stat
         return vc
 
-    @staticmethod
-    def create_box_array_dataset(
-            box_path: str, split: float, frame_size: tuple = (128, 128)) -> VideoClass:
-        vc = VideoClass()
-        vc.params['split'] = split
-        vc.params['box_path'] = box_path
-        dataset = load_data(box_path)
-        vc.classes = sorted(list(dataset.keys()))
-
-        data = []
-        for class_ in dataset.keys():
-            cl_id = vc.classes.index(class_)
-            for vid in dataset[class_].keys():
-                seq_frame_1, seq_frame_2 = [], []
-                cameras = list(dataset[class_][vid].keys())
-                if dataset[class_][vid] != {camera: [] for camera in cameras} and len(
-                        dataset[class_][vid][cameras[0]]) > 2:
-                    sequence = list(range(len(dataset[class_][vid][cameras[0]]))) if len(
-                        dataset[class_][vid][cameras[0]]) \
-                        else list(range(len(dataset[class_][vid][cameras[1]])))
-                    # idx = VideoClassifier.resize_list(sequence, num_frames)
-                    for fr in range(len(sequence)):
-                        fr1 = np.zeros(frame_size)
-                        fr2 = np.zeros(frame_size)
-
-                        if dataset[class_][vid][cameras[0]][fr]:
-                            box1 = [int(bb * frame_size[i % 2]) for i, bb in
-                                    enumerate(dataset[class_][vid][cameras[0]][fr])]
-                            fr1[box1[1]:box1[3], box1[0]:box1[2]] = 1.
-                        fr1 = np.expand_dims(fr1, axis=-1)
-                        seq_frame_1.append(fr1)
-
-                        if dataset[class_][vid][cameras[1]][fr]:
-                            box2 = [int(bb * frame_size[i % 2]) for i, bb in
-                                    enumerate(dataset[class_][vid][cameras[1]][fr])]
-                            fr2[box2[1]:box2[3], box2[0]:box2[2]] = 1.
-                        fr2 = np.expand_dims(fr2, axis=-1)
-                        seq_frame_2.append(fr2)
-
-                    seq_frame_1 = np.array(seq_frame_1)
-                    seq_frame_2 = np.array(seq_frame_2)
-                    batch = [[seq_frame_1, seq_frame_2], cl_id]
-                    data.append(batch)
-
-        random.shuffle(data)
-        x, y = list(zip(*data))
-        y = np.array(y)
-
-        vc.x_train = x[:int(vc.params['split'] * len(x))]
-        vc.y_train = y[:int(vc.params['split'] * len(y))]
-        tr_stat = dict(Counter(vc.y_train))
-        vc.train_stat = tr_stat
-        vc.x_val = x[int(vc.params['split'] * len(x)):]
-        vc.y_val = y[int(vc.params['split'] * len(y)):]
-        v_stat = dict(Counter(vc.y_val))
-        vc.val_stat = v_stat
-        return vc
-
     def train(self, dataset: VideoClass, epochs: int, batch_size: int = 1, weights: str = '',
               lr: float = 0.005, num_frames: int = 6, concat_axis: int = 2, save_dataset: bool = False,
               load_dataset_path: str = '') -> None:
@@ -380,14 +297,13 @@ class VideoClassifier:
             else:
                 os.mkdir(os.path.join(ROOT_DIR, 'video_class_train', name))
                 stop = True
+        print(os.path.join(ROOT_DIR, 'video_class_train', name))
         if load_dataset_path:
             dataset = self.load_dataset(load_dataset_path)
 
         if save_dataset:
             self.save_dataset(dataset, os.path.join(ROOT_DIR, 'video_class_train', name))
 
-        st = time.time()
-        print("Training is started\n")
         num_classes = len(dataset.classes)
         num_train_batches = int(len(dataset.x_train) / batch_size)
         train_seq = list(np.arange(len(dataset.x_train)))
@@ -407,14 +323,13 @@ class VideoClassifier:
 
         txt = f"training parameters:\n" \
               f"- name: {name},\n" \
-              f"- save path: {os.path.join(ROOT_DIR, 'video_class_train', name)}\n" \
+              f"- save path: {os.path.join(ROOT_DIR, '../video_class_train', name)}\n" \
               f"- optimizer: {optimizer.__dict__.get('_zero_grad_profile_name')}\n" \
               f"- optimizr params: {optimizer.state_dict().get('param_groups')[0]}\n" \
               f"\n- Model structure:\n" \
               f"{inspect.getsource(self.model.__init__) if not weights and not self.weights else ''}\n" \
               f"{inspect.getsource(self.model.forward) if not weights and not self.weights else ''}\n"
-        print(txt)
-        save_txt(txt, os.path.join(ROOT_DIR, 'video_class_train', name, f"model_info.txt"))
+        save_txt(txt, os.path.join(ROOT_DIR, '../video_class_train', name, f"model_info.txt"))
 
         train_loss_hist, val_loss_hist, train_acc_hist, val_acc_hist = [], [], [], []
         self.fill_history(status='create')
@@ -439,25 +354,13 @@ class VideoClassifier:
                 optimizer.step()
 
                 if batch + 1 in logger_batch_markers:
-                    save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, f'Train_Confusion Matrix.jpg')
+                    save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, 'Train_Confusion Matrix.jpg')
                     cm = self.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
                     train_acc = self.accuracy(cm)
-                    print(
-                        f"  -- Epoch {epoch + 1}, batch {batch + 1} / {num_train_batches}, "
-                        f"train_loss= {round(train_loss / (batch + 1), 4)}, "
-                        f"train_accuracy= {train_acc}, "
-                        f"average batch time = {round((time.time() - st_ep) * 1000 / (batch + 1), 1)} ms, "
-                        f"time passed = {time_converter(int(time.time() - st))}"
-                    )
 
-            if epoch + 1 in lr_steps and epoch + 1 != epochs:
-                print(
-                    f"  -- Epoch {epoch + 1}, lr was reduced from  {optimizer.param_groups[0]['lr']} "
-                    f"to {optimizer.param_groups[0]['lr'] / 2}"
-                )
                 optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr'] / 2
 
-            save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, f'Train_Confusion Matrix.jpg')
+            save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, 'Train_Confusion Matrix.jpg')
             cm = self.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
             train_acc = self.accuracy(cm)
             train_loss_hist.append(round(train_loss / num_train_batches, 4))
@@ -478,7 +381,7 @@ class VideoClassifier:
                     loss = criterion(output, y_val)
                     val_loss += loss.cpu().detach().numpy()
 
-            save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, f'Val_Confusion Matrix.jpg')
+            save_cm = os.path.join(ROOT_DIR, 'video_class_train', name, 'Val_Confusion Matrix.jpg')
             cm = self.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
             val_acc = self.accuracy(cm)
             val_loss_hist.append(round(val_loss / num_val_batches, 4))
@@ -506,15 +409,6 @@ class VideoClassifier:
             if val_acc >= best_acc:
                 self.save_model(name=name, mode='best')
                 best_acc = val_acc
-                print('\nBest weights were saved')
-
-            print(f"\nEpoch {epoch + 1}, train_loss= {round(train_loss / num_train_batches, 4)}, "
-                        f"val_loss = {round(val_loss / num_val_batches, 4)}, "
-                        f"train_accuracy= {train_acc}, val_accuracy = {val_acc}, "
-                        f"epoch time = {time_converter(int(time.time() - st_ep))}\n")
-
-        print(f"Training is finished, "
-                    f"train time = {time_converter(int(time.time() - st))}\n")
 
     def predict(self, array, model: nn.Module, classes: list = None) -> list:
         if classes is None:
@@ -555,40 +449,9 @@ class VideoClassifier:
                 y_pred.append(dataset.classes[np.argmax(output.cpu().detach().numpy(), axis=-1)[0]])
 
         cm = vc.get_confusion_matrix(y_true, y_pred, dataset.classes, save_cm, get_percent=True)
-        print(f"Confusion Matrix were saved in folder '{weights_folder}'")
         return cm
 
 
 if __name__ == "__main__":
-    dataset = load_data(os.path.join(ROOT_DIR, 'datasets/train_class_boxes_model5_Pex.dict'))
-    # weights = os.path.join(ROOT_DIR, 'video_class_train/model5_16f_3/best.pt')
-    frame_size = (96, 96)
-    concat_axis = 2
-    num_frames = 12
+    pass
 
-    st = time.time()
-    device = 'cuda:0'
-    name = f'model5_{num_frames}f'
-    # device = 'cpu'
-    dataset = VideoClassifier.create_box_video_dataset(
-        dataset=dataset,
-        split=0.9,
-        frame_size=frame_size,
-    )
-
-    inp = [1, num_frames, *dataset.x_val[0][0][0].shape]
-    inp[concat_axis] = inp[concat_axis] * 2
-    print('input size', inp)
-    vc = VideoClassifier(num_classes=len(dataset.classes), weights='',
-                         input_size=tuple(inp[1:]), name=name, device=device)
-    print("Training is started")
-    vc.train(
-        dataset=dataset,
-        epochs=100,
-        batch_size=4,
-        lr=0.00005,
-        num_frames=num_frames,
-        concat_axis=concat_axis,
-        save_dataset=False,
-        load_dataset_path=''
-    )
