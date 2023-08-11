@@ -6,17 +6,11 @@ import torch
 import torchvision
 from torchvision.utils import draw_bounding_boxes
 import matplotlib.path as mpltPath
-
 from classification.nn_classificator import VideoClassifier
-from parameters import MIN_OBJ_SEQUENCE, MIN_EMPTY_SEQUENCE, GLOBAL_STEP, ROOT_DIR, DEAD_LIMIT_PERCENT, \
-    SPEED_LIMIT_PERCENT
-
+from parameters import *
 
 class PolyTracker:
-    def __init__(self,
-                 polygon_in: list,
-                 polygon_out: list,
-                 name: str = ''):
+    def __init__(self, polygon_in: list, polygon_out: list, name: str = ''):
         self.count_frames = []
         self.name = name
         self.frame_id = 0
@@ -29,11 +23,11 @@ class PolyTracker:
         self.dead_boxes = {}
 
     @staticmethod
-    def prepare_image(image, colors, tracker_current_boxes, poly_width, reshape,  polygon_in,
-                      polygon_out):
+    def prepare_image(image: np.ndarray, colors: list, tracker_current_boxes: list, poly_width: int,
+                      reshape: tuple, polygon_in: list, polygon_out: list) -> np.ndarray:
         # Draw all figures on image
         img = PolyTracker.draw_polygons(polygons=polygon_in, image=image, outline=(0, 255, 0), width=poly_width)
-        img = PolyTracker.draw_polygons(polygons=polygon_out, image=image, outline=(0, 0, 255), width=poly_width)
+        img = PolyTracker.draw_polygons(polygons=polygon_out, image=img, outline=(0, 0, 255), width=poly_width)
 
         labels = [f"carpet" for _ in tracker_current_boxes]
         current_boxes = [tr[0] for tr in tracker_current_boxes]
@@ -41,7 +35,6 @@ class PolyTracker:
             cl = colors * len(labels)
         else:
             cl = colors
-
         img = PolyTracker.put_box_on_image(
             save_path=None,
             image=img,
@@ -58,7 +51,7 @@ class PolyTracker:
         return img
 
     @staticmethod
-    def draw_polygons(polygons: list, image: np.ndarray, outline=(0, 200, 0), width: int = 5) -> np.ndarray:
+    def draw_polygons(polygons: list, image: np.ndarray, outline: tuple = (0, 200, 0), width: int = 5) -> np.ndarray:
         if type(polygons[0]) == list:
             xy = []
             for i in polygons:
@@ -74,6 +67,9 @@ class PolyTracker:
 
     @staticmethod
     def point_in_polygon(point: list, polygon: list[list, ...]) -> bool:
+        """
+        Check if point is in polygon
+        """
         path = mpltPath.Path(polygon)
         return path.contains_points([point])[0]
 
@@ -93,7 +89,9 @@ class PolyTracker:
         return ((c1[0] - c2[0]) ** 2 + (c1[1] - c2[1]) ** 2) ** 0.5
 
     @staticmethod
-    def put_box_on_image(save_path, image, labels, color_list, coordinates):
+    def put_box_on_image(
+            image: np.ndarray, labels: list, color_list: list, coordinates: list, save_path: str = None
+    ) -> np.ndarray:
         image = np.transpose(image, (2, 0, 1))
         w, h = image.shape[:2]
         image = torch.from_numpy(image)
@@ -103,7 +101,7 @@ class PolyTracker:
         bbox = torch.tensor(coord, dtype=torch.int)
         if bbox.tolist():
             image_true = draw_bounding_boxes(
-                image, bbox, width=3, labels=labels, colors=color_list, fill=True,
+                image=image, boxes=bbox, width=3, labels=labels, colors=color_list, fill=True,
                 font=os.path.join(ROOT_DIR, "arial.ttf"), font_size=int(h * 0.02))
             image = torchvision.transforms.ToPILImage()(image_true)
         else:
@@ -113,12 +111,12 @@ class PolyTracker:
         return np.array(image)
 
     @staticmethod
-    def add_track():
+    def add_track() -> dict:
         return dict(id=None, boxes=[], frame_id=[], check_in=[], check_out=[], shift_center=[], speed=[],
                     shift_top_left=[], shift_top_right=[], shift_bottom_left=[], shift_bottom_right=[])
 
     @staticmethod
-    def fill_track(track: dict, id: int, frame_id: int, box: list, check_in: bool, check_out: bool):
+    def fill_track(track: dict, id: int, frame_id: int, box: list, check_in: bool, check_out: bool) -> dict:
         track['id'] = id
         track['frame_id'].append(frame_id)
         track['check_in'].append(check_in)
@@ -137,7 +135,7 @@ class PolyTracker:
         return track
 
     @staticmethod
-    def expand_poly(poly, step):
+    def expand_poly(poly: list, step: int) -> list:
         def poly_center_coord(poly):
             x = np.mean([i[0] for i in poly])
             y = np.mean([i[1] for i in poly])
@@ -153,7 +151,7 @@ class PolyTracker:
             exp_poly.append([int(new_x), int(new_y)])
         return exp_poly
 
-    def update_dead_boxes(self, frame_id, new_box, distance_limit):
+    def update_dead_boxes(self, frame_id: int, new_box: list, distance_limit: float) -> list:
         """
         Update dead box form with data and remove too old dead tracks
 
@@ -163,7 +161,6 @@ class PolyTracker:
         :return: initial box, ex. [x1, y1, x2, y2] if not match to any dead tracks
                 or empty list if box is in dead track
         """
-        # new_box = [int(x) for x in new_box[:4]]
         drop_keys = []
         find = False
         for k in self.dead_boxes.keys():
@@ -185,7 +182,7 @@ class PolyTracker:
             return []
         return new_box
 
-    def fill_dead_box_form(self, key, frame_id, box):
+    def fill_dead_box_form(self, key: int, frame_id: int, box: list) -> None:
         """
         Fill the dead box form with data
 
@@ -193,7 +190,7 @@ class PolyTracker:
         :param frame_id: int
         :param box: list of coordinates, ex. [x1, y1, x2, y2]
         """
-        # box = [int(x) for x in box[:4]]
+
         self.dead_boxes[key]['frame_id'].append(frame_id)
         self.dead_boxes[key]['coords'].append(box)
 
@@ -221,20 +218,18 @@ class PolyTracker:
         }
 
     @staticmethod
-    def predict_track_class(model: VideoClassifier, tracks, classes, frame_size: tuple[int, int]):
-        # vc = VideoClassifier(num_classes=len(classes), weights=model_weights)
-        # print('predict_track_class', tracks)
+    def predict_track_class(model: VideoClassifier, tracks: dict, classes: list, frame_size: tuple[int, int]) -> list:
+
         arr = model.track_to_array(
             tracks=[tracks['tr1'], tracks['tr2']], frame_size=frame_size, num_frames=model.input_size[0]
         )
         return model.predict(arr, model=model.model, classes=classes)
-        # return classes
 
     @staticmethod
     def combine_count(frame_id: int, count: int, last_track_seq: dict, class_counter: list, class_list: list,
                       tracker_1_count_frames: list, tracker_2_count_frames: list, class_model: VideoClassifier,
                       existing_tracks: list[int, int], frame_size: tuple[int, int],
-                      debug: bool = False, stop_flag: bool = False, ) -> (list, dict, list):
+                      debug: bool = False, stop_flag: bool = False) -> (list, dict, list):
         if debug:
             print(f"combine_count: frame_id={frame_id}, count={count}, last_track_seq={last_track_seq}, "
                   f"tracker_1_count_frames={tracker_1_count_frames}, tracker_2_count_frames={tracker_2_count_frames}")
@@ -265,8 +260,6 @@ class PolyTracker:
         if stop_flag and (new_track_seq['tr1'] or new_track_seq['tr2']):
             len_1 = len(new_track_seq['tr1'][0]) if new_track_seq['tr1'] else 0
             len_2 = len(new_track_seq['tr2'][0]) if new_track_seq['tr2'] else 0
-            # print(0, "len(last_track_seq['tr1'][0])", len(new_track_seq['tr1'][0]),
-            # "len(last_track_seq['tr2'][0])", len(new_track_seq['tr2'][0]))
             if len_1 >= MIN_OBJ_SEQUENCE or len_2 >= MIN_OBJ_SEQUENCE:
                 last_track_seq['tr1'] = new_track_seq['tr1'] if new_state[0] else last_track_seq['tr1']
                 last_track_seq['tr2'] = new_track_seq['tr2'] if new_state[1] else last_track_seq['tr2']
@@ -274,7 +267,6 @@ class PolyTracker:
                     model=class_model, tracks=last_track_seq, classes=class_list, frame_size=frame_size)
                 class_counter.append(predict_class[0])
                 end_track = copy.deepcopy(last_track_seq)
-                # print(0, "frame_id", frame_id, "last_track_seq", last_track_seq)
                 return class_counter, last_track_seq, end_track
 
         if new_state == [False, False] and last_state == [False, False]:
@@ -290,7 +282,6 @@ class PolyTracker:
                     model=class_model, tracks=last_track_seq, classes=class_list, frame_size=frame_size)
                 class_counter.append(predict_class[0])
                 end_track = copy.deepcopy(last_track_seq)
-                # print(1, "frame_id", frame_id, "last_track_seq", last_track_seq)
                 last_track_seq['tr1'] = []
                 last_track_seq['tr2'] = []
                 return class_counter, last_track_seq, end_track
@@ -320,7 +311,7 @@ class PolyTracker:
             return class_counter, last_track_seq, end_track
 
     @staticmethod
-    def isin(pattern, sequence):
+    def isin(pattern: list, sequence: list) -> bool:
         for i in range(len(sequence) - len(pattern) + 1):
             if sequence[i:i + len(pattern)] == pattern:
                 return True
@@ -410,7 +401,8 @@ class PolyTracker:
             self.track_list[id] = new_track
             self.track_list.pop(check_id)
 
-    def update_track_list(self, distance_limit: float, img_shape: tuple, stop_flag: bool = False, debug: bool = False):
+    def update_track_list(
+            self, distance_limit: float, img_shape: tuple, stop_flag: bool = False, debug: bool = False) -> None:
         rel, deleted = [], []
         self.count_frames = []
         cut_idxs = []
@@ -489,7 +481,7 @@ class PolyTracker:
         self.track_list = [self.track_list[i] for i in rel]
 
     def process(self, frame_id: int, boxes: list, img_shape: tuple, speed_limit_percent: float = SPEED_LIMIT_PERCENT,
-                stop_flag: bool = False, debug: bool = False):
+                stop_flag: bool = False, debug: bool = False) -> None:
         # check if boxes are relevant
         self.current_boxes = []
         self.frame_id = frame_id
@@ -504,7 +496,7 @@ class PolyTracker:
         for box in boxes:
             box = [int(x) for x in box[:4]]
             center = self.get_center(box)
-            # print(self.point_in_polygon(center, limit_in), self.point_in_polygon(center, limit_out))
+
             # if not self.point_in_polygon(center, limit_in) and self.point_in_polygon(center, limit_out):
             if self.point_in_polygon(center, limit_out):  # and not self.point_in_polygon(center, limit_in):
                 check_in = self.point_in_polygon(center, limit_in)
@@ -516,7 +508,7 @@ class PolyTracker:
 
                 if box:
                     self.current_boxes.append([box, check_in, check_out])
-        # print("self.current_boxes", self.current_boxes)
+
         # If no track in list - write new track
         if not self.track_list:
             for box in self.current_boxes:
@@ -530,7 +522,6 @@ class PolyTracker:
                         check_in=box[1],
                         check_out=box[2]
                     )
-
                     self.max_id += 1
                     self.track_list.append(track)
                 else:
@@ -604,6 +595,7 @@ class PolyTracker:
                             'coords': []
                         }
                         self.fill_dead_box_form(key=key, frame_id=frame_id, box=self.current_boxes[b][0])
+
         self.update_track_list(distance_limit=dist_limit, img_shape=img_shape, debug=debug, stop_flag=stop_flag)
         if debug:
             print('self.dead_boxes', self.dead_boxes)
