@@ -34,9 +34,13 @@ async def background_service():
     Background service
     """
 
+    # params
+    stream = True  # prediction from video stream
+    save_predict_video = True
+
     loop = asyncio.get_event_loop()
     with ThreadPoolExecutor() as pool:
-        result = await loop.run_in_executor(pool, predict, video_paths, False, True)
+        result = await loop.run_in_executor(pool, predict, video_paths, stream, save_predict_video)
         parameters.started = False
 
 
