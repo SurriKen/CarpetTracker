@@ -333,6 +333,10 @@ def detect_synchro_video_polygon(
             _, frame1 = vc1.read()
             _, frame2 = vc2.read()
 
+            # stop the process if parameters.started equal False
+            if not parameters.started:
+                break
+
             res1 = models.get('model_1').predict(frame1, iou=iou, conf=conf)
             tracker_1.process(frame_id=frame_id, boxes=res1[0].boxes.data.tolist(), img_shape=res1[0].orig_shape[:2],
                               debug=False)
@@ -379,6 +383,7 @@ def detect_synchro_video_polygon(
                 cl_count.update(dict(Counter(class_counter)))
                 result['total_count'] = count
                 result.update(cl_count)
+                parameters.latest_results = result  # saving intermediate results
                 if save_path:
                     dict_to_csv(data=result, folder_path=save_path, filename=f"{dt}")
             if end_track != {'tr1': [], 'tr2': []}:
@@ -422,6 +427,9 @@ def detect_synchro_video_polygon(
         if save_path and save_predict_video:
             out.release()
             cv2.destroyAllWindows()
+
+        parameters.latest_results = result  # saving the final results
+
         return result, class_counter
 
 
